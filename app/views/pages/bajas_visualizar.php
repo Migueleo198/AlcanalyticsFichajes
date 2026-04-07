@@ -32,7 +32,8 @@
       </div>
 
       <!-- PERFIL -->
-      <i class="bi bi-person-circle fs-5 profile"></i>
+    <i class="bi bi-person-circle fs-5 profile" 
+     data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
     </div>
   </div>
 

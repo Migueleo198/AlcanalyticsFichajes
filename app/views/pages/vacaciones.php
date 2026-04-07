@@ -18,7 +18,9 @@
         <i class="bi bi-plus"></i> Solicitar vacaciones
       </button>
 
-      <i class="bi bi-person-circle fs-5 profile"></i>
+      <!-- PERFIL -->
+    <i class="bi bi-person-circle fs-5 profile" 
+     data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
     </div>
   </div>
 
