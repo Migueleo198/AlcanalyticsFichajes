@@ -44,7 +44,7 @@
     <i class="bi bi-plus-circle me-2"></i>Solicitar baja
   </a>
 
-  <a href="<?= RUTA_URL ?>/Bajas/visualizar" class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/visualizar') ? 'active' : '' ?>">
+  <a href="<?= RUTA_URL ?>/Bajas/visualizar" class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/gestionar') ? 'active' : '' ?>">
     <i class="bi bi-eye me-2"></i>Gestionar
   </a>
 
