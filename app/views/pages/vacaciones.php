@@ -18,6 +18,27 @@
         <i class="bi bi-plus"></i> Solicitar vacaciones
       </button>
 
+      <!-- NOTIFICACIONES -->
+    <div class="dropdown me-3 position-relative">
+      <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon" 
+   data-bs-toggle="dropdown" 
+   style="cursor:pointer;"></i>
+      
+      <!-- Badge -->
+      <span id="contadorNotificaciones" 
+      class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+       3
+      </span>
+
+      <!-- Dropdown -->
+      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
+        <li class="fw-bold mb-2">Notificaciones</li>
+        <li class="dropdown-item">Nuevo fichaje registrado</li>
+        <li class="dropdown-item">Contrato por vencer</li>
+        <li class="dropdown-item">Actualización completada</li>
+      </ul>
+    </div>
+
       <!-- PERFIL -->
     <i class="bi bi-person-circle fs-5 profile" 
      data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>

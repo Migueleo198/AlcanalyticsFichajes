@@ -14,7 +14,9 @@
 
     <!-- NOTIFICACIONES -->
     <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5" id="notificacionesIcon" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
+      <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon" 
+   data-bs-toggle="dropdown" 
+   style="cursor:pointer;"></i>
       
       <!-- Badge -->
       <span id="contadorNotificaciones" 
