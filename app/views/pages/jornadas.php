@@ -99,5 +99,6 @@ const RUTA_URL = "<?= RUTA_URL ?>";
 
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureJornadas.js"></script>
+<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>

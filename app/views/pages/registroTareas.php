@@ -8,50 +8,104 @@
 
   <!-- TOPBAR -->
   <div class="topbar d-flex justify-content-between align-items-center">
-  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar tareas...">
+    <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar tareas...">
 
-  <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center">
 
-    <!-- NOTIFICACIONES -->
-    <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5" id="notificacionesIcon" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
-      
-      <!-- Badge -->
-      <span id="contadorNotificaciones" 
-      class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
-       3
-      </span>
+      <!-- NOTIFICACIONES -->
+      <div class="dropdown me-3 position-relative">
+        <i class="bi bi-bell fs-5" id="notificacionesIcon" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
+        
+        <span id="contadorNotificaciones" 
+        class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+        3
+        </span>
 
-      <!-- Dropdown -->
-      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
-        <li class="fw-bold mb-2">Notificaciones</li>
-        <li class="dropdown-item">Nuevo fichaje registrado</li>
-        <li class="dropdown-item">Contrato por vencer</li>
-        <li class="dropdown-item">Actualización completada</li>
-      </ul>
+        <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
+          <li class="fw-bold mb-2">Notificaciones</li>
+          <li class="dropdown-item">Nuevo fichaje registrado</li>
+          <li class="dropdown-item">Contrato por vencer</li>
+          <li class="dropdown-item">Actualización completada</li>
+        </ul>
+      </div>
+
+      <!-- PERFIL -->
+      <i class="bi bi-person-circle fs-5 profile" 
+        data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
+
     </div>
+  </div>
 
-    <!-- PERFIL -->
-    <!-- PERFIL -->
-    <i class="bi bi-person-circle fs-5 profile" 
-     data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
-    </div>
-</div>
-
+  <!-- CARD -->
   <div class="card card-custom p-3">
 
-    <div class="d-flex justify-content-between mb-3">
-      <h5>Listado de Tareas</h5>
+    <div class="d-flex justify-content-between mb-3 align-items-center">
+      <h5 class="mb-0">Listado de Tareas</h5>
 
-      <!-- BOTÓN AÑADIR -->
-      <button 
-        class="btn btn-success btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#addModal"
-      >
-        + Añadir tarea
-      </button>
+      <div class="d-flex gap-2">
+
+        <!-- FILTROS -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="bi bi-funnel"></i> Filtrar
+          </button>
+
+          <div class="dropdown-menu p-3" style="width: 300px;">
+
+            <!-- TÍTULO -->
+            <div class="mb-2">
+              <label class="form-label">Título</label>
+              <input type="text" id="filterTitulo" class="form-control" placeholder="Buscar título...">
+            </div>
+
+            <!-- USUARIO -->
+            <div class="mb-2">
+              <label class="form-label">Usuario</label>
+              <input type="text" id="filterUsuario" class="form-control" placeholder="Usuario...">
+            </div>
+
+            <!-- ESTADO -->
+            <div class="mb-2">
+              <label class="form-label">Estado</label>
+              <select id="filterEstado" class="form-select">
+                <option value="">Todos</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="completado">Completado</option>
+              </select>
+            </div>
+
+            <!-- TIPO -->
+            <div class="mb-2">
+              <label class="form-label">Tipo</label>
+              <input type="text" id="filterTipo" class="form-control" placeholder="Tipo...">
+            </div>
+
+            <!-- FECHA -->
+            <div class="mb-2">
+              <label class="form-label">Fecha</label>
+              <input type="date" id="filterFecha" class="form-control">
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+              <button id="clearFilters" class="btn btn-sm btn-secondary">Limpiar</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- BOTÓN AÑADIR -->
+        <button 
+          class="btn btn-success btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#addModal"
+        >
+          + Añadir tarea
+        </button>
+
+      </div>
     </div>
+    
 
     <table class="table">
       <thead>
@@ -290,5 +344,6 @@
 
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureTareas.js"></script>
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
+<script type="module" src="<?= RUTA_URL ?>/js/infrastructure/filtrosTareas.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php'; ?>
