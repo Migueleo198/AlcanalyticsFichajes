@@ -1,0 +1,237 @@
+/* Reset básico para asegurar consistencia entre navegadores */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.badge-sm {
+  font-size: 0.6rem !important; 
+  padding: 3px 5px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.badge-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+html, body {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    background-image: url('../media/fondo_app_alcanalytics.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.login-container {
+    padding: 80px;
+    background: rgba(255, 255, 255, 0.85); /* Ligeramente transparente para que el fondo sea visible */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-box {
+    width: 100%;
+}
+
+.login-box h2 {
+    text-align: center;
+    color: #0074BC;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    background: transparent;
+    outline: none; /* Añadido para eliminar el contorno por defecto */
+}
+
+.input-group label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 15px;
+    transition: all 0.2s;
+    color: #999;
+}
+
+.input-group input:focus,
+.input-group input:not(:placeholder-shown) {
+    border-bottom-color: #667eea;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    transform: translateY(-26px);
+    font-size: 12px;
+    color: #667eea;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: #667eea;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #5866c1;
+}
+
+.help-text {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.help-text a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+
+
+/*Ajustes footer*/
+
+.footer-no-login {
+    width: 100%;
+    background-color: #0074bc; /* Color de fondo del pie de página */
+    color: #fff; /* Color del texto del pie de página */
+    text-align: center;
+    padding: 10px 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.footer-no-login p {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+.footer-no-login a {
+    color: #fff; /* Color del texto normal */
+    text-decoration: none;
+    transition: color 0.2s; /* Transición de color de 0.2 segundos */
+}
+
+.footer-no-login a:hover {
+    color: #000000; /* Color cuando te sitúas sobre el enlace */
+}
+
+
+
+
+/* Ajustes Recuperar Contraseña */
+.recovery-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('../img/fondo_app_alcanalytics.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.recovery-box {
+    width: 400px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recovery-box h2 {
+    text-align: center;
+    color: #0074BC;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    background: transparent;
+}
+
+.input-group label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 15px;
+    transition: all 0.2s;
+    color: #999;
+}
+
+.input-group input:focus,
+.input-group input:not(:placeholder-shown) {
+    border-bottom-color: #0074BC;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    transform: translateY(-26px);
+    font-size: 12px;
+    color: #0074BC;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: #0074BC;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #00548E;
+}
+
+
+/*SideBar*/
+
+
+
+

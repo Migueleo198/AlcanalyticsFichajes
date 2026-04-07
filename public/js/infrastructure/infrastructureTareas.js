@@ -1,0 +1,178 @@
+// =========================
+// LOAD TASKS
+// =========================
+async function loadTasks() {
+
+    try {
+        const RESPONSE = await fetch("/RegistroTareas/getTasks");
+
+        if (!RESPONSE.ok) {
+            throw new Error('No response from server: ' + RESPONSE.status);
+        }
+
+        const DATA = await RESPONSE.json();
+        return DATA;
+
+    } catch (error) {
+        console.log(error.message);
+        return { success: false, data: [] };
+    }
+}
+
+
+// =========================
+// RENDER TABLE
+// =========================
+loadTasks().then((response) => {
+
+    const lista = document.getElementById('lista');
+
+    if (!lista) return;
+
+    if (response && response.success && response.data.length > 0) {
+
+        let html = '';
+
+        response.data.forEach(tarea => {
+
+            html += `
+                <tr>
+                    <td>${tarea.id_tarea}</td>
+                    <td>${tarea.id_fichaje}</td>
+                    <td>${tarea.nombre_usuario}</td>
+                    <td>${tarea.titulo}</td>
+                    <td>${tarea.descripcion}</td>
+                    <td>${tarea.hora_inicio}</td>
+                    <td>${tarea.hora_fin}</td>
+                    <td>${tarea.tiempo_total}</td>
+                    <td>${tarea.estado}</td>
+                    <td>${tarea.fecha}</td>
+                    <td>
+                        <span class="badge bg-primary">
+                            ${tarea.nombre}
+                        </span>
+                    </td>
+
+                    <td>
+                        <button 
+                            class="btn btn-outline-secondary btn-sm px-3 btn-editar"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#editModal"
+
+                            data-id="${tarea.id_tarea}"
+                            data-id_fichaje="${tarea.id_fichaje}"
+                            data-nombre_usuario="${tarea.nombre_usuario}"
+                            data-titulo="${tarea.titulo}"
+                            data-descripcion="${tarea.descripcion}"
+                            data-hora_inicio="${tarea.hora_inicio}"
+                            data-hora_fin="${tarea.hora_fin}"
+                            data-tiempo_total="${tarea.tiempo_total}"
+                            data-estado="${tarea.estado}"
+                            data-fecha="${tarea.fecha}"
+                        >
+                            ✏️
+                        </button>
+                    </td>
+
+                    <td>
+                        <button 
+                            class="btn btn-outline-secondary btn-sm px-3 btn-eliminar"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteModal"
+
+                            data-id="${tarea.id_tarea}"
+                            data-id_fichaje="${tarea.id_fichaje}"
+                            data-titulo="${tarea.titulo}"
+                            data-descripcion="${tarea.descripcion}"
+                            data-estado="${tarea.estado}"
+                            data-fecha="${tarea.fecha}"
+                        >
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        lista.innerHTML = html;
+
+    } else {
+        lista.innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center">
+                    No hay tareas registradas
+                </td>
+            </tr>
+        `;
+    }
+     document.dispatchEvent(new Event('tableReady'));
+});
+
+
+// =========================
+// MODAL HANDLERS
+// =========================
+document.addEventListener('click', function (e) {
+
+    // =========================
+    // EDITAR
+    // =========================
+    const editBtn = e.target.closest('.btn-editar');
+    if (editBtn) {
+
+        const modal = document.querySelector('#editModal');
+        let fecha = editBtn.dataset.fecha;
+        if (fecha) {
+            if (!fecha.includes(' ')) {
+                // Si solo viene la fecha → añade hora por defecto
+                fecha = fecha + 'T00:00';
+            } else {
+                // Si ya viene con hora
+                fecha = fecha.replace(' ', 'T').substring(0, 16);
+            }
+        }
+
+        modal.querySelector('[name="id"]').value = editBtn.dataset.id;
+        modal.querySelector('[name="id_fichaje"]').value = editBtn.dataset.id_fichaje;
+        modal.querySelector('[name="titulo"]').value = editBtn.dataset.titulo;
+        modal.querySelector('[name="descripcion"]').value = editBtn.dataset.descripcion;
+        modal.querySelector('[name="hora_inicio"]').value = editBtn.dataset.hora_inicio;
+        modal.querySelector('[name="hora_fin"]').value = editBtn.dataset.hora_fin;
+        modal.querySelector('[name="tiempo_total"]').value = editBtn.dataset.tiempo_total;
+        modal.querySelector('[name="estado"]').value = editBtn.dataset.estado;
+        modal.querySelector('[name="fecha"]').value = fecha;
+
+        return;
+    }
+
+    // =========================
+    // ELIMINAR
+    // =========================
+    const deleteBtn = e.target.closest('.btn-eliminar');
+    if (deleteBtn) {
+
+        const modal = document.querySelector('#deleteModal');
+
+        let fecha = deleteBtn.dataset.fecha;
+        if (fecha) {
+            if (!fecha.includes(' ')) {
+                // Si solo viene la fecha → añade hora por defecto
+                fecha = fecha + 'T00:00';
+            } else {
+                // Si ya viene con hora
+                fecha = fecha.replace(' ', 'T').substring(0, 16);
+            }
+        }
+
+        modal.querySelector('[name="id"]').value = deleteBtn.dataset.id;
+        modal.querySelector('[name="id_fichaje"]').value = deleteBtn.dataset.id_fichaje;
+        modal.querySelector('[name="titulo"]').value = deleteBtn.dataset.titulo;
+        modal.querySelector('[name="descripcion"]').value = deleteBtn.dataset.descripcion;
+        modal.querySelector('[name="hora_inicio"]').value = deleteBtn.dataset.hora_inicio;
+        modal.querySelector('[name="hora_fin"]').value = deleteBtn.dataset.hora_fin;
+        modal.querySelector('[name="tiempo_total"]').value = deleteBtn.dataset.tiempo_total;
+        modal.querySelector('[name="estado"]').value = deleteBtn.dataset.estado;
+        modal.querySelector('[name="fecha"]').value = fecha;
+    }
+
+});

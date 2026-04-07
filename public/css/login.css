@@ -1,0 +1,11 @@
+body {
+  background-color: #f5f7fb !important; 
+}
+
+.card {
+  border: none !important;
+}
+
+.btn-primary {
+  border-radius: 10px !important;
+}

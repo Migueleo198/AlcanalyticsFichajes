@@ -1,0 +1,23 @@
+.message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+/* Tipos */
+.message.info { background: #3498db; }
+.message.success { background: #2ecc71; }
+.message.error { background: #e74c3c; }
+
+/* Visible */
+.message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
