@@ -45,9 +45,42 @@
       <h5 class="mb-0">Listado de Empleados</h5>
 
       <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm">
-          <i class="bi bi-funnel"></i> Filtrar
-        </button>
+       <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+  <i class="bi bi-funnel"></i> Filtrar
+</button>
+
+<div class="dropdown-menu p-3" style="width: 300px;">
+
+  <div class="mb-2">
+    <label class="form-label">Nombre</label>
+    <input type="text" id="filterNombre" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Usuario</label>
+    <input type="text" id="filterUsuario" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">DNI</label>
+    <input type="text" id="filterDni" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Rol</label>
+    <select id="filterRol" class="form-select">
+      <option value="">Todos</option>
+      <option value="Administrador">Administrador</option>
+      <option value="Trabajador">Trabajador</option>
+      <option value="Practicas">Practicas</option>
+    </select>
+  </div>
+
+  <div class="d-flex justify-content-between mt-3">
+    <button id="clearFilters" class="btn btn-sm btn-secondary">Limpiar</button>
+  </div>
+
+</div>
 
         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
           <i class="bi bi-person-plus"></i> Añadir
@@ -345,5 +378,6 @@
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureEmpleados.js"></script>
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
+<script type="module" src="<?= RUTA_URL ?>/js/infrastructure/filtrosEmpleados.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php'; ?>

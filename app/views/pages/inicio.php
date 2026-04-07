@@ -81,9 +81,41 @@
   <div class="card card-custom p-3">
     <div class="d-flex justify-content-between mb-3">
       <h5>Listado de Fichajes</h5>
-      <button class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-funnel"></i> Filtrar
-      </button> 
+      <div class="dropdown">
+  <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+    <i class="bi bi-funnel"></i> Filtrar
+  </button>
+
+  <div class="dropdown-menu p-3" style="width: 300px;">
+
+    <!-- EMPLEADO -->
+    <div class="mb-2">
+      <label class="form-label">Empleado</label>
+      <input type="text" id="filterEmpleado" class="form-control" placeholder="Nombre...">
+    </div>
+
+    <!-- ESTADO -->
+    <div class="mb-2">
+      <label class="form-label">Estado</label>
+      <select id="filterEstado" class="form-select">
+        <option value="">Todos</option>
+        <option value="cerrado">Cerrado</option>
+        <option value="abierto">Abierto</option>
+      </select>
+    </div>
+
+    <!-- FECHA -->
+    <div class="mb-2">
+      <label class="form-label">Fecha</label>
+      <input type="date" id="filterFecha" class="form-control">
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+      <button id="clearFilters" class="btn btn-sm btn-secondary">Limpiar</button>
+    </div>
+
+  </div>
+</div>
     </div>
 
     <table class="table">
@@ -205,5 +237,6 @@ const fichajeActivo = <?php echo json_encode($datos['fichajeActivo'] ?? null); ?
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureHome.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
+<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtroFichajes.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>
