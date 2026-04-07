@@ -60,7 +60,7 @@ async function loadFichajes() {
 
           <td>
             <button 
-              class="btn btn-outline-warning btn-sm btn-incidencia"
+              class="btn btn-outline-primary btn-sm btn-incidencia"
               data-bs-toggle="modal" 
               data-bs-target="#incidenciaModal"
               data-fichaje="${f.id_fichaje}"
