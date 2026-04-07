@@ -2,15 +2,20 @@ document.addEventListener('tableReady', () => {
 
     const TABLE = document.querySelector('table');
     const TBODY = TABLE.querySelector('tbody');
-    const CONTAINER = TABLE.closest('.card'); // place pagination inside card
+    const CONTAINER = TABLE.closest('.card');
 
+    const buscador = document.getElementById('buscadorTabla');
+
+    // Master data (ALL rows)
     const fullTable = Array.from(TBODY.querySelectorAll('tr'));
+
+    let filteredTable = [...fullTable];
 
     let currentPage = 0;
     const rowsPerPage = 5;
 
     // =========================
-    // CREATE PAGINATION UI
+    // PAGINATION UI
     // =========================
     let paginationWrapper = document.getElementById('paginationWrapper');
 
@@ -45,10 +50,10 @@ document.addEventListener('tableReady', () => {
     const pageIndicator = document.getElementById('pageIndicator');
 
     // =========================
-    // RENDER PAGE
+    // RENDER
     // =========================
     function renderPage(page) {
-        const totalPages = Math.ceil(fullTable.length / rowsPerPage);
+        const totalPages = Math.ceil(filteredTable.length / rowsPerPage) || 1;
 
         if (page < 0) page = 0;
         if (page >= totalPages) page = totalPages - 1;
@@ -60,11 +65,10 @@ document.addEventListener('tableReady', () => {
         const start = page * rowsPerPage;
         const end = start + rowsPerPage;
 
-        fullTable.slice(start, end).forEach(row => {
+        filteredTable.slice(start, end).forEach(row => {
             TBODY.appendChild(row);
         });
 
-        // Update UI
         pageIndicator.textContent = `${currentPage + 1} de ${totalPages}`;
 
         prevBtn.classList.toggle('disabled', currentPage === 0);
@@ -72,14 +76,30 @@ document.addEventListener('tableReady', () => {
     }
 
     // =========================
+    // FILTER FUNCTION
+    // =========================
+    function applyFilter() {
+        const filtro = buscador.value.toLowerCase().trim();
+
+        filteredTable = fullTable.filter(row => {
+            return row.textContent.toLowerCase().includes(filtro);
+        });
+
+        currentPage = 0;
+        renderPage(0);
+    }
+
+    // =========================
     // EVENTS
     // =========================
+    buscador.addEventListener('input', applyFilter);
+
     prevBtn.addEventListener('click', () => {
         if (currentPage > 0) renderPage(currentPage - 1);
     });
 
     nextBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(fullTable.length / rowsPerPage);
+        const totalPages = Math.ceil(filteredTable.length / rowsPerPage);
         if (currentPage < totalPages - 1) renderPage(currentPage + 1);
     });
 
