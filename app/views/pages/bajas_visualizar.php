@@ -51,12 +51,53 @@
 
       <div class="card card-custom p-3">
 
-        <div class="d-flex justify-content-between mb-3">
-          <h5>Listado de Bajas</h5>
-          <button class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-funnel"></i> Filtrar
-          </button> 
-        </div>
+        <div class="d-flex justify-content-between mb-3 align-items-center">
+  <h5>Gestión de Bajas</h5>
+
+  <div class="dropdown">
+    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+      <i class="bi bi-funnel"></i> Filtrar
+    </button>
+
+    <div class="dropdown-menu p-3" style="width: 300px;">
+
+      <!-- EMPLEADO -->
+      <div class="mb-2">
+        <label class="form-label">Empleado</label>
+        <input type="text" id="filterEmpleado" class="form-control" placeholder="Empleado...">
+      </div>
+
+      <!-- MOTIVO -->
+      <div class="mb-2">
+        <label class="form-label">Motivo</label>
+        <input type="text" id="filterMotivo" class="form-control" placeholder="Motivo...">
+      </div>
+
+      <!-- ESTADO -->
+      <div class="mb-2">
+        <label class="form-label">Estado</label>
+        <select id="filterEstado" class="form-select">
+          <option value="">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobada">Aprobada</option>
+          <option value="rechazada">Rechazada</option>
+        </select>
+      </div>
+
+      <!-- FECHA INICIO -->
+      <div class="mb-2">
+        <label class="form-label">Fecha inicio</label>
+        <input type="date" id="filterFechaInicio" class="form-control">
+      </div>
+
+      <!-- CLEAR -->
+      <div class="d-flex justify-content-between mt-3">
+        <button id="clearFilters" class="btn btn-sm btn-secondary">Limpiar</button>
+      </div>
+
+    </div>
+  </div>
+  </div>
 
         <table class="table align-middle">
           <thead>
@@ -110,4 +151,13 @@
 </div>
 </div>
 
+
+<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
+<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtroBajas.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.dispatchEvent(new Event('tableReady'));
+});
+</script>
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>
