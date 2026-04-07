@@ -15,6 +15,24 @@ document.addEventListener('tableReady', () => {
     const rowsPerPage = 5;
 
     // =========================
+    // EXPOSE DATA GLOBALLY (SAFE)
+    // =========================
+    window.paginationData = {
+        get fullTable() {
+            return fullTable;
+        },
+        get filteredTable() {
+            return filteredTable;
+        },
+        setFilteredTable(newFiltered) {
+            if (!Array.isArray(newFiltered)) return;
+            filteredTable = newFiltered;
+            currentPage = 0;
+            renderPage(0);
+        }
+    };
+
+    // =========================
     // PAGINATION UI
     // =========================
     let paginationWrapper = document.getElementById('paginationWrapper');
@@ -76,7 +94,7 @@ document.addEventListener('tableReady', () => {
     }
 
     // =========================
-    // FILTER FUNCTION
+    // FILTER FUNCTION (UNCHANGED)
     // =========================
     function applyFilter() {
         const filtro = buscador.value.toLowerCase().trim();

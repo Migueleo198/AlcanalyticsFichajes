@@ -45,28 +45,74 @@
 
 
  <div class="card card-custom p-3">
-    <div class="d-flex justify-content-between mb-3">
-      <h5>Listado de Incidencias</h5>
-      <button class="btn btn-outline-secondary btn-sm"> <i class="bi bi-funnel"></i> Filtrar </button> 
+  <div class="d-flex justify-content-between mb-3 align-items-center">
+    <h5>Listado de Incidencias</h5>
+
+    <div class="d-flex gap-2">
+
+      <!-- FILTROS DROPDOWN -->
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="bi bi-funnel"></i> Filtrar
+        </button>
+
+        <div class="dropdown-menu p-3" style="width: 300px;">
+
+          <!-- ID FICHAJE -->
+          <div class="mb-2">
+            <label class="form-label">ID Fichaje</label>
+            <input type="text" id="filterIdFichaje" class="form-control" placeholder="ID...">
+          </div>
+
+          <!-- MENSAJE -->
+          <div class="mb-2">
+            <label class="form-label">Mensaje</label>
+            <input type="text" id="filterMensaje" class="form-control" placeholder="Mensaje...">
+          </div>
+
+          <!-- ESTADO -->
+          <div class="mb-2">
+            <label class="form-label">Estado</label>
+            <select id="filterEstado" class="form-select">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en proceso">En proceso</option>
+              <option value="resuelto">Resuelto</option>
+            </select>
+          </div>
+
+          <!-- FECHA -->
+          <div class="mb-2">
+            <label class="form-label">Fecha</label>
+            <input type="date" id="filterFecha" class="form-control">
+          </div>
+
+          <!-- CLEAR -->
+          <div class="d-flex justify-content-between mt-3">
+            <button id="clearFilters" class="btn btn-sm btn-secondary">Limpiar</button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>id_fichaje</th>
-          <th>mensaje</th>
-          <th>respuesta</th>
-          <th>estado</th>
-          <th>fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id='lista'>
-       
-      </tbody>
-    </table>
   </div>
 
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>id_fichaje</th>
+        <th>mensaje</th>
+        <th>respuesta</th>
+        <th>estado</th>
+        <th>fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id='lista'>
+    </tbody>
+  </table>
 </div>
 
 </div>
@@ -185,4 +231,6 @@
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureIncidencias.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
+<script type="module" src="<?= RUTA_URL ?>/js/infrastructure/filtrosIncidencias.js"></script>
+
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>

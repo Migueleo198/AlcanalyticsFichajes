@@ -1,7 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 
     const buscador = document.getElementById('buscadorTabla');
-    const filterEmpleado = document.getElementById('filterEmpleado');
+    const filterIdFichaje = document.getElementById('filterIdFichaje');
+    const filterMensaje = document.getElementById('filterMensaje');
     const filterEstado = document.getElementById('filterEstado');
     const filterFecha = document.getElementById('filterFecha');
     const clearBtn = document.getElementById('clearFilters');
@@ -9,11 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function aplicarFiltros() {
 
         const { fullTable, setFilteredTable } = window.paginationData || {};
-
         if (!fullTable || !setFilteredTable) return;
 
         const texto = buscador?.value.toLowerCase().trim() || "";
-        const empleado = filterEmpleado?.value.toLowerCase().trim() || "";
+        const idFichaje = filterIdFichaje?.value.toLowerCase().trim() || "";
+        const mensaje = filterMensaje?.value.toLowerCase().trim() || "";
         const estado = filterEstado?.value.toLowerCase().trim() || "";
         const fecha = filterFecha?.value || "";
 
@@ -22,15 +23,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const columns = row.querySelectorAll("td");
             if (!columns.length) return false;
 
-            const empleadoTxt = columns[1]?.innerText.toLowerCase() || "";
-            const fechaTxt = columns[2]?.innerText || "";
-            const estadoTxt = columns[5]?.innerText.toLowerCase() || "";
+            // Column mapping:
+            // 0: #
+            // 1: id_fichaje
+            // 2: mensaje
+            // 3: respuesta
+            // 4: estado
+            // 5: fecha
+
+            const idTxt = columns[1]?.innerText.toLowerCase() || "";
+            const mensajeTxt = columns[2]?.innerText.toLowerCase() || "";
+            const estadoTxt = columns[4]?.innerText.toLowerCase() || "";
+            const fechaTxt = columns[5]?.innerText || "";
 
             const rowText = row.textContent.toLowerCase();
 
             return (
                 (texto === "" || rowText.includes(texto)) &&
-                (empleado === "" || empleadoTxt.includes(empleado)) &&
+                (idFichaje === "" || idTxt.includes(idFichaje)) &&
+                (mensaje === "" || mensajeTxt.includes(mensaje)) &&
                 (estado === "" || estadoTxt.includes(estado)) &&
                 (fecha === "" || fechaTxt.includes(fecha))
             );
@@ -43,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // EVENTS
     // =========================
     buscador?.addEventListener("input", aplicarFiltros);
-    filterEmpleado?.addEventListener("input", aplicarFiltros);
+    filterIdFichaje?.addEventListener("input", aplicarFiltros);
+    filterMensaje?.addEventListener("input", aplicarFiltros);
     filterEstado?.addEventListener("change", aplicarFiltros);
     filterFecha?.addEventListener("change", aplicarFiltros);
 
@@ -53,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn?.addEventListener("click", () => {
 
         if (buscador) buscador.value = "";
-        if (filterEmpleado) filterEmpleado.value = "";
+        if (filterIdFichaje) filterIdFichaje.value = "";
+        if (filterMensaje) filterMensaje.value = "";
         if (filterEstado) filterEstado.value = "";
         if (filterFecha) filterFecha.value = "";
 

@@ -1,74 +1,78 @@
-const buscador = document.getElementById("buscadorTabla");
+document.addEventListener("DOMContentLoaded", () => {
 
-const filterNombre = document.getElementById("filterNombre");
-const filterUsuario = document.getElementById("filterUsuario");
-const filterDni = document.getElementById("filterDni");
-const filterRol = document.getElementById("filterRol");
+    const buscador = document.getElementById('buscadorTabla');
+    const filterNombre = document.getElementById('filterNombre');
+    const filterUsuario = document.getElementById('filterUsuario');
+    const filterDni = document.getElementById('filterDni');
+    const filterRol = document.getElementById('filterRol');
+    const clearBtn = document.getElementById('clearFilters');
 
-const clearBtn = document.getElementById("clearFilters");
+    function aplicarFiltros() {
 
-const filas = () => document.querySelectorAll("#lista tr");
+        const { fullTable, setFilteredTable } = window.paginationData || {};
 
-function aplicarFiltros() {
+        if (!fullTable || !setFilteredTable) return;
 
-  const textoBusqueda = buscador?.value.toLowerCase() || "";
-  const nombre = filterNombre?.value.toLowerCase() || "";
-  const usuario = filterUsuario?.value.toLowerCase() || "";
-  const dni = filterDni?.value.toLowerCase() || "";
-  const rol = filterRol?.value.toLowerCase() || "";
+        const texto = buscador?.value.toLowerCase().trim() || "";
+        const nombre = filterNombre?.value.toLowerCase().trim() || "";
+        const usuario = filterUsuario?.value.toLowerCase().trim() || "";
+        const dni = filterDni?.value.toLowerCase().trim() || "";
+        const rol = filterRol?.value.toLowerCase().trim() || "";
 
-  filas().forEach(fila => {
+        const filtered = fullTable.filter(row => {
 
-    const columnas = fila.querySelectorAll("td");
-    if (columnas.length === 0) return;
+            const columns = row.querySelectorAll("td");
+            if (!columns.length) return false;
 
-    const nombreTxt = columnas[1].innerText.toLowerCase();
-    const usuarioTxt = columnas[2].innerText.toLowerCase();
-    const dniTxt = columnas[3].innerText.toLowerCase();
-    const rolTxt = columnas[6].innerText.toLowerCase();
+            // Column mapping based on your table:
+            // 0: ID
+            // 1: Nombre
+            // 2: Usuario
+            // 3: DNI
+            // 4: Teléfono
+            // 5: Email
+            // 6: Rol
 
-    // 🔎 buscador global
-    const coincideBusqueda =
-      nombreTxt.includes(textoBusqueda) ||
-      usuarioTxt.includes(textoBusqueda) ||
-      dniTxt.includes(textoBusqueda);
+            const nombreTxt = columns[1]?.innerText.toLowerCase() || "";
+            const usuarioTxt = columns[2]?.innerText.toLowerCase() || "";
+            const dniTxt = columns[3]?.innerText.toLowerCase() || "";
+            const rolTxt = columns[6]?.innerText.toLowerCase() || "";
 
-    // 🎯 filtros específicos
-    const coincideNombre = nombre === "" || nombreTxt.includes(nombre);
-    const coincideUsuario = usuario === "" || usuarioTxt.includes(usuario);
-    const coincideDni = dni === "" || dniTxt.includes(dni);
-    const coincideRol = rol === "" || rolTxt.includes(rol);
+            const rowText = row.textContent.toLowerCase();
 
-    if (
-      coincideBusqueda &&
-      coincideNombre &&
-      coincideUsuario &&
-      coincideDni &&
-      coincideRol
-    ) {
-      fila.style.display = "";
-    } else {
-      fila.style.display = "none";
+            return (
+                (texto === "" || rowText.includes(texto)) &&
+                (nombre === "" || nombreTxt.includes(nombre)) &&
+                (usuario === "" || usuarioTxt.includes(usuario)) &&
+                (dni === "" || dniTxt.includes(dni)) &&
+                (rol === "" || rolTxt.includes(rol))
+            );
+        });
+
+        setFilteredTable(filtered);
     }
 
-  });
-}
+    // =========================
+    // EVENTS
+    // =========================
+    buscador?.addEventListener("input", aplicarFiltros);
+    filterNombre?.addEventListener("input", aplicarFiltros);
+    filterUsuario?.addEventListener("input", aplicarFiltros);
+    filterDni?.addEventListener("input", aplicarFiltros);
+    filterRol?.addEventListener("change", aplicarFiltros);
 
-// eventos
-buscador?.addEventListener("input", aplicarFiltros);
-filterNombre?.addEventListener("input", aplicarFiltros);
-filterUsuario?.addEventListener("input", aplicarFiltros);
-filterDni?.addEventListener("input", aplicarFiltros);
-filterRol?.addEventListener("change", aplicarFiltros);
+    // =========================
+    // CLEAR FILTERS
+    // =========================
+    clearBtn?.addEventListener("click", () => {
 
-// limpiar filtros
-clearBtn?.addEventListener("click", () => {
+        if (buscador) buscador.value = "";
+        if (filterNombre) filterNombre.value = "";
+        if (filterUsuario) filterUsuario.value = "";
+        if (filterDni) filterDni.value = "";
+        if (filterRol) filterRol.value = "";
 
-  if (filterNombre) filterNombre.value = "";
-  if (filterUsuario) filterUsuario.value = "";
-  if (filterDni) filterDni.value = "";
-  if (filterRol) filterRol.value = "";
-  if (buscador) buscador.value = "";
+        aplicarFiltros();
+    });
 
-  aplicarFiltros();
 });
