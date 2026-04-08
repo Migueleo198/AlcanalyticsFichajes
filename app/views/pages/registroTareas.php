@@ -13,14 +13,14 @@
     <div class="d-flex align-items-center">
 
       <!-- NOTIFICACIONES -->
-    <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon" 
-   data-bs-toggle="dropdown" 
-   style="cursor:pointer;"></i>
-        
-        <span id="contadorNotificaciones" 
-        class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
-        3
+      <div class="dropdown me-3 position-relative">
+        <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon"
+           data-bs-toggle="dropdown"
+           style="cursor:pointer;"></i>
+
+        <span id="contadorNotificaciones"
+              class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+          3
         </span>
 
         <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
@@ -32,8 +32,8 @@
       </div>
 
       <!-- PERFIL -->
-      <i class="bi bi-person-circle fs-5 profile" 
-        data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
+      <i class="bi bi-person-circle fs-5 profile"
+         data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
 
     </div>
   </div>
@@ -54,36 +54,31 @@
 
           <div class="dropdown-menu p-3" style="width: 300px;">
 
-            <!-- TÍTULO -->
             <div class="mb-2">
               <label class="form-label">Título</label>
-              <input type="text" id="filterTitulo" class="form-control" placeholder="Buscar título...">
+              <input type="text" id="filterTitulo" class="form-control">
             </div>
 
-            <!-- USUARIO -->
             <div class="mb-2">
               <label class="form-label">Usuario</label>
-              <input type="text" id="filterUsuario" class="form-control" placeholder="Usuario...">
+              <input type="text" id="filterUsuario" class="form-control">
             </div>
 
-            <!-- ESTADO -->
             <div class="mb-2">
               <label class="form-label">Estado</label>
               <select id="filterEstado" class="form-select">
                 <option value="">Todos</option>
                 <option value="pendiente">Pendiente</option>
-                <option value="en_proceso">En proceso</option>
+                <option value="en_progreso">En proceso</option>
                 <option value="completado">Completado</option>
               </select>
             </div>
 
-            <!-- TIPO -->
             <div class="mb-2">
               <label class="form-label">Tipo</label>
-              <input type="text" id="filterTipo" class="form-control" placeholder="Tipo...">
+              <input type="text" id="filterTipo" class="form-control">
             </div>
 
-            <!-- FECHA -->
             <div class="mb-2">
               <label class="form-label">Fecha</label>
               <input type="date" id="filterFecha" class="form-control">
@@ -97,17 +92,12 @@
         </div>
 
         <!-- BOTÓN AÑADIR -->
-        <button 
-          class="btn btn-success btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#addModal"
-        >
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
           + Añadir tarea
         </button>
 
       </div>
     </div>
-    
 
     <table class="table">
       <thead>
@@ -134,7 +124,6 @@
 </div>
 </div>
 
-
 <!-- ========================= -->
 <!-- MODAL AÑADIR -->
 <!-- ========================= -->
@@ -142,7 +131,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="/RegistroTareas/createTask" method="POST">
+      <form action="<?= RUTA_URL ?>/RegistroTareas/create" method="POST">
 
         <div class="modal-header">
           <h5 class="modal-title">Nueva Tarea</h5>
@@ -185,7 +174,7 @@
             <label>Estado</label>
             <select name="estado" class="form-control">
               <option value="pendiente">Pendiente</option>
-              <option value="en_proceso">En proceso</option>
+              <option value="en_progreso">En proceso</option>
               <option value="completado">Completado</option>
             </select>
           </div>
@@ -197,7 +186,12 @@
 
           <div class="mb-2">
             <label>Tipo</label>
-            <input type="text" name="id_tipo" class="form-control">
+            <select name="id_tipo" class="form-control">
+              <option value="1">Tipo 1</option>
+              <option value="2">Tipo 2</option>
+              <option value="3">Tipo 3</option>
+              <option value="4">Tipo 4</option>
+            </select>
           </div>
 
         </div>
@@ -212,7 +206,6 @@
   </div>
 </div>
 
-
 <!-- ========================= -->
 <!-- MODAL EDITAR -->
 <!-- ========================= -->
@@ -220,7 +213,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="/RegistroTareas/updateTask" method="POST">
+      <form action="<?= RUTA_URL ?>/RegistroTareas/update" method="POST">
 
         <div class="modal-header">
           <h5 class="modal-title">Editar Tarea</h5>
@@ -265,7 +258,7 @@
             <label>Estado</label>
             <select name="estado" class="form-control">
               <option value="pendiente">Pendiente</option>
-              <option value="en_proceso">En proceso</option>
+              <option value="en_progreso">En proceso</option>
               <option value="completado">Completado</option>
             </select>
           </div>
@@ -287,7 +280,6 @@
   </div>
 </div>
 
-
 <!-- ========================= -->
 <!-- MODAL ELIMINAR -->
 <!-- ========================= -->
@@ -295,7 +287,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="/RegistroTareas/deleteTask" method="POST">
+      <form action="<?= RUTA_URL ?>/RegistroTareas/delete" method="POST">
 
         <div class="modal-header">
           <h5 class="modal-title">Eliminar Tarea</h5>
@@ -308,27 +300,27 @@
 
           <div class="mb-2">
             <label>ID Fichaje</label>
-            <input type="text" name="id_fichaje" class="form-control" disabled>
+            <input type="text" name="id_fichaje" class="form-control" readonly>
           </div>
 
           <div class="mb-2">
             <label>Título</label>
-            <input type="text" name="titulo" class="form-control" disabled>
+            <input type="text" name="titulo" class="form-control" readonly>
           </div>
 
           <div class="mb-2">
             <label>Descripción</label>
-            <textarea name="descripcion" class="form-control" disabled></textarea>
+            <textarea name="descripcion" class="form-control" readonly></textarea>
           </div>
 
           <div class="mb-2">
             <label>Estado</label>
-            <input type="text" name="estado" class="form-control" disabled>
+            <input type="text" name="estado" class="form-control" readonly>
           </div>
 
           <div class="mb-2">
             <label>Fecha</label>
-            <input type="datetime-local" name="fecha" class="form-control" disabled>
+            <input type="datetime-local" name="fecha" class="form-control" readonly>
           </div>
 
         </div>
@@ -343,6 +335,11 @@
   </div>
 </div>
 
+<script>
+  const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
+  const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+  const RUTA_URL = "<?= RUTA_URL ?>";
+</script>
 
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureTareas.js"></script>
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>

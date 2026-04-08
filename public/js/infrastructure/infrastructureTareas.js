@@ -2,16 +2,14 @@
 // LOAD TASKS
 // =========================
 async function loadTasks() {
-
     try {
-        const RESPONSE = await fetch("/RegistroTareas/getTasks");
+        const RESPONSE = await fetch(RUTA_URL + "/RegistroTareas/getTasks");
 
         if (!RESPONSE.ok) {
             throw new Error('No response from server: ' + RESPONSE.status);
         }
 
-        const DATA = await RESPONSE.json();
-        return DATA;
+        return await RESPONSE.json();
 
     } catch (error) {
         console.log(error.message);
@@ -23,10 +21,9 @@ async function loadTasks() {
 // =========================
 // RENDER TABLE
 // =========================
-loadTasks().then((response) => {
+function renderTasks(response) {
 
     const lista = document.getElementById('lista');
-
     if (!lista) return;
 
     if (response && response.success && response.data.length > 0) {
@@ -35,24 +32,14 @@ loadTasks().then((response) => {
 
         response.data.forEach(tarea => {
 
-            html += `
-                <tr>
-                    <td>${tarea.id_tarea}</td>
-                    <td>${tarea.id_fichaje}</td>
-                    <td>${tarea.nombre_usuario}</td>
-                    <td>${tarea.titulo}</td>
-                    <td>${tarea.descripcion}</td>
-                    <td>${tarea.hora_inicio}</td>
-                    <td>${tarea.hora_fin}</td>
-                    <td>${tarea.tiempo_total}</td>
-                    <td>${tarea.estado}</td>
-                    <td>${tarea.fecha}</td>
-                    <td>
-                        <span class="badge bg-primary">
-                            ${tarea.nombre}
-                        </span>
-                    </td>
+            // =========================
+            // BOTONES (PERMISOS)
+            // =========================
+            let acciones = '';
 
+            if (USER_ROL === 'Administrador' || USER_ID == tarea.id_usuario) {
+
+                acciones = `
                     <td>
                         <button 
                             class="btn btn-outline-secondary btn-sm px-3 btn-editar"
@@ -61,7 +48,6 @@ loadTasks().then((response) => {
 
                             data-id="${tarea.id_tarea}"
                             data-id_fichaje="${tarea.id_fichaje}"
-                            data-nombre_usuario="${tarea.nombre_usuario}"
                             data-titulo="${tarea.titulo}"
                             data-descripcion="${tarea.descripcion}"
                             data-hora_inicio="${tarea.hora_inicio}"
@@ -90,6 +76,32 @@ loadTasks().then((response) => {
                             🗑️
                         </button>
                     </td>
+                `;
+            } else {
+                acciones = `<td colspan="2"></td>`;
+            }
+
+            // =========================
+            // ROW
+            // =========================
+            html += `
+                <tr>
+                    <td>${tarea.id_tarea}</td>
+                    <td>${tarea.id_fichaje}</td>
+                    <td>${tarea.nombre_usuario}</td>
+                    <td>${tarea.titulo}</td>
+                    <td>${tarea.descripcion}</td>
+                    <td>${tarea.hora_inicio}</td>
+                    <td>${tarea.hora_fin}</td>
+                    <td>${tarea.tiempo_total}</td>
+                    <td>${tarea.estado}</td>
+                    <td>${tarea.fecha}</td>
+                    <td>
+                        <span class="badge bg-primary">
+                            ${tarea.nombre_tipo ?? `Tipo ${tarea.id_tipo}`}
+                        </span>
+                    </td>
+                    ${acciones}
                 </tr>
             `;
         });
@@ -99,13 +111,23 @@ loadTasks().then((response) => {
     } else {
         lista.innerHTML = `
             <tr>
-                <td colspan="11" class="text-center">
+                <td colspan="13" class="text-center">
                     No hay tareas registradas
                 </td>
             </tr>
         `;
     }
-     document.dispatchEvent(new Event('tableReady'));
+
+    document.dispatchEvent(new Event('tableReady'));
+}
+
+
+// =========================
+// INIT
+// =========================
+document.addEventListener("DOMContentLoaded", async () => {
+    const response = await loadTasks();
+    renderTasks(response);
 });
 
 
@@ -121,14 +143,16 @@ document.addEventListener('click', function (e) {
     if (editBtn) {
 
         const modal = document.querySelector('#editModal');
+
         let fecha = editBtn.dataset.fecha;
+
         if (fecha) {
-            if (!fecha.includes(' ')) {
-                // Si solo viene la fecha → añade hora por defecto
+            if (!fecha.includes('T') && fecha.includes(' ')) {
+                fecha = fecha.replace(' ', 'T').substring(0, 16);
+            } else if (!fecha.includes('T')) {
                 fecha = fecha + 'T00:00';
             } else {
-                // Si ya viene con hora
-                fecha = fecha.replace(' ', 'T').substring(0, 16);
+                fecha = fecha.substring(0, 16);
             }
         }
 
@@ -154,13 +178,14 @@ document.addEventListener('click', function (e) {
         const modal = document.querySelector('#deleteModal');
 
         let fecha = deleteBtn.dataset.fecha;
+
         if (fecha) {
-            if (!fecha.includes(' ')) {
-                // Si solo viene la fecha → añade hora por defecto
+            if (!fecha.includes('T') && fecha.includes(' ')) {
+                fecha = fecha.replace(' ', 'T').substring(0, 16);
+            } else if (!fecha.includes('T')) {
                 fecha = fecha + 'T00:00';
             } else {
-                // Si ya viene con hora
-                fecha = fecha.replace(' ', 'T').substring(0, 16);
+                fecha = fecha.substring(0, 16);
             }
         }
 

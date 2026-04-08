@@ -11,9 +11,11 @@
       <i class="bi bi-clock-history me-2"></i>Fichajes
     </a>
 
+    <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
     <a href="<?= RUTA_URL ?>/empleado/index" class="<?= ($_SERVER['REQUEST_URI'] == '/empleado/index') ? 'active' : '' ?>">
-      <i class="bi bi-people me-2"></i>Empleados
-    </a>
+    <i class="bi bi-people me-2"></i>Empleados
+      </a>
+    <?php endif; ?>
 
      <a href="<?= RUTA_URL ?>/Jornadas/index" class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
        <i class="bi bi-kanban me-2"></i>Gestión de Jornadas

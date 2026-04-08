@@ -230,6 +230,11 @@
     </div>
   </div>
 </div>
+
+<script>
+    const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
+    const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+</script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureIncidencias.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>

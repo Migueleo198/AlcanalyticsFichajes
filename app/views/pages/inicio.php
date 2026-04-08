@@ -45,7 +45,7 @@
 
   <!-- CARDS KPI -->
   <div class="row g-3 mb-4">
-
+     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
     <div class="col-md-3">
     <a href="<?= RUTA_URL ?>/empleado/index" class="text-decoration-none">
     <div class="card card-custom p-3 cardhov">
@@ -54,6 +54,7 @@
     </div>
   </a>
   </div>
+  <?php endif ?>
   
 
     <div class="col-md-3">
