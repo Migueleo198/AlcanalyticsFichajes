@@ -139,4 +139,21 @@ public function getRetrasosHoy() {
 
     return $this->db->query($sql)->fetch()['total'];
 }
+
+
+    public function getByUserAndRange($userId, $desde, $hasta) {
+
+        $stmt = $this->db->prepare("
+            SELECT f.*, u.nombre, u.apellidos, u.dni
+            FROM Fichaje f
+            JOIN Usuario u ON u.id_usuario = f.id_usuario
+            WHERE f.id_usuario = ?
+            AND f.fecha BETWEEN ? AND ?
+            ORDER BY f.fecha ASC
+        ");
+
+        $stmt->execute([$userId, $desde, $hasta]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
