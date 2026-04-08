@@ -22,9 +22,14 @@ class RegistroTareas extends Controller
         $modeloFichaje = new FichajeModelo($conexion);
         $fichaje = $modeloFichaje->obtenerFichajeActivo($_SESSION['id_usuario']);
 
+        // ✅ CARGAR TIPOS DESDE EL MODELO
+        $modeloTareas = new RegistroTareasModelo($conexion);
+        $tipos = $modeloTareas->getTipos();
+
         $datos = [
             "title" => "Tareas",
-            "fichajeActivo" => $fichaje
+            "fichajeActivo" => $fichaje,
+            "tipo" => $tipos // ✅ CLAVE
         ];
 
         $this->load_view('registroTareas', $datos);
@@ -73,7 +78,7 @@ class RegistroTareas extends Controller
 
             $data = $_POST;
 
-            // ✅ añadir usuario desde sesión
+            // añadir usuario desde sesión
             $data['id_usuario'] = $_SESSION['id_usuario'];
 
             $db = new Database();
@@ -82,7 +87,6 @@ class RegistroTareas extends Controller
             $modelo = new RegistroTareasModelo($conexion);
             $modelo->createTask($data);
 
-            // ✅ redirección a la vista (no JSON)
             header("Location: " . RUTA_URL . "/RegistroTareas");
             exit;
         }

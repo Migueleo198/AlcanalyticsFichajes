@@ -91,7 +91,6 @@
           </div>
         </div>
 
-        <!-- BOTÓN AÑADIR -->
         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
           + Añadir tarea
         </button>
@@ -184,13 +183,17 @@
             <input type="datetime-local" name="fecha" class="form-control">
           </div>
 
+          <!-- TIPOS -->
           <div class="mb-2">
             <label>Tipo</label>
-            <select name="id_tipo" class="form-control">
-              <option value="1">Tipo 1</option>
-              <option value="2">Tipo 2</option>
-              <option value="3">Tipo 3</option>
-              <option value="4">Tipo 4</option>
+            <select name="id_tipo" class="form-control" required>
+              <option value="">Seleccione tipo</option>
+
+              <?php var_dump($datos); foreach ($datos['tipo'] as $tipo): ?>
+                <option value="<?= $tipo['id_tipo'] ?>">
+                  <?= htmlspecialchars($tipo['nombre']) ?>
+                </option>
+              <?php endforeach; ?>
             </select>
           </div>
 
@@ -268,65 +271,23 @@
             <input type="datetime-local" name="fecha" class="form-control">
           </div>
 
+          <!-- ✅ IMPORTANTE: tipo en edición -->
+          <div class="mb-2">
+            <label>Tipo</label>
+            <select name="id_tipo" class="form-control">
+              <option value="">Seleccione tipo</option>
+              <?php foreach ($datos['tipo'] as $tipo): ?>
+                <option value="<?= $tipo['id_tipo'] ?>">
+                  <?= htmlspecialchars($tipo['nombre']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
         </div>
 
         <div class="modal-footer">
           <button class="btn btn-primary">Guardar cambios</button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
-</div>
-
-<!-- ========================= -->
-<!-- MODAL ELIMINAR -->
-<!-- ========================= -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <form action="<?= RUTA_URL ?>/RegistroTareas/delete" method="POST">
-
-        <div class="modal-header">
-          <h5 class="modal-title">Eliminar Tarea</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-
-        <div class="modal-body">
-
-          <input type="hidden" name="id">
-
-          <div class="mb-2">
-            <label>ID Fichaje</label>
-            <input type="text" name="id_fichaje" class="form-control" readonly>
-          </div>
-
-          <div class="mb-2">
-            <label>Título</label>
-            <input type="text" name="titulo" class="form-control" readonly>
-          </div>
-
-          <div class="mb-2">
-            <label>Descripción</label>
-            <textarea name="descripcion" class="form-control" readonly></textarea>
-          </div>
-
-          <div class="mb-2">
-            <label>Estado</label>
-            <input type="text" name="estado" class="form-control" readonly>
-          </div>
-
-          <div class="mb-2">
-            <label>Fecha</label>
-            <input type="datetime-local" name="fecha" class="form-control" readonly>
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-danger">Eliminar</button>
         </div>
 
       </form>

@@ -32,9 +32,6 @@ function renderTasks(response) {
 
         response.data.forEach(tarea => {
 
-            // =========================
-            // BOTONES (PERMISOS)
-            // =========================
             let acciones = '';
 
             if (USER_ROL === 'Administrador' || USER_ID == tarea.id_usuario) {
@@ -55,6 +52,7 @@ function renderTasks(response) {
                             data-tiempo_total="${tarea.tiempo_total}"
                             data-estado="${tarea.estado}"
                             data-fecha="${tarea.fecha}"
+                            data-id_tipo="${tarea.id_tipo ?? ''}"
                         >
                             ✏️
                         </button>
@@ -81,9 +79,6 @@ function renderTasks(response) {
                 acciones = `<td colspan="2"></td>`;
             }
 
-            // =========================
-            // ROW
-            // =========================
             html += `
                 <tr>
                     <td>${tarea.id_tarea}</td>
@@ -164,6 +159,13 @@ document.addEventListener('click', function (e) {
         modal.querySelector('[name="hora_fin"]').value = editBtn.dataset.hora_fin;
         modal.querySelector('[name="tiempo_total"]').value = editBtn.dataset.tiempo_total;
         modal.querySelector('[name="estado"]').value = editBtn.dataset.estado;
+
+        // ✅ FIX SEGURO PARA TIPO
+        const selectTipo = modal.querySelector('[name="id_tipo"]');
+        if (selectTipo) {
+            selectTipo.value = editBtn.dataset.id_tipo || '';
+        }
+
         modal.querySelector('[name="fecha"]').value = fecha;
 
         return;
@@ -193,9 +195,6 @@ document.addEventListener('click', function (e) {
         modal.querySelector('[name="id_fichaje"]').value = deleteBtn.dataset.id_fichaje;
         modal.querySelector('[name="titulo"]').value = deleteBtn.dataset.titulo;
         modal.querySelector('[name="descripcion"]').value = deleteBtn.dataset.descripcion;
-        modal.querySelector('[name="hora_inicio"]').value = deleteBtn.dataset.hora_inicio;
-        modal.querySelector('[name="hora_fin"]').value = deleteBtn.dataset.hora_fin;
-        modal.querySelector('[name="tiempo_total"]').value = deleteBtn.dataset.tiempo_total;
         modal.querySelector('[name="estado"]').value = deleteBtn.dataset.estado;
         modal.querySelector('[name="fecha"]').value = fecha;
     }
