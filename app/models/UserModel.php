@@ -35,17 +35,31 @@ class UserModel {
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // SIN HASH (temporal)
-        if ($user && $contrasenya === $user['contraseña']) {
+        if (!$user) {
+            return false;
+        }
+
+        $storedPassword = $user['contraseña'];
+
+        if (password_verify($contrasenya, $storedPassword)) {
             return $user;
         }
 
-        // CON HASH (recomendado)
-        // if ($user && password_verify($contrasenya, $user['contraseña'])) {
-        //     return $user;
-        // }
+        // Compatibilidad con contraseñas antiguas guardadas en texto plano
+        if ($contrasenya === $storedPassword) {
+            $this->upgradePasswordHash($user['id_usuario'], $contrasenya);
+            return $user;
+        }
 
         return false;
+    }
+
+    private function upgradePasswordHash($id, $password) {
+        $stmt = $this->db->prepare("UPDATE Usuario SET contraseña = :password WHERE id_usuario = :id");
+        $stmt->execute([
+            ':password' => password_hash($password, PASSWORD_DEFAULT),
+            ':id' => $id
+        ]);
     }
 
     public function getUser($usuario) {
@@ -91,11 +105,13 @@ class UserModel {
             VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol)
         ");
 
+        $hashedPassword = password_hash($datos['contraseña'], PASSWORD_DEFAULT);
+
         return $stmt->execute([
             ':nombre' => $datos['nombre'],
             ':apellidos' => $datos['apellidos'],
             ':usuario' => $datos['nombre_usuario'],
-            ':password' => $datos['contraseña'], // 👉 puedes meter password_hash aquí
+            ':password' => $hashedPassword,
             ':dni' => $datos['dni'],
             ':telefono' => $datos['telefono'],
             ':email' => $datos['email'],
