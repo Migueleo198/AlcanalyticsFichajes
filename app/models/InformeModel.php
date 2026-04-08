@@ -56,4 +56,21 @@ class InformeModel {
         $stmt = $this->db->query("SELECT id_usuario, nombre, apellidos FROM Usuario");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function getByUserAndRange($userId, $desde, $hasta) {
+
+    $stmt = $this->db->prepare("
+        SELECT f.*, u.nombre, u.apellidos
+        FROM fichajes f
+        JOIN Usuario u ON u.id_usuario = f.user_id
+        WHERE f.user_id = ?
+        AND f.fecha BETWEEN ? AND ?
+        ORDER BY f.fecha ASC
+    ");
+
+    $stmt->execute([$userId, $desde, $hasta]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
