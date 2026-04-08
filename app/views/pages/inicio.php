@@ -231,6 +231,11 @@
 const RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
+<script>
+    const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
+    const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+</script>
+
 <!-- JS -->
 <script>
 const fichajeActivo = <?php echo json_encode($datos['fichajeActivo'] ?? null); ?>;

@@ -34,6 +34,32 @@ class FichajeModelo {
 
     }
 
+    public function getByUser($id_usuario){
+
+    $sql = "SELECT 
+                f.id_fichaje,
+                f.fecha,
+                f.hora_entrada,
+                f.hora_salida,
+                f.tiempo_total,
+                f.estado,
+                f.horas_ordinarias,
+                f.horas_extra,
+                u.nombre,
+                u.apellidos,
+                m.nombre AS motivo
+            FROM Fichaje f
+            INNER JOIN Usuario u ON f.id_usuario = u.id_usuario
+            LEFT JOIN MotivoAlta m ON f.id_motivo = m.id_motivo
+            WHERE f.id_usuario = ?
+            ORDER BY f.fecha DESC, f.hora_entrada DESC";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_usuario]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
     // 🔍 FICHAJE ACTIVO
     public function obtenerFichajeActivo($id_usuario) {
         $sql = "SELECT * FROM Fichaje 

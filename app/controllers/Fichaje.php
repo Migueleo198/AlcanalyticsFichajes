@@ -59,7 +59,19 @@ class Fichaje extends Controller {
 
     header('Content-Type: application/json');
 
-    $fichajes = $this->modelo->getFichajes();
+    $id_usuario = $_SESSION['id_usuario'];
+    $rol = $_SESSION['rol'] ?? '';
+
+    // ✅ SI NO ES ADMIN → filtrar por usuario
+    if ($rol !== 'Administrador') {
+
+        $fichajes = $this->modelo->getByUser($id_usuario);
+
+    } else {
+
+        // ✅ ADMIN → todos
+        $fichajes = $this->modelo->getFichajes();
+    }
 
     if($fichajes && count($fichajes) > 0){
         echo json_encode([
@@ -72,20 +84,6 @@ class Fichaje extends Controller {
             "data" => []
         ]);
     }
-    }
-
-    // ========================
-    // API
-    // ========================
-
-    private function checkSession() {
-        if (!isset($_SESSION['id_usuario'])) {
-            echo json_encode([
-                'ok' => false,
-                'error' => 'no_session'
-            ]);
-            exit;
-        }
     }
 
     public function iniciar() {
