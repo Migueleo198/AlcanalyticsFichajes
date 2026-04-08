@@ -43,7 +43,7 @@ function renderIncidencias(response) {
                 fecha = fecha.replace('T', ' ').substring(0, 16);
             }
 
-            const row = `
+            let row = `
                 <tr>
                     <td>${incidencia.id_incidencia}</td>
                     <td>${incidencia.id_fichaje}</td>
@@ -61,8 +61,10 @@ function renderIncidencias(response) {
                     </td>
 
                     <td>${fecha}</td>
-
-                    <td>
+                `
+                 if (USER_ROL === 'Administrador') {
+            row +=
+                    `<td>
                         <button 
                             class="btn btn-outline-warning btn-sm btn-editar"
                             data-bs-toggle="modal" 
@@ -95,7 +97,7 @@ function renderIncidencias(response) {
                     </td>
                 </tr>
             `;
-
+                 }
             lista.insertAdjacentHTML('beforeend', row);
         });
 
