@@ -23,7 +23,7 @@ class Bajas extends Controller
     }
     }
 
-    // 👉 FORMULARIO SOLICITAR BAJA
+    
     public function index()
     {
         $this->checkSession();
@@ -42,7 +42,7 @@ class Bajas extends Controller
         $this->load_view('bajas', $datos);
     }
 
-    // 👉 GUARDAR SOLICITUD
+    
     public function solicitar()
     {
         $this->checkSession();
@@ -73,7 +73,7 @@ class Bajas extends Controller
 {
     $this->checkSession();
 
-    // 🔥 Si es admin → redirigir a gestión
+    
     if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador') {
         header("Location: " . RUTA_URL . "/Bajas/gestionar");
         exit;
@@ -93,11 +93,11 @@ class Bajas extends Controller
     $this->load_view('bajas_visualizar', $datos);
 }
 
-    // 👉 PANEL ADMIN (ver todas)
+    
     public function gestionar()
     {
         $this->checkSession();
-        $this->checkAdmin(); // 🔥 SOLO ADMIN
+        $this->checkAdmin(); 
 
         $db = new Database();
         $conexion = $db->conectar();
@@ -113,13 +113,13 @@ class Bajas extends Controller
         $this->load_view('bajas_admin', $datos);
     }
 
-    // 👉 APROBAR / RECHAZAR (solo admin)
+    
     public function cambiarEstado($id, $estado)
     {
         $this->checkSession();
-        $this->checkAdmin(); // 🔥 SOLO ADMIN
+        $this->checkAdmin(); 
 
-        // 🔒 Validación extra de seguridad
+        
         $estadosValidos = ['aprobada', 'rechazada'];
 
         if (!in_array($estado, $estadosValidos)) {

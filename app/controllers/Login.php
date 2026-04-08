@@ -50,7 +50,7 @@ class Login extends Controller
         $user = $this->userModel->login($usuario, $contrasenya);
 
         if ($user) {
-            // 🔐 GUARDAR SOLO LO NECESARIO
+           
             $_SESSION['id_usuario'] = $user['id_usuario'];
             $_SESSION['nombre'] = $user['nombre'];
             $_SESSION['rol'] = $user['rol'];
@@ -69,7 +69,6 @@ class Login extends Controller
         exit;
     }
 
-    // 🔓 LOGOUT
     public function logout()
     {
         session_start();

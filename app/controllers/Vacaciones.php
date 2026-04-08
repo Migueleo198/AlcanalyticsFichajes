@@ -31,7 +31,7 @@ class Vacaciones extends Controller
         $this->load_view('vacaciones', $datos);
     }
 
-    // 🔹 Obtener vacaciones para calendario
+    
     public function getVacaciones() {
         session_start();
 
@@ -52,7 +52,7 @@ class Vacaciones extends Controller
         echo json_encode($eventos);
     }
 
-    // 🔹 Añadir vacaciones
+   
     public function add() {
         session_start();
 
@@ -82,7 +82,7 @@ class Vacaciones extends Controller
         }
     }
 
-    // 🔹 Cambiar estado
+   
     public function updateEstado() {
         session_start();
 
@@ -97,7 +97,7 @@ class Vacaciones extends Controller
         }
     }
 
-    // 🔹 Eliminar
+    
     public function delete($id) {
         session_start();
 

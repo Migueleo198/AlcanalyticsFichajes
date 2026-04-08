@@ -34,7 +34,7 @@ class FichajeModelo {
 
     }
 
-    // 🔍 FICHAJE ACTIVO
+    
     public function obtenerFichajeActivo($id_usuario) {
         $sql = "SELECT * FROM Fichaje 
                 WHERE id_usuario = ? 
@@ -48,10 +48,10 @@ class FichajeModelo {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // ▶️ INICIAR (PROTEGIDO)
+   
     public function iniciarFichaje($id_usuario) {
 
-        // evitar duplicados
+       
         $check = $this->obtenerFichajeActivo($id_usuario);
         if ($check) return false;
 
@@ -63,7 +63,7 @@ class FichajeModelo {
         return $stmt->execute([$id_usuario]);
     }
 
-    // ⏸️ INICIAR DESCANSO
+   
     public function iniciarDescanso($id_fichaje) {
         $sql = "INSERT INTO Descanso (id_fichaje, hora_inicio)
                 VALUES (?, CURTIME())";
@@ -72,7 +72,7 @@ class FichajeModelo {
         return $stmt->execute([$id_fichaje]);
     }
 
-    // 🔄 FINALIZAR DESCANSO
+   
     public function finalizarDescanso($id_fichaje) {
         $sql = "UPDATE Descanso 
                 SET hora_fin = CURTIME()
@@ -83,7 +83,7 @@ class FichajeModelo {
         return $stmt->execute([$id_fichaje]);
     }
 
-    // ⛔ FINALIZAR FICHAJE
+    
     public function finalizarFichaje($id_fichaje) {
         $sql = "UPDATE Fichaje 
                 SET hora_salida = CURTIME(), estado = 'cerrado'
@@ -93,7 +93,7 @@ class FichajeModelo {
         return $stmt->execute([$id_fichaje]);
     }
 
-    // 🔍 DESCANSO ACTIVO
+    
     public function estaEnDescanso($id_fichaje) {
         $sql = "SELECT * FROM Descanso 
                 WHERE id_fichaje = ? 
@@ -105,7 +105,7 @@ class FichajeModelo {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // 🔍 TODOS LOS DESCANSOS
+    
     public function obtenerDescansos($id_fichaje) {
         $sql = "SELECT * FROM Descanso WHERE id_fichaje = ?";
         $stmt = $this->db->prepare($sql);

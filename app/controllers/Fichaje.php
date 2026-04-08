@@ -36,10 +36,10 @@ class Fichaje extends Controller {
 
         $id_fichaje = $fichaje['id_fichaje'];
 
-        // Obtener descansos
+       
         $descansos = $this->modelo->obtenerDescansos($id_fichaje);
 
-        // Detectar descanso activo
+       
         $descanso = $this->modelo->estaEnDescanso($id_fichaje);
 
         $enDescanso = $descanso ? true : false;
@@ -48,7 +48,7 @@ class Fichaje extends Controller {
     $datos = [
         "title" => "Fichajes",
         "fichaje" => $fichaje,
-        "descansos" => $descansos,   // 🔥 IMPORTANTE
+        "descansos" => $descansos,   
         "enDescanso" => $enDescanso
     ];
 
@@ -74,9 +74,7 @@ class Fichaje extends Controller {
     }
     }
 
-    // ========================
-    // API
-    // ========================
+   
 
     private function checkSession() {
         if (!isset($_SESSION['id_usuario'])) {

@@ -4,9 +4,7 @@ require_once '../app/models/UserModel.php';
 
 class User {
 
-    // =========================
-    // 🔐 LOGIN
-    // =========================
+   
     public function login() {
         header('Content-Type: application/json');
 

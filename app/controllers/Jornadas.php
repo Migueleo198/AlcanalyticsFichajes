@@ -19,16 +19,14 @@ class Jornadas extends Controller
         $db = new Database();
         $conexion = $db->conectar();
 
-        // ✅ Nombre correcto del modelo
+      
         $this->modelo = new JornadasModel($conexion);
     }
 
-    // =========================
-    // VISTA NORMAL (SIN JS)
-    // =========================
+  
     public function index()
     {
-        // ✅ Obtener jornadas
+      
         $jornadas = $this->modelo->getJornadas();
 
         $datos = [
@@ -39,9 +37,7 @@ class Jornadas extends Controller
         $this->load_view('jornadas', $datos);
     }
 
-    // =========================
-    // API (PARA JS)
-    // =========================
+    
     public function getJornadas()
     {
         header('Content-Type: application/json');

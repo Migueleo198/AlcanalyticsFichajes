@@ -9,7 +9,7 @@ class VacacionesModel
         $this->conexion = $db;
     }
 
-    // 🔹 Insertar vacaciones
+    
     public function insertarVacacion($data)
     {
         $sql = "INSERT INTO Vacaciones 
@@ -30,7 +30,7 @@ class VacacionesModel
         ]);
     }
 
-    // 🔹 Obtener vacaciones de un usuario
+    
     public function obtenerVacacionesPorUsuario($id_usuario)
     {
         $sql = "SELECT *
@@ -44,7 +44,7 @@ class VacacionesModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 🔹 Obtener TODAS (para admin / calendario)
+    
     public function obtenerTodasVacaciones()
     {
         $sql = "SELECT v.*, u.nombre, u.apellidos
@@ -58,7 +58,7 @@ class VacacionesModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 🔹 Actualizar estado
+    
     public function actualizarEstado($id, $estado)
     {
         $sql = "UPDATE Vacaciones 
@@ -73,7 +73,7 @@ class VacacionesModel
         ]);
     }
 
-    // 🔹 Eliminar
+    
     public function eliminarVacacion($id)
     {
         $sql = "DELETE FROM Vacaciones 
@@ -91,7 +91,7 @@ class VacacionesModel
     return $this->obtenerTodasVacaciones();
     }
 
-    // 🔹 Comprobar solapamientos
+    
     public function haySolapamiento($id_usuario, $inicio, $fin)
     {
         $sql = "SELECT *
@@ -114,7 +114,7 @@ class VacacionesModel
         return $stmt->rowCount() > 0;
     }
 
-    // 🔹 Calcular días
+    
     private function calcularDias($inicio, $fin)
     {
         $fecha1 = new DateTime($inicio);
