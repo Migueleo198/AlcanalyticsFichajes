@@ -59,7 +59,12 @@ class Fichaje extends Controller {
 
     header('Content-Type: application/json');
 
-    $fichajes = $this->modelo->getFichajes();
+    
+    $id_usuario = $_SESSION['id_usuario'];
+    $rol = $_SESSION['rol'];
+
+   
+    $fichajes = $this->modelo->getFichajes($id_usuario, $rol);
 
     if($fichajes && count($fichajes) > 0){
         echo json_encode([
