@@ -6,7 +6,7 @@
 
 <div class="content">
 
-    <h3 class="mb-3">📅 Gestión de Ausencias</h3>
+    <h3 class="mb-3">Gestión de Ausencias</h3>
 
     <!-- FORMULARIO -->
     <div class="card p-3 mb-4">
@@ -44,7 +44,7 @@
 
             </div>
 
-            <button class="btn btn-primary mt-3">➕ Crear ausencia</button>
+            <button class="btn btn-primary mt-3">Crear ausencia</button>
 
         </form>
 
