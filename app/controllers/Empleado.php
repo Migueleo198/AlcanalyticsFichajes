@@ -32,7 +32,7 @@ class Empleado extends Controller {
             "title" => "Empleados"
         ];
 
-        $this->load_view('', $datos);
-empleados
+        $this->load_view('empleados', $datos);
+
     }
 }
