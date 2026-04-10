@@ -46,7 +46,7 @@
     <i class="bi bi-plus-circle me-2"></i>Solicitar baja
   </a>
 
-  <a href="<?= RUTA_URL ?>/Bajas/index" class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
+  <a href="<?= RUTA_URL ?>/Ausencias/index" class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
     <i class="bi bi-plus-circle me-2"></i>Solicitar Ausencia
   </a>
 

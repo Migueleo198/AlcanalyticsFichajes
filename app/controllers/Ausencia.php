@@ -20,12 +20,12 @@ class Ausencias extends Controller
         $modelo = new AusenciaModel($conexion);
 
         $datos = [
-            "ausencias" => $modelo->getAll(),
-            "motivos" => $modelo->getMotivos(),
+            //"ausencias" => $modelo->getAll(),
+            //"motivos" => $modelo->getMotivos(),
             "title" => "Gestión de Ausencias"
         ];
 
-        $this->load_view('ausencias', $datos);
+        $this->load_view('ausencia', $datos);
     }
 
     public function crear()
