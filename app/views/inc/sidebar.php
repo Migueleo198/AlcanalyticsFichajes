@@ -36,7 +36,7 @@
 
        <a data-bs-toggle="collapse" href="#bajasMenu" role="button"
    aria-expanded="false" aria-controls="bajasMenu">
-  <i class="bi bi-person-dash me-2"></i>Bajas
+  <i class="bi bi-person-dash me-2"></i>Ausencias y Bajas
   <i class="bi bi-chevron-down float-end"></i>
 </a>
 
@@ -46,13 +46,17 @@
     <i class="bi bi-plus-circle me-2"></i>Solicitar baja
   </a>
 
+  <a href="<?= RUTA_URL ?>/Bajas/index" class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
+    <i class="bi bi-plus-circle me-2"></i>Solicitar Ausencia
+  </a>
+
   <a href="<?= RUTA_URL ?>/Bajas/visualizar" class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/gestionar') ? 'active' : '' ?>">
     <i class="bi bi-eye me-2"></i>Gestionar
   </a>
 
 </div>
 
-    
+    <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
     <a data-bs-toggle="collapse" href="#reportesMenu" role="button"
        aria-expanded="false" aria-controls="reportesMenu">
       <i class="bi bi-bar-chart me-2"></i>Estadísticas y Métricas
@@ -84,9 +88,9 @@
       <a href="#">
         <i class="bi bi-person-lines-fill me-2"></i>Estadísticas de empleados
       </a>
-
+     
     </div>
-
+ <?php endif; ?>
     <a href="<?= RUTA_URL ?>/incidencias/index" class="<?= ($_SERVER['REQUEST_URI'] == '/incidencias/index') ? 'active' : '' ?>">
       <i class="bi bi-exclamation-triangle me-2"></i>Registro de Incidencias
     </a>

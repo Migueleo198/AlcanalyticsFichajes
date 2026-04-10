@@ -142,3 +142,61 @@
   animation: shake 1.2s ease-in-out infinite; /* slower */
   transform-origin: center;
 }
+
+
+.btn-informe {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+/* 📅 Semanal - azul suave */
+.btn-semanal {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-semanal:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* 📆 Mensual - verde elegante */
+.btn-mensual {
+    background: #10b981;
+    color: white;
+}
+
+.btn-mensual:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* 🎯 Personalizado (principal) */
+.btn-generar {
+    background: #6366f1;
+    color: white;
+}
+
+.btn-generar:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+/* 🧹 Limpiar */
+.btn-limpiar {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-limpiar:hover {
+    background: #d1d5db;
+}
+
+/* 🔥 Estado activo */
+.btn-active {
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+    transform: scale(1.03);
+}

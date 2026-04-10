@@ -8,36 +8,34 @@
 
   <!-- TOPBAR -->
   <div class="topbar d-flex justify-content-between align-items-center">
-  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar informes...">
+    <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar informes...">
 
-  <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center">
 
-   <!-- NOTIFICACIONES -->
-    <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon" 
-   data-bs-toggle="dropdown" 
-   style="cursor:pointer;"></i>
-      
-      <!-- Badge -->
-      <span id="contadorNotificaciones" 
-      class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
-       3
-      </span>
+      <!-- NOTIFICACIONES -->
+      <div class="dropdown me-3 position-relative">
+        <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon"
+           data-bs-toggle="dropdown"
+           style="cursor:pointer;"></i>
 
-      <!-- Dropdown -->
-      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
-        <li class="fw-bold mb-2">Notificaciones</li>
-        <li class="dropdown-item">Nuevo fichaje registrado</li>
-        <li class="dropdown-item">Contrato por vencer</li>
-        <li class="dropdown-item">Actualización completada</li>
-      </ul>
+        <span id="contadorNotificaciones"
+              class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+          3
+        </span>
+
+        <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
+          <li class="fw-bold mb-2">Notificaciones</li>
+          <li class="dropdown-item">Nuevo fichaje registrado</li>
+          <li class="dropdown-item">Contrato por vencer</li>
+          <li class="dropdown-item">Actualización completada</li>
+        </ul>
+      </div>
+
+      <!-- PERFIL -->
+      <i class="bi bi-person-circle fs-5 profile"
+         data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
     </div>
-
-    <!-- PERFIL -->
-    <i class="bi bi-person-circle fs-5 profile" 
-     data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
-    </div>
-</div>
+  </div>
 
   <!-- HEADER -->
   <h3>Generación de Informes</h3>
@@ -90,27 +88,46 @@
       <div class="col-md-4">
         <label class="form-label">Usuario</label>
         <select id="usuario" class="form-select">
-          <option value="">Todos</option>
 
-          <?php foreach ($datos['usuarios'] as $u): ?>
-            <option value="<?= $u['id_usuario'] ?>">
-              <?= $u['nombre'] . " " . $u['apellidos'] ?>
+          <?php if ($_SESSION['rol'] === 'Administrador'): ?>
+            <option value="">Todos</option>
+
+            <?php foreach ($datos['usuarios'] as $u): ?>
+              <option value="<?= $u['id_usuario'] ?>">
+                <?= $u['nombre'] . " " . $u['apellidos'] ?>
+              </option>
+            <?php endforeach; ?>
+
+          <?php else: ?>
+            <option value="<?= $_SESSION['id_usuario'] ?>" selected>
+              <?= $_SESSION['nombre'] ?? 'Mi usuario' ?>
             </option>
-          <?php endforeach; ?>
+          <?php endif; ?>
+
         </select>
       </div>
 
     </div>
 
     <!-- BOTONES -->
-    <div class="mt-4 d-flex gap-2">
+    <div class="mt-4 d-flex gap-2 flex-wrap">
+
+      <button id="btnSemanal" class="btn btn-success">
+        <i class="bi bi-calendar-week"></i> Semanal
+      </button>
+
+      <button id="btnMensual" class="btn btn-info">
+        <i class="bi bi-calendar-month"></i> Mensual
+      </button>
+
       <button id="btnGenerarInforme" class="btn btn-primary">
-        <i class="bi bi-download"></i> Generar informe
+        <i class="bi bi-download"></i> Descagar PDF
       </button>
 
       <button id="btnLimpiarFiltros" class="btn btn-outline-secondary">
         Limpiar
       </button>
+
     </div>
 
   </div>
@@ -119,11 +136,10 @@
 
 </div>
 
-
 <script>
     const RUTA_URL = "<?= RUTA_URL ?>";
 </script>
-<!-- JS EXTERNO -->
-<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureInformes.js"></script>
+
+<script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureInformes.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php'; ?>
