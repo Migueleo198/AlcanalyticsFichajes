@@ -21,10 +21,40 @@ loadUsers().then((response) => {
 
     if (response && response.success && response.data.length > 0) {
 
-      
         const fragment = document.createDocumentFragment();
 
         response.data.forEach(usuario => {
+
+            
+            let matriculasHTML = '';
+
+            if (usuario.matriculas && usuario.matriculas.length > 0) {
+
+                matriculasHTML = `
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown">
+                                Ver (${usuario.matriculas.length})
+                        </button>
+
+                        <ul class="dropdown-menu">
+                            ${usuario.matriculas.map(m => `
+                                <li>
+                                    <span class="dropdown-item">
+                                         ${m.matricula}
+                                    </span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+
+            } else {
+                matriculasHTML = `
+                    <span class="text-muted">Sin matrículas</span>
+                `;
+            }
 
             const tr = document.createElement('tr');
 
@@ -35,11 +65,18 @@ loadUsers().then((response) => {
                 <td>${usuario.dni}</td>
                 <td>${usuario.telefono}</td>
                 <td>${usuario.email}</td>
+
+               
+                <td>
+                    ${matriculasHTML}
+                </td>
+
                 <td>
                     <span class="badge bg-primary">
                         ${usuario.rol}
                     </span>
                 </td>
+
                 <td>
                     <button 
                         class="btn btn-outline-secondary btn-sm px-3 btn-editar"
@@ -58,6 +95,7 @@ loadUsers().then((response) => {
                         ✏️
                     </button>
                 </td>
+
                 <td>
                     <button 
                         class="btn btn-outline-secondary btn-sm px-3 btn-eliminar"
@@ -81,7 +119,6 @@ loadUsers().then((response) => {
             fragment.appendChild(tr);
         });
 
-        
         lista.appendChild(fragment);
 
     } else {
@@ -94,9 +131,9 @@ loadUsers().then((response) => {
         `;
     }
 
-   
     document.dispatchEvent(new Event('tableReady'));
 });
+
 
 // =========================
 // EDIT MODAL HANDLER
@@ -129,9 +166,6 @@ document.addEventListener('click', function(e) {
     if (!btn) return;
 
     const modal = document.querySelector('#deleteModal');
-
-    // Set ID in hidden input
-    modal.querySelector('[name="id"]').value = btn.dataset.id;
 
     modal.querySelector('[name="id"]').value = btn.dataset.id;
     modal.querySelector('[name="nombre"]').value = btn.dataset.nombre;

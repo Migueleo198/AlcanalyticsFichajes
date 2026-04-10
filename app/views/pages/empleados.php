@@ -102,6 +102,7 @@
             <th>DNI</th>
             <th>Teléfono</th>
             <th>Email</th>
+            <th>Matrículas</th>
             <th>Rol</th>
             <th class="text-center">Acciones</th>
           </tr>
@@ -352,6 +353,11 @@
 
           <div class="mb-3">
             <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" disabled>
+          </div>
+
+           <div class="mb-3">
+            <label class="form-label">Matricula</label>
             <input type="email" name="email" class="form-control" disabled>
           </div>
 

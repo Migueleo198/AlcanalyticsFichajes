@@ -13,8 +13,8 @@ class AusenciaModel
     {
         $sql = "SELECT a.*, u.nombre AS usuario, m.nombre AS motivo
                 FROM ausencias a
-                INNER JOIN usuarios u ON u.id_usuario = a.id_usuario
-                INNER JOIN motivos m ON m.id_motivo = a.id_motivo
+                INNER JOIN Usuario u ON u.id_usuario = a.id_usuario
+                INNER JOIN motivos_ausencia m ON m.id_motivo = a.id_motivo
                 ORDER BY a.id DESC";
 
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
@@ -22,7 +22,7 @@ class AusenciaModel
 
     public function getMotivos()
     {
-        return $this->db->query("SELECT * FROM motivos")->fetchAll(PDO::FETCH_ASSOC);
+        return $this->db->query("SELECT * FROM motivos_ausencia")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function crear($idUsuario, $idMotivo, $inicio, $fin)

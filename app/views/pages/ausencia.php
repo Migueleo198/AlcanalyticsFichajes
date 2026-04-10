@@ -17,7 +17,16 @@
 
                 <div class="col-md-3">
                     <label>Usuario</label>
-                    <input type="number" name="id_usuario" class="form-control" required>
+                   <select name="id_usuario" class="form-control" required>
+                    <option value="">Selecciona usuario</option>
+    
+                      <?php foreach ($datos['usuarios'] as $u): ?>
+                    <option value="<?= $u['id_usuario'] ?>">
+                     <?= $u['nombre'] ?>
+                      </option>
+                     <?php endforeach; ?>
+
+                    </select>
                 </div>
 
                 <div class="col-md-3">

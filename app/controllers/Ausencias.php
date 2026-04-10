@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/AusenciaModel.php';
+require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../config/Database.php';
 
 class Ausencias extends Controller
@@ -18,12 +19,15 @@ class Ausencias extends Controller
         $conexion = $db->conectar();
 
         $modelo = new AusenciaModel($conexion);
+        $modeloUser = new UserModel($conexion);
+
 
         $datos = [
-            //"ausencias" => $modelo->getAll(),
-            //"motivos" => $modelo->getMotivos(),
-            "title" => "Gestión de Ausencias"
-        ];
+             "ausencias" => $modelo->getAll(),
+             "motivos" => $modelo->getMotivos(),
+             "usuarios" => $modeloUser->getUsuarios(),
+             "title" => "Gestión de Ausencias"
+            ];
 
         $this->load_view('ausencia', $datos);
     }
