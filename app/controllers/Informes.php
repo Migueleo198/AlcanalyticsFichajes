@@ -100,4 +100,33 @@ class Informes extends Controller {
 
     $dompdf->stream("informe_fichajes.pdf", ["Attachment" => true]);
 }
+
+
+public function informeSemanalCron() {
+
+   
+    
+    $db = new Database();
+    $conexion = $db->conectar();
+    $modelo = new InformeModel($conexion);
+
+    
+    $desde = date("Y-m-d", strtotime("monday this week"));
+    $hasta = date("Y-m-d", strtotime("sunday this week"));
+
+    
+    $usuarios = $modelo->obtenerUsuarios();
+
+    foreach ($usuarios as $user) {
+
+        $datos = $modelo->obtenerInforme($desde, $hasta, $user['id_usuario']);
+
+        // 👉 Aquí puedes:
+        // - generar PDF
+        // - guardar en BD
+        // - enviar email
+
+        echo "Informe semanal generado para usuario ID: " . $user['id_usuario'] . "\n";
+    }
+}
 }
