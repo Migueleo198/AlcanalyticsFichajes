@@ -38,46 +38,33 @@ class User extends Controller
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        try {
-            $id = $_GET['id'] ?? null;
+        $id = $_GET['id'] ?? null;
 
-            if (!$id) {
-                http_response_code(400);
-                echo json_encode([
-                    "success" => false,
-                    "message" => "ID requerido"
-                ]);
-                exit;
-            }
-
-            $model = new UserModel();
-
-            $usuario = $model->getUsuarioById($id);
-
-            if (!$usuario) {
-                http_response_code(404);
-                echo json_encode([
-                    "success" => false,
-                    "message" => "Usuario no encontrado"
-                ]);
-                exit;
-            }
-
-            // ⚠️ EVITAMOS ERROR: método no existe en tu model
-            $matriculas = [];
-
-            echo json_encode([
-                "success" => true,
-                "data" => $usuario,
-                "matriculas" => $matriculas
-            ]);
-        } catch (Throwable $e) {
-            http_response_code(500);
+        if (!$id) {
+            http_response_code(400);
             echo json_encode([
                 "success" => false,
-                "message" => "Error interno"
+                "message" => "ID requerido"
             ]);
+            exit;
         }
+
+        $model = new UserModel();
+        $usuario = $model->getUsuarioById($id);
+
+        if (!$usuario) {
+            http_response_code(404);
+            echo json_encode([
+                "success" => false,
+                "message" => "Usuario no encontrado"
+            ]);
+            exit;
+        }
+
+        echo json_encode([
+            "success" => true,
+            "data" => $usuario
+        ]);
 
         exit;
     }
@@ -140,7 +127,7 @@ class User extends Controller
 
         $model = new UserModel();
 
-        $id = $model->crearUsuario([
+        $ok = $model->crearUsuario([
             'nombre' => $_POST['nombre'] ?? '',
             'apellidos' => $_POST['apellidos'] ?? '',
             'nombre_usuario' => $_POST['usuario'] ?? '',
@@ -152,18 +139,25 @@ class User extends Controller
         ]);
 
         echo json_encode([
-            "success" => (bool)$id
+            "success" => (bool)$ok
         ]);
 
         exit;
     }
 
     // =========================
-    // EDIT USER
+    // EDIT USER (FIXED WITH MATRICULAS)
     // =========================
     public function editUser()
     {
         header('Content-Type: application/json; charset=utf-8');
+
+        $matriculas = $_POST['matriculas'] ?? [];
+
+        // ⚠️ normalize single value or array
+        if (!is_array($matriculas)) {
+            $matriculas = [$matriculas];
+        }
 
         $datos = [
             'id' => $_POST['id'] ?? null,
@@ -173,7 +167,8 @@ class User extends Controller
             'dni' => $_POST['dni'] ?? '',
             'telefono' => $_POST['telefono'] ?? '',
             'email' => $_POST['email'] ?? '',
-            'rol' => $_POST['rol'] ?? ''
+            'rol' => $_POST['rol'] ?? '',
+            'matriculas' => array_values(array_filter($matriculas))
         ];
 
         if (!$datos['id']) {
@@ -185,9 +180,23 @@ class User extends Controller
         }
 
         $model = new UserModel();
-        $ok = $model->editUser($datos);
 
-        echo json_encode(["success" => (bool)$ok]);
+        try {
+            $ok = $model->editUser($datos);
+
+            echo json_encode([
+                "success" => (bool)$ok
+            ]);
+
+        } catch (Throwable $e) {
+
+            http_response_code(500);
+
+            echo json_encode([
+                "success" => false,
+                "message" => $e->getMessage()
+            ]);
+        }
 
         exit;
     }

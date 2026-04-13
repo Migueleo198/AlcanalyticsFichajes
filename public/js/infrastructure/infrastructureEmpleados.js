@@ -179,6 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.dispatchEvent(new Event('tableReady'));
     });
 
+    // =========================
+    // ✏️ EDIT MODAL
+    // =========================
     document.addEventListener('click', function (e) {
 
         const btn = e.target.closest('.btn-editar');
@@ -195,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.querySelector('[name="email"]').value = btn.dataset.email;
         modal.querySelector('[name="rol"]').value = btn.dataset.rol;
 
-       
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
 
         const select = modal.querySelector('#editMatriculasSelect');
@@ -206,17 +208,17 @@ document.addEventListener("DOMContentLoaded", () => {
         matriculas.forEach(m => {
 
             const option = document.createElement("option");
-            option.value = m.id_matricula;
+            option.value = m.matricula;   // IMPORTANT: VALUE = STRING
             option.textContent = m.matricula;
-
-           
             option.selected = true;
 
             select.appendChild(option);
         });
     });
 
-
+    // =========================
+    // 💾 SUBMIT EDIT USER
+    // =========================
     document.querySelector('#editModal form').addEventListener('submit', async (e) => {
 
         e.preventDefault();
@@ -224,18 +226,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const form = e.target;
         const data = new FormData(form);
 
-        
         const select = form.querySelector('#editMatriculasSelect');
 
         if (select) {
-            const selected = Array.from(select.selectedOptions)
+
+            const selectedMatriculas = Array.from(select.selectedOptions)
                 .map(opt => opt.value);
 
-            // remove old (avoid duplicates)
             data.delete('matriculas[]');
 
-            selected.forEach(id => {
-                data.append('matriculas[]', id);
+            selectedMatriculas.forEach(matricula => {
+                data.append('matriculas[]', matricula);
             });
         }
 
