@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/FichajeModel.php';
 
@@ -9,9 +10,12 @@ class Fichaje extends Controller {
     private $modelo;
 
     public function __construct() {
+
+        // Conexión BD
         $db = new Database();
         $conexion = $db->conectar();
 
+        // Seguridad sesión
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");
             exit;
@@ -21,67 +25,94 @@ class Fichaje extends Controller {
     }
 
     // ========================
-    // VISTA
+    // VISTA PRINCIPAL
     // ========================
     public function index() {
 
-    $id_usuario = $_SESSION['id_usuario'];
+        $id_usuario = $_SESSION['id_usuario'];
 
-    $fichaje = $this->modelo->obtenerFichajeActivo($id_usuario);
+        $fichaje = $this->modelo->obtenerFichajeActivo($id_usuario);
 
-    $enDescanso = false;
-    $descansos = [];
+        $descansos = [];
+        $enDescanso = false;
 
-    if ($fichaje) {
+        if ($fichaje && isset($fichaje['id_fichaje'])) {
 
-        $id_fichaje = $fichaje['id_fichaje'];
+            $id_fichaje = $fichaje['id_fichaje'];
 
-       
-        $descansos = $this->modelo->obtenerDescansos($id_fichaje);
+            $descansos = $this->modelo->obtenerDescansos($id_fichaje);
 
-       
-        $descanso = $this->modelo->estaEnDescanso($id_fichaje);
+            $descanso = $this->modelo->estaEnDescanso($id_fichaje);
 
-        $enDescanso = $descanso ? true : false;
+            $enDescanso = !empty($descanso);
+        }
+
+        $datos = [
+            "title" => "Fichajes",
+            "fichaje" => $fichaje,
+            "descansos" => $descansos,
+            "enDescanso" => $enDescanso
+        ];
+
+        $this->load_view('fichajes', $datos);
     }
 
-    $datos = [
-        "title" => "Fichajes",
-        "fichaje" => $fichaje,
-        "descansos" => $descansos,   
-        "enDescanso" => $enDescanso
-    ];
+    // ========================
+    // DETALLE GLOBAL DE FICHAJES
+    // ========================
+    public function detalle() {
 
-    $this->load_view('fichajes', $datos);
+        $id_usuario = $_SESSION['id_usuario'] ?? null;
+        $rol = trim($_SESSION['rol'] ?? '');
+
+        $fichajes = [];
+
+        // Normalización segura del rol
+        if ($rol === 'Administrador') {
+
+            $fichajes = $this->modelo->getFichajesAdminDetalle();
+
+        } else {
+
+            $fichajes = $this->modelo->getFichajesUsuarioDetalle($id_usuario);
+        }
+
+        // Seguridad: siempre array
+        if (!is_array($fichajes)) {
+            $fichajes = [];
+        }
+
+        $datos = [
+            "title" => "Detalle de fichajes",
+            "fichajes" => $fichajes
+        ];
+
+        $this->load_view("fichaje_detalle", $datos);
     }
 
-    public function listFichajes(){
+    // ========================
+    // LISTADO JSON
+    // ========================
+    public function listFichajes() {
 
-    header('Content-Type: application/json');
+        header('Content-Type: application/json');
 
-    
-    $id_usuario = $_SESSION['id_usuario'];
-    $rol = $_SESSION['rol'];
+        $id_usuario = $_SESSION['id_usuario'];
+        $rol = $_SESSION['rol'];
 
-   
-    $fichajes = $this->modelo->getFichajes($id_usuario, $rol);
+        $fichajes = $this->modelo->getFichajes($id_usuario, $rol);
 
-    if($fichajes && count($fichajes) > 0){
         echo json_encode([
-            "status" => "success",
-            "data" => $fichajes
-        ]);
-    } else {
-        echo json_encode([
-            "status" => "empty",
-            "data" => []
+            "status" => (!empty($fichajes) ? "success" : "empty"),
+            "data" => $fichajes ?: []
         ]);
     }
-    }
 
-   
-
+    // ========================
+    // CHECK SESSION
+    // ========================
     private function checkSession() {
+
         if (!isset($_SESSION['id_usuario'])) {
             echo json_encode([
                 'ok' => false,
@@ -91,7 +122,11 @@ class Fichaje extends Controller {
         }
     }
 
+    // ========================
+    // INICIAR FICHAJE
+    // ========================
     public function iniciar() {
+
         header('Content-Type: application/json');
         $this->checkSession();
 
@@ -100,39 +135,58 @@ class Fichaje extends Controller {
         echo json_encode(['ok' => true]);
     }
 
+    // ========================
+    // PAUSAR
+    // ========================
     public function pausar() {
+
         header('Content-Type: application/json');
         $this->checkSession();
 
         $fichaje = $this->modelo->obtenerFichajeActivo($_SESSION['id_usuario']);
 
-        if ($fichaje) {
-            $this->modelo->iniciarDescanso($fichaje['id_fichaje']);
+        if ($fichaje && isset($fichaje['id_fichaje'])) {
+
+            $motivo = $_POST['motivo'] ?? $_GET['motivo'] ?? null;
+            $motivo = $motivo ? trim($motivo) : null;
+
+            $this->modelo->iniciarDescanso(
+                $fichaje['id_fichaje'],
+                $motivo
+            );
         }
 
         echo json_encode(['ok' => true]);
     }
 
+    // ========================
+    // REANUDAR
+    // ========================
     public function reanudar() {
+
         header('Content-Type: application/json');
         $this->checkSession();
 
         $fichaje = $this->modelo->obtenerFichajeActivo($_SESSION['id_usuario']);
 
-        if ($fichaje) {
+        if ($fichaje && isset($fichaje['id_fichaje'])) {
             $this->modelo->finalizarDescanso($fichaje['id_fichaje']);
         }
 
         echo json_encode(['ok' => true]);
     }
 
+    // ========================
+    // FINALIZAR
+    // ========================
     public function finalizar() {
+
         header('Content-Type: application/json');
         $this->checkSession();
 
         $fichaje = $this->modelo->obtenerFichajeActivo($_SESSION['id_usuario']);
 
-        if ($fichaje) {
+        if ($fichaje && isset($fichaje['id_fichaje'])) {
             $this->modelo->finalizarFichaje($fichaje['id_fichaje']);
         }
 

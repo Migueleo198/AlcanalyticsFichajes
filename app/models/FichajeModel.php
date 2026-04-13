@@ -10,61 +10,58 @@ class FichajeModelo {
 
     public function getFichajes($id_usuario, $rol){
 
-    if ($rol === 'Administrador') {
+        if ($rol === 'Administrador') {
 
-        // ADMIN → ve todo
-        $sql = "SELECT 
-                    f.id_fichaje,
-                    f.fecha,
-                    f.hora_entrada,
-                    f.hora_salida,
-                    f.tiempo_total,
-                    f.estado,
-                    f.horas_ordinarias,
-                    f.horas_extra,
-                    u.nombre,
-                    u.apellidos,
-                    m.nombre AS motivo
-                FROM Fichaje f
-                INNER JOIN Usuario u ON f.id_usuario = u.id_usuario
-                LEFT JOIN MotivoAlta m ON f.id_motivo = m.id_motivo
-                ORDER BY f.fecha DESC, f.hora_entrada DESC";
+            $sql = "SELECT 
+                        f.id_fichaje,
+                        f.fecha,
+                        f.hora_entrada,
+                        f.hora_salida,
+                        f.tiempo_total,
+                        f.estado,
+                        f.horas_ordinarias,
+                        f.horas_extra,
+                        u.nombre,
+                        u.apellidos,
+                        m.nombre AS motivo
+                    FROM Fichaje f
+                    INNER JOIN Usuario u ON f.id_usuario = u.id_usuario
+                    LEFT JOIN MotivoAlta m ON f.id_motivo = m.id_motivo
+                    ORDER BY f.fecha DESC, f.hora_entrada DESC";
 
-        $stmt = $this->db->query($sql);
+            $stmt = $this->db->query($sql);
 
-    } else {
+        } else {
 
-        // USUARIO NORMAL → solo sus fichajes
-        $sql = "SELECT 
-                    f.id_fichaje,
-                    f.fecha,
-                    f.hora_entrada,
-                    f.hora_salida,
-                    f.tiempo_total,
-                    f.estado,
-                    f.horas_ordinarias,
-                    f.horas_extra,
-                    u.nombre,
-                    u.apellidos,
-                    m.nombre AS motivo
-                FROM Fichaje f
-                INNER JOIN Usuario u ON f.id_usuario = u.id_usuario
-                LEFT JOIN MotivoAlta m ON f.id_motivo = m.id_motivo
-                WHERE f.id_usuario = ?
-                ORDER BY f.fecha DESC, f.hora_entrada DESC";
+            $sql = "SELECT 
+                        f.id_fichaje,
+                        f.fecha,
+                        f.hora_entrada,
+                        f.hora_salida,
+                        f.tiempo_total,
+                        f.estado,
+                        f.horas_ordinarias,
+                        f.horas_extra,
+                        u.nombre,
+                        u.apellidos,
+                        m.nombre AS motivo
+                    FROM Fichaje f
+                    INNER JOIN Usuario u ON f.id_usuario = u.id_usuario
+                    LEFT JOIN MotivoAlta m ON f.id_motivo = m.id_motivo
+                    WHERE f.id_usuario = ?
+                    ORDER BY f.fecha DESC, f.hora_entrada DESC";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id_usuario]);
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id_usuario]);
+        }
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
     public function getFichaje($id_usuario){
-
+        // (sin uso por ahora)
     }
 
-    
     public function obtenerFichajeActivo($id_usuario) {
         $sql = "SELECT * FROM Fichaje 
                 WHERE id_usuario = ? 
@@ -78,10 +75,8 @@ class FichajeModelo {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-   
     public function iniciarFichaje($id_usuario) {
 
-       
         $check = $this->obtenerFichajeActivo($id_usuario);
         if ($check) return false;
 
@@ -93,17 +88,25 @@ class FichajeModelo {
         return $stmt->execute([$id_usuario]);
     }
 
-   
-    public function iniciarDescanso($id_fichaje) {
-        $sql = "INSERT INTO Descanso (id_fichaje, hora_inicio)
-                VALUES (?, CURTIME())";
+    // ==========================
+    // 🔥 PAUSA CON MOTIVO
+    // ==========================
+    public function iniciarDescanso($id_fichaje, $motivo = null) {
+
+        $sql = "INSERT INTO Descanso 
+                (id_fichaje, hora_inicio, motivo)
+                VALUES (?, CURTIME(), ?)";
 
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$id_fichaje]);
+
+        return $stmt->execute([
+            $id_fichaje,
+            $motivo ? trim($motivo) : null
+        ]);
     }
 
-   
     public function finalizarDescanso($id_fichaje) {
+
         $sql = "UPDATE Descanso 
                 SET hora_fin = CURTIME()
                 WHERE id_fichaje = ? 
@@ -113,8 +116,8 @@ class FichajeModelo {
         return $stmt->execute([$id_fichaje]);
     }
 
-    
     public function finalizarFichaje($id_fichaje) {
+
         $sql = "UPDATE Fichaje 
                 SET hora_salida = CURTIME(), estado = 'cerrado'
                 WHERE id_fichaje = ?";
@@ -123,8 +126,8 @@ class FichajeModelo {
         return $stmt->execute([$id_fichaje]);
     }
 
-    
     public function estaEnDescanso($id_fichaje) {
+
         $sql = "SELECT * FROM Descanso 
                 WHERE id_fichaje = ? 
                 AND hora_fin IS NULL";
@@ -135,41 +138,42 @@ class FichajeModelo {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    
     public function obtenerDescansos($id_fichaje) {
+
         $sql = "SELECT * FROM Descanso WHERE id_fichaje = ?";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id_fichaje]);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getEmpleadosActivos() {
-    $sql = "SELECT COUNT(*) as total FROM Usuario WHERE activo = 1";
-    return $this->db->query($sql)->fetch()['total'];
-}
+        $sql = "SELECT COUNT(*) as total FROM Usuario WHERE activo = 1";
+        return $this->db->query($sql)->fetch()['total'];
+    }
 
-public function getFichajesHoy() {
-    $sql = "SELECT COUNT(*) as total FROM Fichaje WHERE fecha = CURDATE()";
-    return $this->db->query($sql)->fetch()['total'];
-}
+    public function getFichajesHoy() {
+        $sql = "SELECT COUNT(*) as total FROM Fichaje WHERE fecha = CURDATE()";
+        return $this->db->query($sql)->fetch()['total'];
+    }
 
-public function getHorasHoy() {
-    $sql = "SELECT SUM(horas_ordinarias + horas_extra) as total 
-            FROM Fichaje 
-            WHERE fecha = CURDATE()";
+    public function getHorasHoy() {
+        $sql = "SELECT SUM(horas_ordinarias + horas_extra) as total 
+                FROM Fichaje 
+                WHERE fecha = CURDATE()";
 
-    return $this->db->query($sql)->fetch()['total'] ?? 0;
-}
+        return $this->db->query($sql)->fetch()['total'] ?? 0;
+    }
 
-public function getRetrasosHoy() {
-    $sql = "SELECT COUNT(*) as total 
-            FROM Fichaje 
-            WHERE fecha = CURDATE() 
-            AND estado = 'retraso'";
+    public function getRetrasosHoy() {
+        $sql = "SELECT COUNT(*) as total 
+                FROM Fichaje 
+                WHERE fecha = CURDATE() 
+                AND estado = 'retraso'";
 
-    return $this->db->query($sql)->fetch()['total'];
-}
-
+        return $this->db->query($sql)->fetch()['total'];
+    }
 
     public function getByUserAndRange($userId, $desde, $hasta) {
 
@@ -186,4 +190,68 @@ public function getRetrasosHoy() {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+ 
+// ADMIN
+public function getFichajesAdminDetalle() {
+
+    $sql = "SELECT 
+                f.id_fichaje,
+                f.fecha,
+                f.hora_entrada,
+                f.hora_salida,
+                f.estado,
+                u.nombre,
+                u.apellidos
+            FROM Fichaje f
+            INNER JOIN Usuario u ON u.id_usuario = f.id_usuario
+            ORDER BY f.fecha DESC, f.hora_entrada DESC";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+
+    $fichajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($fichajes as &$f) {
+
+        $sql2 = "SELECT * FROM Descanso WHERE id_fichaje = ? ORDER BY hora_inicio ASC";
+        $stmt2 = $this->db->prepare($sql2);
+        $stmt2->execute([$f['id_fichaje']]);
+
+        $f['descansos'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    return $fichajes;
+}
+
+public function getFichajesUsuarioDetalle($id_usuario) {
+
+    $sql = "SELECT 
+                id_fichaje,
+                fecha,
+                hora_entrada,
+                hora_salida,
+                estado
+            FROM Fichaje
+            WHERE id_usuario = ?
+            ORDER BY fecha DESC, hora_entrada DESC";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_usuario]);
+
+    $fichajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($fichajes as &$f) {
+
+        $sql2 = "SELECT * FROM Descanso WHERE id_fichaje = ? ORDER BY hora_inicio ASC";
+        $stmt2 = $this->db->prepare($sql2);
+        $stmt2->execute([$f['id_fichaje']]);
+
+        $f['descansos'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    return $fichajes;
+}
+
 }

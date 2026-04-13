@@ -25,7 +25,6 @@ loadUsers().then((response) => {
 
         response.data.forEach(usuario => {
 
-            
             let matriculasHTML = '';
 
             if (usuario.matriculas && usuario.matriculas.length > 0) {
@@ -56,6 +55,11 @@ loadUsers().then((response) => {
                 `;
             }
 
+            // 👉 FORMATEO FECHA
+            const fechaFormateada = usuario.fecha_nacimiento
+                ? new Date(usuario.fecha_nacimiento).toLocaleDateString()
+                : '-';
+
             const tr = document.createElement('tr');
 
             tr.innerHTML = `
@@ -66,7 +70,9 @@ loadUsers().then((response) => {
                 <td>${usuario.telefono}</td>
                 <td>${usuario.email}</td>
 
-               
+                <!-- NUEVO -->
+                <td>${fechaFormateada}</td>
+
                 <td>
                     ${matriculasHTML}
                 </td>
@@ -91,6 +97,7 @@ loadUsers().then((response) => {
                         data-telefono="${usuario.telefono}"
                         data-email="${usuario.email}"
                         data-rol="${usuario.rol}"
+                        data-fecha="${usuario.fecha_nacimiento || ''}"
                     >
                         ✏️
                     </button>
@@ -110,6 +117,7 @@ loadUsers().then((response) => {
                         data-telefono="${usuario.telefono}"
                         data-email="${usuario.email}"
                         data-rol="${usuario.rol}"
+                        data-fecha="${usuario.fecha_nacimiento || ''}"
                     >
                         🗑️
                     </button>
@@ -124,7 +132,7 @@ loadUsers().then((response) => {
     } else {
         lista.innerHTML = `
             <tr>
-                <td colspan="9" class="text-center">
+                <td colspan="10" class="text-center">
                     No hay empleados registrados
                 </td>
             </tr>
@@ -154,6 +162,9 @@ document.addEventListener('click', function(e) {
     modal.querySelector('[name="email"]').value = btn.dataset.email;
     modal.querySelector('[name="rol"]').value = btn.dataset.rol;
 
+    // 👉 NUEVO
+    modal.querySelector('[name="fecha_nacimiento"]').value = btn.dataset.fecha;
+
 });
 
 
@@ -175,4 +186,7 @@ document.addEventListener('click', function(e) {
     modal.querySelector('[name="telefono"]').value = btn.dataset.telefono;
     modal.querySelector('[name="email"]').value = btn.dataset.email;
     modal.querySelector('[name="rol"]').value = btn.dataset.rol;
+
+    // 👉 NUEVO
+    modal.querySelector('[name="fecha_nacimiento"]').value = btn.dataset.fecha;
 });

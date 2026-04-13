@@ -13,8 +13,15 @@ const reloj = document.getElementById("reloj");
 const estadoUI = document.getElementById("estado");
 
 const btnIniciar = document.getElementById("btnIniciar");
-const btnPausar = document.getElementById("btnPausar"); // único botón
+const btnPausar = document.getElementById("btnPausar");
 const btnFinalizar = document.getElementById("btnFinalizar");
+
+// ======================
+// MODAL PAUSA
+// ======================
+const modalPausa = new bootstrap.Modal(document.getElementById("modalPausa"));
+const motivoInput = document.getElementById("motivoPausa");
+const confirmarPausa = document.getElementById("confirmarPausa");
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -36,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tiempoPausado += (fin - inicio);
       }
 
-      // Detectar pausa activa
+      // pausa activa
       if (d.hora_inicio && !d.hora_fin) {
         estado = "pausa";
 
@@ -59,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const ultima = descansos[descansos.length - 1];
       if (ultima && !ultima.hora_fin) {
         pausaInicio = new Date();
+
         const [h, m, s] = ultima.hora_inicio.split(":");
         pausaInicio.setHours(h, m, s);
       }
@@ -112,7 +120,6 @@ function actualizarUI() {
   btnPausar.disabled = true;
   btnFinalizar.disabled = true;
 
-  // limpiar clases bootstrap dinámicas
   btnPausar.classList.remove("btn-warning", "btn-primary");
 
   if (!fichaje && estado === "no_iniciado") {
@@ -121,22 +128,24 @@ function actualizarUI() {
 
   if (estado === "trabajando") {
     estadoUI.textContent = "Trabajando";
+
     btnIniciar.disabled = true;
     btnPausar.disabled = false;
     btnFinalizar.disabled = false;
 
     btnPausar.textContent = "Pausar";
-    btnPausar.classList.add("btn-warning"); // 🟡
+    btnPausar.classList.add("btn-warning");
   }
 
   if (estado === "pausa") {
     estadoUI.textContent = "En descanso";
+
     btnIniciar.disabled = true;
     btnPausar.disabled = false;
     btnFinalizar.disabled = false;
 
     btnPausar.textContent = "Reanudar";
-    btnPausar.classList.add("btn-primary"); // 🔵
+    btnPausar.classList.add("btn-primary");
   }
 }
 
@@ -157,26 +166,26 @@ function api(url, callback = null) {
     .catch(err => console.error(err));
 }
 
-
 // ======================
-// EVENTOS BOTONES
+// INICIAR
 // ======================
-
 btnIniciar.onclick = () => {
   api(RUTA_URL + '/Fichaje/iniciar', () => location.reload());
 };
 
+// ======================
+// PAUSAR / REANUDAR
+// ======================
 btnPausar.onclick = () => {
 
   if (estado === "trabajando") {
-    // PAUSAR
-    pausaInicio = new Date();
-    estado = "pausa";
 
-    api(RUTA_URL + '/Fichaje/pausar');
+    motivoInput.value = "";
+    modalPausa.show();
+  }
 
-  } else if (estado === "pausa") {
-    // REANUDAR
+  else if (estado === "pausa") {
+
     if (pausaInicio) {
       tiempoPausado += (new Date() - pausaInicio);
       pausaInicio = null;
@@ -185,11 +194,58 @@ btnPausar.onclick = () => {
     estado = "trabajando";
 
     api(RUTA_URL + '/Fichaje/reanudar');
+
+    actualizarUI();
   }
+};
+
+// ======================
+// CONFIRMAR PAUSA
+// ======================
+confirmarPausa.onclick = () => {
+
+  const motivo = motivoInput.value;
+
+  if (!motivo) {
+    alert("Debes seleccionar un motivo");
+    return;
+  }
+
+  pausaInicio = new Date();
+  estado = "pausa";
+
+  modalPausa.hide();
+
+  api(RUTA_URL + '/Fichaje/pausar?motivo=' + encodeURIComponent(motivo));
 
   actualizarUI();
 };
 
+// ======================
+// FINALIZAR (🔥 FIX PAUSA ABIERTA)
+// ======================
 btnFinalizar.onclick = () => {
+
+  // 🔥 si hay pausa activa, cerrarla antes
+  if (estado === "pausa" && pausaInicio) {
+
+    const ahora = new Date();
+
+    tiempoPausado += (ahora - pausaInicio);
+    pausaInicio = null;
+
+    estado = "trabajando";
+
+    api(RUTA_URL + '/Fichaje/reanudar', () => {
+
+      api(RUTA_URL + '/Fichaje/finalizar', () => location.reload());
+
+    });
+
+    actualizarUI();
+    return;
+  }
+
+  // sin pausa activa
   api(RUTA_URL + '/Fichaje/finalizar', () => location.reload());
 };

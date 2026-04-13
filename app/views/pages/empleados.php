@@ -102,6 +102,7 @@
             <th>DNI</th>
             <th>Teléfono</th>
             <th>Email</th>
+            <th>Fecha_Nac</th>
             <th>Matrículas</th>
             <th>Rol</th>
             <th class="text-center">Acciones</th>
