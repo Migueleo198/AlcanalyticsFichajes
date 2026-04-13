@@ -216,6 +216,11 @@
     </div>
 
     <div class="mb-3">
+      <label class="form-label">Matrículas (separadas por coma)</label>
+      <input type="text" name="matriculas" class="form-control">
+    </div>
+
+    <div class="mb-3">
       <label class="form-label">Rol</label>
       <select name="rol" class="form-select" required>
         <option value="">Seleccionar rol</option>
@@ -287,6 +292,23 @@
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control" required>
           </div>
+
+          <div class="mb-3">
+    <label class="form-label">Matrículas</label>
+
+    <!-- SELECT -->
+    <select id="editMatriculasSelect" class="form-select mb-2">
+        <option value="">Selecciona una matrícula</option>
+    </select>
+
+    <!-- INPUT FOR EDITING -->
+    <input type="text" id="editMatriculaInput" class="form-control" placeholder="Editar matrícula">
+
+    <!-- SAVE BUTTON -->
+    <button type="button" class="btn btn-sm btn-primary mt-2" id="saveMatriculaBtn">
+        Guardar matrícula
+    </button>
+</div>
 
           <div class="mb-3">
             <label class="form-label">Rol</label>

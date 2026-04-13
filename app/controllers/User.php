@@ -1,14 +1,15 @@
 <?php
+
 require_once '../app/models/UserModel.php';
 
-class User
+class User extends Controller
 {
     // =========================
     // LOGIN
     // =========================
     public function login()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
         $input = json_decode(file_get_contents("php://input"), true);
 
@@ -18,18 +19,16 @@ class User
         $model = new UserModel();
         $user = $model->login($usuario, $contrasenya);
 
-        if ($user) {
-            echo json_encode([
-                "success" => true,
-                "usuario" => $user['nombre_usuario'],
-                "rol" => $user['rol']
-            ]);
-        } else {
-            echo json_encode([
-                "success" => false,
-                "message" => "Credenciales incorrectas"
-            ]);
-        }
+        echo json_encode($user ? [
+            "success" => true,
+            "usuario" => $user['nombre_usuario'],
+            "rol" => $user['rol']
+        ] : [
+            "success" => false,
+            "message" => "Credenciales incorrectas"
+        ]);
+
+        exit;
     }
 
     // =========================
@@ -37,26 +36,50 @@ class User
     // =========================
     public function getUser()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
-        $id = $_GET['id'] ?? null;
+        try {
+            $id = $_GET['id'] ?? null;
 
-        if (!$id) {
-            echo json_encode(["success" => false, "message" => "ID requerido"]);
-            return;
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "ID requerido"
+                ]);
+                exit;
+            }
+
+            $model = new UserModel();
+
+            $usuario = $model->getUsuarioById($id);
+
+            if (!$usuario) {
+                http_response_code(404);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Usuario no encontrado"
+                ]);
+                exit;
+            }
+
+            // ⚠️ EVITAMOS ERROR: método no existe en tu model
+            $matriculas = [];
+
+            echo json_encode([
+                "success" => true,
+                "data" => $usuario,
+                "matriculas" => $matriculas
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                "success" => false,
+                "message" => "Error interno"
+            ]);
         }
 
-        $model = new UserModel();
-        $usuario = $model->getUsuarioById($id);
-
-        // 👇 aquí añadimos matrículas
-        $matriculas = $model->getMatriculasByUsuario($id);
-
-        echo json_encode([
-            "success" => true,
-            "data" => $usuario,
-            "matriculas" => $matriculas
-        ]);
+        exit;
     }
 
     // =========================
@@ -64,15 +87,17 @@ class User
     // =========================
     public function getUsers()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
         $model = new UserModel();
         $usuarios = $model->getUsuarios();
 
         echo json_encode([
             "success" => true,
-            "data" => $usuarios
+            "data" => $usuarios ?: []
         ]);
+
+        exit;
     }
 
     // =========================
@@ -80,39 +105,42 @@ class User
     // =========================
     public function removeUser()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
-        if (empty($_POST)) {
-            echo json_encode(["success" => false, "message" => "Datos vacíos"]);
-            return;
+        if (empty($_POST['id'])) {
+            echo json_encode([
+                "success" => false,
+                "message" => "ID requerido"
+            ]);
+            exit;
         }
 
         $model = new UserModel();
         $ok = $model->removeUser($_POST['id']);
 
-        if ($ok) {
-            header("Location: /empleado/index");
-            exit;
-        } else {
-            echo json_encode(["success" => false, "message" => "Error al eliminar usuario"]);
-        }
+        echo json_encode(["success" => (bool)$ok]);
+
+        exit;
     }
 
     // =========================
-    // ADD USER (con matrícula opcional)
+    // ADD USER
     // =========================
     public function addUser()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
         if (empty($_POST)) {
-            echo json_encode(["success" => false, "message" => "Datos vacíos"]);
-            return;
+            echo json_encode([
+                "success" => false,
+                "message" => "Datos vacíos"
+            ]);
+            exit;
         }
 
         $model = new UserModel();
 
-        $ok = $model->crearUsuario([
+        $id = $model->crearUsuario([
             'nombre' => $_POST['nombre'] ?? '',
             'apellidos' => $_POST['apellidos'] ?? '',
             'nombre_usuario' => $_POST['usuario'] ?? '',
@@ -123,15 +151,10 @@ class User
             'rol' => $_POST['rol'] ?? ''
         ]);
 
-        // 👇 si envías matrícula al crear usuario
-        if ($ok && !empty($_POST['matricula'])) {
-            $model->addMatricula(
-                $ok, // id usuario (ajústalo según tu model)
-                $_POST['matricula']
-            );
-        }
+        echo json_encode([
+            "success" => (bool)$id
+        ]);
 
-        header("Location: /empleado/index");
         exit;
     }
 
@@ -140,6 +163,8 @@ class User
     // =========================
     public function editUser()
     {
+        header('Content-Type: application/json; charset=utf-8');
+
         $datos = [
             'id' => $_POST['id'] ?? null,
             'nombre' => $_POST['nombre'] ?? '',
@@ -152,18 +177,18 @@ class User
         ];
 
         if (!$datos['id']) {
-            echo "ID requerido";
-            return;
+            echo json_encode([
+                "success" => false,
+                "message" => "ID requerido"
+            ]);
+            exit;
         }
 
         $model = new UserModel();
         $ok = $model->editUser($datos);
 
-        if ($ok) {
-            header("Location: /empleado/index");
-            exit;
-        } else {
-            echo "Error al actualizar";
-        }
+        echo json_encode(["success" => (bool)$ok]);
+
+        exit;
     }
 }
