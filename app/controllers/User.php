@@ -111,7 +111,7 @@ class User extends Controller
     }
 
     // =========================
-    // ADD USER
+    // ADD USER (WITH MATRICULAS)
     // =========================
     public function addUser()
     {
@@ -127,6 +127,7 @@ class User extends Controller
 
         $model = new UserModel();
 
+        // Crear usuario
         $ok = $model->crearUsuario([
             'nombre' => $_POST['nombre'] ?? '',
             'apellidos' => $_POST['apellidos'] ?? '',
@@ -138,6 +139,19 @@ class User extends Controller
             'rol' => $_POST['rol'] ?? ''
         ]);
 
+        // 👉 NUEVO: guardar matrículas (string separadas por coma)
+        if ($ok && !empty($_POST['matriculas'])) {
+
+            $matriculas = explode(',', $_POST['matriculas']);
+
+            foreach ($matriculas as $m) {
+                $m = trim($m);
+                if (!empty($m)) {
+                    $model->addMatricula($_POST['id'] ?? null, $m);
+                }
+            }
+        }
+
         echo json_encode([
             "success" => (bool)$ok
         ]);
@@ -146,18 +160,21 @@ class User extends Controller
     }
 
     // =========================
-    // EDIT USER (FIXED WITH MATRICULAS)
+    // EDIT USER (FINAL VERSION)
     // =========================
     public function editUser()
     {
         header('Content-Type: application/json; charset=utf-8');
 
+        // ✅ recibir array desde JS
         $matriculas = $_POST['matriculas'] ?? [];
 
-        // ⚠️ normalize single value or array
         if (!is_array($matriculas)) {
             $matriculas = [$matriculas];
         }
+
+        // limpiar valores vacíos
+        $matriculas = array_values(array_filter(array_map('trim', $matriculas)));
 
         $datos = [
             'id' => $_POST['id'] ?? null,
@@ -168,7 +185,7 @@ class User extends Controller
             'telefono' => $_POST['telefono'] ?? '',
             'email' => $_POST['email'] ?? '',
             'rol' => $_POST['rol'] ?? '',
-            'matriculas' => array_values(array_filter($matriculas))
+            'matriculas' => $matriculas
         ];
 
         if (!$datos['id']) {
@@ -182,6 +199,11 @@ class User extends Controller
         $model = new UserModel();
 
         try {
+            // ⚠️ IMPORTANTE:
+            // El model debe encargarse de:
+            // - NO borrar
+            // - INSERTAR solo nuevas
+            // - IGNORAR duplicadas
             $ok = $model->editUser($datos);
 
             echo json_encode([

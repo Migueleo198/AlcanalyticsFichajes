@@ -123,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             class="btn btn-outline-secondary btn-sm btn-editar"
                             data-bs-toggle="modal"
                             data-bs-target="#editModal"
-
                             data-id="${usuario.id_usuario}"
                             data-nombre="${usuario.nombre}"
                             data-apellidos="${usuario.apellidos}"
@@ -132,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             data-telefono="${usuario.telefono}"
                             data-email="${usuario.email}"
                             data-rol="${usuario.rol}"
-                            data-fecha="${usuario.fecha_nacimiento || ''}"
                             data-matriculas='${JSON.stringify(matriculas)}'
                         >
                             ✏️
@@ -144,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             class="btn btn-outline-secondary btn-sm btn-eliminar"
                             data-bs-toggle="modal"
                             data-bs-target="#deleteModal"
-
                             data-id="${usuario.id_usuario}"
                             data-nombre="${usuario.nombre}"
                             data-apellidos="${usuario.apellidos}"
@@ -153,7 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             data-telefono="${usuario.telefono}"
                             data-email="${usuario.email}"
                             data-rol="${usuario.rol}"
-                            data-fecha="${usuario.fecha_nacimiento || ''}"
                             data-matriculas='${JSON.stringify(matriculas)}'
                         >
                             🗑️
@@ -201,19 +197,42 @@ document.addEventListener("DOMContentLoaded", () => {
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
 
         const select = modal.querySelector('#editMatriculasSelect');
+        const input = modal.querySelector('#editMatriculaInput');
+
         if (!select) return;
 
         select.innerHTML = '';
 
         matriculas.forEach(m => {
-
             const option = document.createElement("option");
-            option.value = m.matricula;   // IMPORTANT: VALUE = STRING
+            option.value = m.matricula;
             option.textContent = m.matricula;
             option.selected = true;
-
             select.appendChild(option);
         });
+
+        // When selecting, load into input
+        select.addEventListener('change', () => {
+            input.value = select.value;
+        });
+    });
+
+    // =========================
+    // ✏️ UPDATE MATRICULA (UI ONLY)
+    // =========================
+    document.getElementById('saveMatriculaBtn')?.addEventListener('click', () => {
+
+        const select = document.getElementById('editMatriculasSelect');
+        const input = document.getElementById('editMatriculaInput');
+
+        if (!select || !input.value.trim()) return;
+
+        const selectedOption = select.selectedOptions[0];
+
+        if (selectedOption) {
+            selectedOption.value = input.value.trim();
+            selectedOption.textContent = input.value.trim();
+        }
     });
 
     // =========================
@@ -230,13 +249,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (select) {
 
-            const selectedMatriculas = Array.from(select.selectedOptions)
+            const matriculas = Array.from(select.options)
                 .map(opt => opt.value);
 
             data.delete('matriculas[]');
 
-            selectedMatriculas.forEach(matricula => {
-                data.append('matriculas[]', matricula);
+            matriculas.forEach(m => {
+                data.append('matriculas[]', m);
             });
         }
 

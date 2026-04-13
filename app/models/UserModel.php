@@ -155,105 +155,68 @@ class UserModel {
     // =========================
     // EDIT USER + SYNC MATRICULAS
     // =========================
-    public function editUser($datos) {
+   public function editUser($datos) {
 
-        try {
-            $this->db->beginTransaction();
+    try {
+        $this->db->beginTransaction();
 
-            // 1. UPDATE USER
-            $stmt = $this->db->prepare("
-                UPDATE Usuario SET
-                    nombre = :nombre,
-                    apellidos = :apellidos,
-                    nombre_usuario = :usuario,
-                    dni = :dni,
-                    telefono = :telefono,
-                    email = :email,
-                    rol = :rol
-                WHERE id_usuario = :id
+        // =========================
+        // 1. UPDATE USER (unchanged)
+        // =========================
+        $stmt = $this->db->prepare("
+            UPDATE Usuario SET
+                nombre = :nombre,
+                apellidos = :apellidos,
+                nombre_usuario = :usuario,
+                dni = :dni,
+                telefono = :telefono,
+                email = :email,
+                rol = :rol
+            WHERE id_usuario = :id
+        ");
+
+        $stmt->execute([
+            ':id' => $datos['id'],
+            ':nombre' => $datos['nombre'],
+            ':apellidos' => $datos['apellidos'],
+            ':usuario' => $datos['nombre_usuario'],
+            ':dni' => $datos['dni'],
+            ':telefono' => $datos['telefono'],
+            ':email' => $datos['email'],
+            ':rol' => $datos['rol']
+        ]);
+
+        // =========================
+        // 2. UPDATE MATRICULAS (FIXED)
+        // =========================
+        if (!empty($datos['matriculas']) && is_array($datos['matriculas'])) {
+
+            $stmtUpdate = $this->db->prepare("
+                UPDATE matriculas
+                SET matricula = :matricula
+                WHERE id_matricula = :id_matricula
             ");
 
-            $stmt->execute([
-                ':id' => $datos['id'],
-                ':nombre' => $datos['nombre'],
-                ':apellidos' => $datos['apellidos'],
-                ':usuario' => $datos['nombre_usuario'],
-                ':dni' => $datos['dni'],
-                ':telefono' => $datos['telefono'],
-                ':email' => $datos['email'],
-                ':rol' => $datos['rol']
-            ]);
+            foreach ($datos['matriculas'] as $id_matricula => $matricula) {
 
-            // 2. GET CURRENT MATRICULAS
-            $stmtGet = $this->db->prepare("
-                SELECT id_matricula
-                FROM matriculas
-                WHERE id_usuario = :id
-            ");
+                // skip empty values
+                if (empty($matricula)) continue;
 
-            $stmtGet->execute([':id' => $datos['id']]);
-            $current = $stmtGet->fetchAll(PDO::FETCH_COLUMN);
-
-            $new = $datos['matriculas'] ?? [];
-
-            // 3. DELETE REMOVED MATRICULAS
-            foreach ($current as $id_matricula) {
-
-                $stmtCheck = $this->db->prepare("
-                    SELECT matricula 
-                    FROM matriculas 
-                    WHERE id_matricula = :id
-                ");
-
-                $stmtCheck->execute([':id' => $id_matricula]);
-                $mat = $stmtCheck->fetchColumn();
-
-                if (!in_array($mat, $new)) {
-                    $stmtDel = $this->db->prepare("
-                        DELETE FROM matriculas
-                        WHERE id_matricula = :id
-                    ");
-
-                    $stmtDel->execute([':id' => $id_matricula]);
-                }
-            }
-
-            // 4. ADD NEW MATRICULAS
-            foreach ($new as $matricula) {
-
-                $stmtExists = $this->db->prepare("
-                    SELECT COUNT(*) 
-                    FROM matriculas 
-                    WHERE id_usuario = :id AND matricula = :matricula
-                ");
-
-                $stmtExists->execute([
-                    ':id' => $datos['id'],
+                $stmtUpdate->execute([
+                    ':id_matricula' => $id_matricula,
                     ':matricula' => $matricula
                 ]);
-
-                if ($stmtExists->fetchColumn() == 0) {
-
-                    $stmtIns = $this->db->prepare("
-                        INSERT INTO matriculas (id_usuario, matricula)
-                        VALUES (:id_usuario, :matricula)
-                    ");
-
-                    $stmtIns->execute([
-                        ':id_usuario' => $datos['id'],
-                        ':matricula' => $matricula
-                    ]);
-                }
             }
-
-            $this->db->commit();
-            return true;
-
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            throw $e;
         }
+
+        $this->db->commit();
+        return true;
+
+    } catch (Exception $e) {
+        $this->db->rollBack();
+        throw $e;
     }
+}
 
     // =========================
     // DELETE USER
