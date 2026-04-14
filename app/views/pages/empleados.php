@@ -233,7 +233,7 @@
           <input type="text" name="telefono" class="form-control mb-2">
           <input type="email" name="email" class="form-control mb-2">
 
-          <!-- ✅ FIX: works for GET + EDIT + SAVE -->
+          
           <label class="form-label">Fecha nacimiento</label>
           <input type="date" name="fecha_nacimiento" class="form-control mb-2">
 
