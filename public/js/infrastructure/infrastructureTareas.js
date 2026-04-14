@@ -42,6 +42,7 @@ function renderTasks(response) {
         class="btn btn-outline-primary btn-sm px-3 btn-editar"
         data-bs-toggle="modal" 
         data-bs-target="#editModal"
+
         data-id="${tarea.id_tarea}"
         data-id_fichaje="${tarea.id_fichaje}"
         data-titulo="${tarea.titulo}"
@@ -62,12 +63,17 @@ function renderTasks(response) {
         class="btn btn-outline-danger btn-sm px-3 btn-eliminar"
         data-bs-toggle="modal" 
         data-bs-target="#deleteModal"
+
         data-id="${tarea.id_tarea}"
         data-id_fichaje="${tarea.id_fichaje}"
         data-titulo="${tarea.titulo}"
         data-descripcion="${tarea.descripcion}"
+        data-hora_inicio="${tarea.hora_inicio || ''}"
+        data-hora_fin="${tarea.hora_fin || ''}"
+        data-tiempo_total="${tarea.tiempo_total || ''}"
         data-estado="${tarea.estado}"
         data-fecha="${tarea.fecha}"
+        data-id_tipo="${tarea.id_tipo ?? ''}"
     >
         <i class="bi bi-trash"></i>
     </button>
@@ -125,15 +131,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // =========================
-// MODAL HANDLERS (FIXED SAFE)
+// MODAL HANDLERS (EDIT + DELETE SAFE)
 // =========================
 document.addEventListener('click', function (e) {
 
+    // =========================
+    // EDIT
+    // =========================
     const editBtn = e.target.closest('.btn-editar');
     if (editBtn) {
 
         const modal = document.querySelector('#editModal');
-        if (!modal) return; // ✅ FIX CRASH
+        if (!modal) return;
 
         let fecha = editBtn.dataset.fecha;
 
@@ -162,11 +171,14 @@ document.addEventListener('click', function (e) {
         return;
     }
 
+    // =========================
+    // DELETE (FULL READ ONLY LOGIC)
+    // =========================
     const deleteBtn = e.target.closest('.btn-eliminar');
     if (deleteBtn) {
 
         const modal = document.querySelector('#deleteModal');
-        if (!modal) return; // ✅ FIX CRASH
+        if (!modal) return;
 
         let fecha = deleteBtn.dataset.fecha;
 
@@ -182,7 +194,14 @@ document.addEventListener('click', function (e) {
         modal.querySelector('[name="id_fichaje"]').value = deleteBtn.dataset.id_fichaje;
         modal.querySelector('[name="titulo"]').value = deleteBtn.dataset.titulo;
         modal.querySelector('[name="descripcion"]').value = deleteBtn.dataset.descripcion;
+        modal.querySelector('[name="hora_inicio"]').value = deleteBtn.dataset.hora_inicio || '';
+        modal.querySelector('[name="hora_fin"]').value = deleteBtn.dataset.hora_fin || '';
+        modal.querySelector('[name="tiempo_total"]').value = deleteBtn.dataset.tiempo_total || '';
         modal.querySelector('[name="estado"]').value = deleteBtn.dataset.estado;
         modal.querySelector('[name="fecha"]').value = fecha;
+
+        const tipo = modal.querySelector('[name="id_tipo"]');
+        if (tipo) tipo.value = deleteBtn.dataset.id_tipo || '';
     }
+
 });

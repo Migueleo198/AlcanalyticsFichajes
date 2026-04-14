@@ -66,31 +66,40 @@ class RegistroTareas extends Controller
     // CREATE
     // =========================
     public function create()
-    {
-        session_start();
+{
+    session_start();
 
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: " . RUTA_URL . "/login");
-            exit;
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-            $data = $_POST;
-
-            // añadir usuario desde sesión
-            $data['id_usuario'] = $_SESSION['id_usuario'];
-
-            $db = new Database();
-            $conexion = $db->conectar();
-
-            $modelo = new RegistroTareasModelo($conexion);
-            $modelo->createTask($data);
-
-            header("Location: " . RUTA_URL . "/RegistroTareas");
-            exit;
-        }
+    if (!isset($_SESSION['id_usuario'])) {
+        header("Location: " . RUTA_URL . "/login");
+        exit;
     }
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        $db = new Database();
+        $conexion = $db->conectar();
+
+        $modeloFichaje = new FichajeModelo($conexion);
+        $fichaje = $modeloFichaje->obtenerFichajeActivo($_SESSION['id_usuario']);
+
+        if (!$fichaje) {
+            header("Location: " . RUTA_URL . "/RegistroTareas?error=no_fichaje");
+            exit;
+        }
+
+        $data = $_POST;
+
+        // 🔥 FORZAR DATOS REALES DEL SISTEMA
+        $data['id_usuario'] = $_SESSION['id_usuario'];
+        $data['id_fichaje'] = $fichaje['id_fichaje'];
+
+        $modelo = new RegistroTareasModelo($conexion);
+        $modelo->createTask($data);
+
+        header("Location: " . RUTA_URL . "/RegistroTareas");
+        exit;
+    }
+}
 
     // =========================
     // UPDATE

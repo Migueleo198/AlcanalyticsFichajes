@@ -119,7 +119,6 @@
     </table>
 
   </div>
-
 </div>
 </div>
 
@@ -139,9 +138,21 @@
 
         <div class="modal-body">
 
+          <!-- FICHAJE AUTOMÁTICO -->
           <div class="mb-2">
-            <label>ID Fichaje</label>
-            <input type="text" name="id_fichaje" class="form-control" required>
+            <label>Fichaje activo</label>
+
+            <?php if (!empty($datos['fichajeActivo'])): ?>
+              <input type="hidden"
+                     name="id_fichaje"
+                     value="<?= $datos['fichajeActivo']['id_fichaje'] ?>">
+
+              <p class="form-control-plaintext">
+                <?= $datos['fichajeActivo']['id_fichaje'] ?>
+              </p>
+            <?php else: ?>
+              <p class="text-danger">No hay fichaje activo</p>
+            <?php endif; ?>
           </div>
 
           <div class="mb-2">
@@ -183,13 +194,11 @@
             <input type="datetime-local" name="fecha" class="form-control">
           </div>
 
-          <!-- TIPOS -->
           <div class="mb-2">
             <label>Tipo</label>
             <select name="id_tipo" class="form-control" required>
               <option value="">Seleccione tipo</option>
-
-              <?php var_dump($datos); foreach ($datos['tipo'] as $tipo): ?>
+              <?php foreach ($datos['tipo'] as $tipo): ?>
                 <option value="<?= $tipo['id_tipo'] ?>">
                   <?= htmlspecialchars($tipo['nombre']) ?>
                 </option>
@@ -271,7 +280,6 @@
             <input type="datetime-local" name="fecha" class="form-control">
           </div>
 
-          <!-- ✅ IMPORTANTE: tipo en edición -->
           <div class="mb-2">
             <label>Tipo</label>
             <select name="id_tipo" class="form-control">
@@ -288,6 +296,83 @@
 
         <div class="modal-footer">
           <button class="btn btn-primary">Guardar cambios</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL DELETE -->
+<!-- ========================= -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form action="<?= RUTA_URL ?>/RegistroTareas/delete" method="POST">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar Tarea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <input type="hidden" name="id">
+
+          <div class="mb-2">
+            <label>ID Fichaje</label>
+            <input type="text" name="id_fichaje" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Título</label>
+            <input type="text" name="titulo" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Descripción</label>
+            <textarea name="descripcion" class="form-control" readonly></textarea>
+          </div>
+
+          <div class="mb-2">
+            <label>Hora inicio</label>
+            <input type="time" name="hora_inicio" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Hora fin</label>
+            <input type="time" name="hora_fin" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Tiempo total</label>
+            <input type="text" name="tiempo_total" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Estado</label>
+            <input type="text" name="estado" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Fecha</label>
+            <input type="datetime-local" name="fecha" class="form-control" readonly>
+          </div>
+
+          <div class="mb-2">
+            <label>Tipo</label>
+            <input type="text" name="id_tipo" class="form-control" readonly>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">
+            Eliminar
+          </button>
         </div>
 
       </form>

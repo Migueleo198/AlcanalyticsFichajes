@@ -54,10 +54,14 @@
         <i class="bi bi-list-check me-2"></i>Gestión de jornadas
       </a>
 
-      <a href="<?= RUTA_URL ?>/AsignarJornadas/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/AsignarJornadas/index') ? 'active' : '' ?>">
-        <i class="bi bi-person-check me-2"></i>Asignar jornadas
-      </a>
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
+
+  <a href="<?= RUTA_URL ?>/AsignarJornadas/index"
+     class="<?= ($_SERVER['REQUEST_URI'] == '/AsignarJornadas/index') ? 'active' : '' ?>">
+    <i class="bi bi-person-check me-2"></i>Asignar jornadas
+  </a>
+
+<?php endif; ?>
 
     </div>
 
