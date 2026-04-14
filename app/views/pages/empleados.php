@@ -164,242 +164,156 @@
 </div>
 </div>
 
-<!--Modal Añadir-->
-
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+<div class="modal fade" id="addModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <!-- HEADER -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="addModalLabel">Añadir empleado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <form action="/user/addUser" method="POST">
 
-      <!-- BODY -->
-      <div class="modal-body">
-  <form action="/user/addUser" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Añadir empleado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input type="text" name="nombre" class="form-control" required>
-    </div>
+        <div class="modal-body">
 
-    <div class="mb-3">
-      <label class="form-label">Apellidos</label>
-      <input type="text" name="apellidos" class="form-control" required>
-    </div>
+          <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" required>
+          <input type="text" name="apellidos" class="form-control mb-2" placeholder="Apellidos" required>
+          <input type="text" name="usuario" class="form-control mb-2" placeholder="Usuario" required>
+          <input type="password" name="contraseña" class="form-control mb-2" placeholder="Contraseña" required>
+          <input type="text" name="dni" class="form-control mb-2" placeholder="DNI" required>
+          <input type="text" name="telefono" class="form-control mb-2" placeholder="Teléfono">
+          <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
 
-    <div class="mb-3">
-      <label class="form-label">Usuario</label>
-      <input type="text" name="usuario" class="form-control" required>
-    </div>
+          <!-- ✅ IMPORTANT FIX -->
+          <label class="form-label">Fecha nacimiento</label>
+          <input type="date" name="fecha_nacimiento" class="form-control mb-2">
 
-     <div class="mb-3">
-      <label class="form-label">Contraseña</label>
-      <input type="text" name="contraseña" class="form-control" required>
-    </div>
+          <input type="text" name="matriculas" class="form-control mb-2" placeholder="Matrículas (separadas por coma)">
 
-    <div class="mb-3">
-      <label class="form-label">DNI</label>
-      <input type="text" name="dni" class="form-control" required>
-    </div>
+          <select name="rol" class="form-select mb-2" required>
+            <option value="Administrador">Administrador</option>
+            <option value="Trabajador">Trabajador</option>
+            <option value="Practicas">Practicas</option>
+          </select>
 
-    <div class="mb-3">
-      <label class="form-label">Teléfono</label>
-      <input type="text" name="telefono" class="form-control">
-    </div>
+        </div>
 
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input type="email" name="email" class="form-control" required>
-    </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
 
-    <div class="mb-3">
-      <label class="form-label">Matrículas (separadas por coma)</label>
-      <input type="text" name="matriculas" class="form-control">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Rol</label>
-      <select name="rol" class="form-select" required>
-        <option value="">Seleccionar rol</option>
-        <option value="Administrador">Administrador</option>
-        <option value="Trabajador">Trabajador</option>
-        <option value="Practicas">Practicas</option>
-      </select>
-    </div>
-
-     <!-- FOOTER -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </div>
-
-  </form>
-</div>
-
-     
+      </form>
 
     </div>
   </div>
 </div>
 
 
-<!-- Modal Editar -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal fade" id="editModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <!-- HEADER -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Editar empleado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <form action="/user/editUser" method="POST">
 
-      <!-- BODY -->
-      <div class="modal-body">
-        <form action="/user/editUser" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar empleado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
 
           <input type="hidden" name="id" id="edit_id">
 
-          <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" required>
+          <input type="text" name="nombre" class="form-control mb-2">
+          <input type="text" name="apellidos" class="form-control mb-2">
+          <input type="text" name="usuario" class="form-control mb-2">
+          <input type="text" name="dni" class="form-control mb-2">
+          <input type="text" name="telefono" class="form-control mb-2">
+          <input type="email" name="email" class="form-control mb-2">
+
+          <!-- ✅ FIX: works for GET + EDIT + SAVE -->
+          <label class="form-label">Fecha nacimiento</label>
+          <input type="date" name="fecha_nacimiento" class="form-control mb-2">
+
+          <!-- MATRÍCULAS -->
+          <div class="mb-2">
+            <label class="form-label">Matrículas</label>
+
+            <select id="editMatriculasSelect" class="form-select mb-2"></select>
+
+            <input type="text" id="editMatriculaInput" class="form-control mb-2" placeholder="Editar matrícula">
+
+            <button type="button" class="btn btn-sm btn-primary" id="saveMatriculaBtn">
+              Guardar matrícula
+            </button>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Apellidos</label>
-            <input type="text" name="apellidos" class="form-control" required>
-          </div>
+          <select name="rol" class="form-select mb-2">
+            <option value="Administrador">Administrador</option>
+            <option value="Trabajador">Trabajador</option>
+            <option value="Practicas">Practicas</option>
+          </select>
 
-          <div class="mb-3">
-            <label class="form-label">Usuario</label>
-            <input type="text" name="usuario" class="form-control" required>
-          </div>
+        </div>
 
-          <div class="mb-3">
-            <label class="form-label">DNI</label>
-            <input type="text" name="dni" class="form-control" required>
-          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
 
-          <div class="mb-3">
-            <label class="form-label">Teléfono</label>
-            <input type="text" name="telefono" class="form-control">
-          </div>
+      </form>
 
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
-          </div>
-
-          <div class="mb-3">
-    <label class="form-label">Matrículas</label>
-
-    <!-- SELECT -->
-    <select id="editMatriculasSelect" class="form-select mb-2">
-        <option value="">Selecciona una matrícula</option>
-    </select>
-
-    <!-- INPUT FOR EDITING -->
-    <input type="text" id="editMatriculaInput" class="form-control" placeholder="Editar matrícula">
-
-    <!-- SAVE BUTTON -->
-    <button type="button" class="btn btn-sm btn-primary mt-2" id="saveMatriculaBtn">
-        Guardar matrícula
-    </button>
-</div>
-
-          <div class="mb-3">
-            <label class="form-label">Rol</label>
-            <select name="rol" class="form-select" required>
-              <option value="">Seleccionar rol</option>
-              <option value="Administrador">Administrador</option>
-              <option value="Trabajador">Trabajador</option>
-              <option value="Practicas">Practicas</option>
-            </select>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-          </div>
-
-        </form>
-      </div>
     </div>
   </div>
 </div>
 
 
-<!-- Modal Eliminar -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <!-- HEADER -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteModalLabel">Eliminar empleado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <form action="/user/removeUser" method="POST">
 
-      <!-- BODY -->
-      <div class="modal-body">
-        <form action="/user/removeUser" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar empleado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-          <input type="hidden" name="id" id="edit_id">
+        <div class="modal-body">
 
-          <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" disabled>
-          </div>
+          <input type="hidden" name="id" id="delete_id">
 
-          <div class="mb-3">
-            <label class="form-label">Apellidos</label>
-            <input type="text" name="apellidos" class="form-control" disabled>
-          </div>
+          <input type="text" name="nombre" class="form-control mb-2" disabled>
+          <input type="text" name="apellidos" class="form-control mb-2" disabled>
+          <input type="text" name="usuario" class="form-control mb-2" disabled>
+          <input type="text" name="dni" class="form-control mb-2" disabled>
+          <input type="text" name="telefono" class="form-control mb-2" disabled>
+          <input type="email" name="email" class="form-control mb-2" disabled>
 
-          <div class="mb-3">
-            <label class="form-label">Usuario</label>
-            <input type="text" name="usuario" class="form-control" disabled>
-          </div>
+          <!-- ✅ FIX -->
+          <label class="form-label">Fecha nacimiento</label>
+          <input type="date" name="fecha_nacimiento" class="form-control mb-2" disabled>
 
-          <div class="mb-3">
-            <label class="form-label">DNI</label>
-            <input type="text" name="dni" class="form-control" disabled>
-          </div>
+          <!-- MATRÍCULAS DISPLAY -->
+          <div id="deleteMatriculasContainer" class="mb-2"></div>
 
-          <div class="mb-3">
-            <label class="form-label">Teléfono</label>
-            <input type="text" name="telefono" class="form-control" disabled >
-          </div>
+          <select name="rol" class="form-select mb-2" disabled>
+            <option value="Administrador">Administrador</option>
+            <option value="Trabajador">Trabajador</option>
+            <option value="Practicas">Practicas</option>
+          </select>
 
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" disabled>
-          </div>
+        </div>
 
-           <div class="mb-3">
-            <label class="form-label">Matricula</label>
-            <input type="email" name="email" class="form-control" disabled>
-          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
 
-          <div class="mb-3">
-            <label class="form-label">Rol</label>
-            <select name="rol" class="form-select" disabled>
-              <option value="">Seleccionar rol</option>
-              <option value="Administrador">Administrador</option>
-              <option value="Trabajador">Trabajador</option>
-            </select>
-          </div>
+      </form>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-          </div>
-
-        </form>
-      </div>
     </div>
   </div>
 </div>

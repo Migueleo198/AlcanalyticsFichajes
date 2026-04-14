@@ -5,6 +5,7 @@ class UserModel {
     private $db;
 
     public function __construct() {
+
         $host = 'localhost';
         $port = '3306';
         $dbname = 'Fichajes2';
@@ -20,8 +21,11 @@ class UserModel {
 
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        } catch(PDOException $e) {
-            die("Error de conexión: " . $e->getMessage());
+        } catch (PDOException $e) {
+            die(json_encode([
+                "success" => false,
+                "error" => "DB connection error"
+            ]));
         }
     }
 
@@ -36,8 +40,7 @@ class UserModel {
             LIMIT 1
         ");
 
-        $stmt->bindParam(':usuario', $usuario);
-        $stmt->execute();
+        $stmt->execute([':usuario' => $usuario]);
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -58,6 +61,7 @@ class UserModel {
     }
 
     private function upgradePasswordHash($id, $password) {
+
         $stmt = $this->db->prepare("
             UPDATE Usuario 
             SET contraseña = :password 
@@ -71,12 +75,22 @@ class UserModel {
     }
 
     // =========================
-    // GET USERS + MATRICULAS
+    // GET USERS (API SAFE)
     // =========================
     public function getUsuarios() {
 
         $stmt = $this->db->prepare("
-            SELECT * FROM Usuario
+            SELECT 
+                id_usuario,
+                nombre,
+                apellidos,
+                nombre_usuario,
+                dni,
+                telefono,
+                email,
+                fecha_nacimiento,
+                rol
+            FROM Usuario
             ORDER BY id_usuario ASC
         ");
 
@@ -95,7 +109,7 @@ class UserModel {
                 ':id' => $usuario['id_usuario']
             ]);
 
-            $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC);
+            $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
         return $usuarios;
@@ -107,11 +121,22 @@ class UserModel {
     public function getUsuarioById($id) {
 
         $stmt = $this->db->prepare("
-            SELECT * FROM Usuario
+            SELECT 
+                id_usuario,
+                nombre,
+                apellidos,
+                nombre_usuario,
+                dni,
+                telefono,
+                email,
+                fecha_nacimiento,
+                rol
+            FROM Usuario
             WHERE id_usuario = :id
         ");
 
         $stmt->execute([':id' => $id]);
+
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$usuario) return false;
@@ -124,121 +149,164 @@ class UserModel {
 
         $stmtMat->execute([':id' => $id]);
 
-        $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC);
+        $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         return $usuario;
     }
 
     // =========================
-    // CREATE USER
+    // CREATE USER (SAFE)
     // =========================
     public function crearUsuario($datos) {
 
-    $stmt = $this->db->prepare("
-        INSERT INTO Usuario 
-        (nombre, apellidos, nombre_usuario, contraseña, dni, telefono, email, rol)
-        VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol)
-    ");
-
-    $stmt->execute([
-        ':nombre' => $datos['nombre'],
-        ':apellidos' => $datos['apellidos'],
-        ':usuario' => $datos['nombre_usuario'],
-        ':password' => password_hash($datos['contraseña'], PASSWORD_DEFAULT),
-        ':dni' => $datos['dni'],
-        ':telefono' => $datos['telefono'],
-        ':email' => $datos['email'],
-        ':rol' => $datos['rol']
-    ]);
-
-    return $this->db->lastInsertId(); // 🔥 IMPORTANT FIX
-}
-
-    // =========================
-    // EDIT USER + SYNC MATRICULAS
-    // =========================
-   public function editUser($datos) {
-
-    try {
-        $this->db->beginTransaction();
-
-        // =========================
-        // UPDATE USER
-        // =========================
         $stmt = $this->db->prepare("
-            UPDATE Usuario SET
-                nombre = :nombre,
-                apellidos = :apellidos,
-                nombre_usuario = :usuario,
-                dni = :dni,
-                telefono = :telefono,
-                email = :email,
-                rol = :rol
-            WHERE id_usuario = :id
+            INSERT INTO Usuario 
+            (nombre, apellidos, nombre_usuario, contraseña, dni, telefono, email, rol, fecha_nacimiento)
+            VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol, :fecha_nacimiento)
         ");
 
         $stmt->execute([
-            ':id' => $datos['id'],
-            ':nombre' => $datos['nombre'],
-            ':apellidos' => $datos['apellidos'],
-            ':usuario' => $datos['nombre_usuario'],
-            ':dni' => $datos['dni'],
-            ':telefono' => $datos['telefono'],
-            ':email' => $datos['email'],
-            ':rol' => $datos['rol']
+            ':nombre' => $datos['nombre'] ?? '',
+            ':apellidos' => $datos['apellidos'] ?? '',
+            ':usuario' => $datos['usuario'] ?? $datos['nombre_usuario'] ?? '',
+            ':password' => password_hash($datos['contraseña'] ?? '', PASSWORD_DEFAULT),
+            ':dni' => $datos['dni'] ?? '',
+            ':telefono' => $datos['telefono'] ?? '',
+            ':email' => $datos['email'] ?? '',
+            ':rol' => $datos['rol'] ?? '',
+            ':fecha_nacimiento' => !empty($datos['fecha_nacimiento']) ? $datos['fecha_nacimiento'] : null
         ]);
 
-        // =========================
-        // FIXED: DELETE + INSERT (REAL REST STYLE)
-        // =========================
+        $id_usuario = $this->db->lastInsertId();
 
-        if (isset($datos['matriculas']) && is_array($datos['matriculas'])) {
+        // MATRICULAS
+        if (!empty($datos['matriculas'])) {
 
-            // delete old
+            $matriculas = is_array($datos['matriculas'])
+                ? $datos['matriculas']
+                : explode(',', $datos['matriculas']);
+
+            foreach ($matriculas as $matricula) {
+
+                $matricula = trim($matricula);
+                if ($matricula === '') continue;
+
+                $this->addMatricula($id_usuario, $matricula);
+            }
+        }
+
+        return $id_usuario;
+    }
+
+    // =========================
+    // EDIT USER (SAFE + FIXED)
+    // =========================
+    public function editUser($datos) {
+
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("
+                UPDATE Usuario SET
+                    nombre = :nombre,
+                    apellidos = :apellidos,
+                    nombre_usuario = :usuario,
+                    dni = :dni,
+                    telefono = :telefono,
+                    email = :email,
+                    rol = :rol,
+                    fecha_nacimiento = :fecha_nacimiento
+                WHERE id_usuario = :id
+            ");
+
+            $stmt->execute([
+                ':id' => $datos['id'] ?? 0,
+                ':nombre' => $datos['nombre'] ?? '',
+                ':apellidos' => $datos['apellidos'] ?? '',
+                ':usuario' => $datos['usuario'] ?? $datos['nombre_usuario'] ?? '',
+                ':dni' => $datos['dni'] ?? '',
+                ':telefono' => $datos['telefono'] ?? '',
+                ':email' => $datos['email'] ?? '',
+                ':rol' => $datos['rol'] ?? '',
+                ':fecha_nacimiento' => !empty($datos['fecha_nacimiento']) ? $datos['fecha_nacimiento'] : null
+            ]);
+
+            // DELETE OLD MATRICULAS
             $this->db->prepare("
                 DELETE FROM matriculas WHERE id_usuario = :id
             ")->execute([':id' => $datos['id']]);
 
-            // insert new
-            $stmtMat = $this->db->prepare("
-                INSERT INTO matriculas (id_usuario, matricula)
-                VALUES (:id_usuario, :matricula)
-            ");
+            // INSERT NEW
+            if (!empty($datos['matriculas'])) {
 
-            foreach ($datos['matriculas'] as $matricula) {
-                if (empty($matricula)) continue;
+                $matriculas = is_array($datos['matriculas'])
+                    ? $datos['matriculas']
+                    : explode(',', $datos['matriculas']);
 
-                $stmtMat->execute([
-                    ':id_usuario' => $datos['id'],
-                    ':matricula' => $matricula
-                ]);
+                $stmtMat = $this->db->prepare("
+                    INSERT INTO matriculas (id_usuario, matricula)
+                    VALUES (:id_usuario, :matricula)
+                ");
+
+                foreach ($matriculas as $matricula) {
+
+                    $matricula = trim($matricula);
+                    if ($matricula === '') continue;
+
+                    $stmtMat->execute([
+                        ':id_usuario' => $datos['id'],
+                        ':matricula' => $matricula
+                    ]);
+                }
             }
+
+            $this->db->commit();
+
+            return [
+                "success" => true
+            ];
+
+        } catch (Exception $e) {
+
+            $this->db->rollBack();
+
+            return [
+                "success" => false,
+                "error" => $e->getMessage()
+            ];
         }
-
-        $this->db->commit();
-        return true;
-
-    } catch (Exception $e) {
-        $this->db->rollBack();
-        throw $e;
     }
-}
 
     // =========================
-    // DELETE USER
+    // DELETE USER (SAFE)
     // =========================
     public function removeUser($id) {
 
-        $stmt = $this->db->prepare("
-            DELETE FROM Usuario
-            WHERE id_usuario = :id
-        ");
+        try {
 
-        return $stmt->execute([':id' => $id]);
+            $this->db->prepare("
+                DELETE FROM matriculas WHERE id_usuario = :id
+            ")->execute([':id' => $id]);
+
+            $stmt = $this->db->prepare("
+                DELETE FROM Usuario WHERE id_usuario = :id
+            ");
+
+            $stmt->execute([':id' => $id]);
+
+            return ["success" => true];
+
+        } catch (Exception $e) {
+
+            return [
+                "success" => false,
+                "error" => $e->getMessage()
+            ];
+        }
     }
 
     // =========================
-    // MATRICULAS HELPERS
+    // MATRICULAS
     // =========================
     public function addMatricula($id_usuario, $matricula) {
 

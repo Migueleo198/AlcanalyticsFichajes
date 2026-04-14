@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadUsers().then((response) => {
 
         const lista = document.getElementById('lista');
+        if (!lista) return;
+
         lista.innerHTML = '';
 
         if (response && response.success && response.data.length > 0) {
@@ -119,42 +121,42 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
 
                     <td>
-    <button 
-        class="btn btn-outline-primary btn-sm btn-editar"
-        data-bs-toggle="modal"
-        data-bs-target="#editModal"
-        data-id="${usuario.id_usuario}"
-        data-nombre="${usuario.nombre}"
-        data-apellidos="${usuario.apellidos}"
-        data-usuario="${usuario.nombre_usuario}"
-        data-dni="${usuario.dni}"
-        data-telefono="${usuario.telefono}"
-        data-email="${usuario.email}"
-        data-rol="${usuario.rol}"
-        data-matriculas='${JSON.stringify(matriculas)}'
-    >
-        <i class="bi bi-pencil-square"></i>
-    </button>
-</td>
+                        <button 
+                            class="btn btn-outline-primary btn-sm btn-editar"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                            data-id="${usuario.id_usuario}"
+                            data-nombre="${usuario.nombre}"
+                            data-apellidos="${usuario.apellidos}"
+                            data-usuario="${usuario.nombre_usuario}"
+                            data-dni="${usuario.dni}"
+                            data-telefono="${usuario.telefono}"
+                            data-email="${usuario.email}"
+                            data-rol="${usuario.rol}"
+                            data-fecha_nacimiento="${usuario.fecha_nacimiento || ''}"
+                            data-matriculas='${JSON.stringify(matriculas)}'
+                        >
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
 
-<td>
-    <button 
-        class="btn btn-outline-danger btn-sm btn-eliminar"
-        data-bs-toggle="modal"
-        data-bs-target="#deleteModal"
-        data-id="${usuario.id_usuario}"
-        data-nombre="${usuario.nombre}"
-        data-apellidos="${usuario.apellidos}"
-        data-usuario="${usuario.nombre_usuario}"
-        data-dni="${usuario.dni}"
-        data-telefono="${usuario.telefono}"
-        data-email="${usuario.email}"
-        data-rol="${usuario.rol}"
-        data-matriculas='${JSON.stringify(matriculas)}'
-    >
-        <i class="bi bi-trash"></i>
-    </button>
-</td>
+                        <button 
+                            class="btn btn-outline-danger btn-sm btn-eliminar"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-id="${usuario.id_usuario}"
+                            data-nombre="${usuario.nombre}"
+                            data-apellidos="${usuario.apellidos}"
+                            data-usuario="${usuario.nombre_usuario}"
+                            data-dni="${usuario.dni}"
+                            data-telefono="${usuario.telefono}"
+                            data-email="${usuario.email}"
+                            data-rol="${usuario.rol}"
+                            data-fecha_nacimiento="${usuario.fecha_nacimiento || ''}"
+                            data-matriculas='${JSON.stringify(matriculas)}'
+                        >
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 `;
 
                 fragment.appendChild(tr);
@@ -184,6 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!btn) return;
 
         const modal = document.querySelector('#editModal');
+        if (!modal) return;
 
         modal.querySelector('[name="id"]').value = btn.dataset.id;
         modal.querySelector('[name="nombre"]').value = btn.dataset.nombre;
@@ -194,31 +197,40 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.querySelector('[name="email"]').value = btn.dataset.email;
         modal.querySelector('[name="rol"]').value = btn.dataset.rol;
 
+        // =========================
+        // 📅 FECHA NACIMIENTO FIX
+        // =========================
+        const fechaEdit = modal.querySelector('[name="fecha_nacimiento"]');
+        if (fechaEdit) {
+            fechaEdit.value = btn.dataset.fecha_nacimiento
+                ? btn.dataset.fecha_nacimiento.split('T')[0]
+                : '';
+        }
+
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
 
         const select = modal.querySelector('#editMatriculasSelect');
         const input = modal.querySelector('#editMatriculaInput');
 
-        if (!select) return;
+        if (select) {
+            select.innerHTML = '';
 
-        select.innerHTML = '';
+            matriculas.forEach(m => {
+                const option = document.createElement("option");
+                option.value = m.matricula;
+                option.textContent = m.matricula;
+                option.selected = true;
+                select.appendChild(option);
+            });
 
-        matriculas.forEach(m => {
-            const option = document.createElement("option");
-            option.value = m.matricula;
-            option.textContent = m.matricula;
-            option.selected = true;
-            select.appendChild(option);
-        });
-
-        // When selecting, load into input
-        select.addEventListener('change', () => {
-            input.value = select.value;
-        });
+            select.onchange = () => {
+                input.value = select.value;
+            };
+        }
     });
 
     // =========================
-    // ✏️ UPDATE MATRICULA (UI ONLY)
+    // 💾 SAVE MATRICULA UI
     // =========================
     document.getElementById('saveMatriculaBtn')?.addEventListener('click', () => {
 
@@ -227,30 +239,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!select || !input.value.trim()) return;
 
-        const selectedOption = select.selectedOptions[0];
+        const option = select.selectedOptions[0];
 
-        if (selectedOption) {
-            selectedOption.value = input.value.trim();
-            selectedOption.textContent = input.value.trim();
+        if (option) {
+            option.value = input.value.trim();
+            option.textContent = input.value.trim();
         }
     });
 
     // =========================
-    // 💾 SUBMIT EDIT USER
+    // 💾 SUBMIT EDIT USER (FIXED)
     // =========================
-    document.querySelector('#editModal form').addEventListener('submit', async (e) => {
+    document.querySelector('#editModal form')?.addEventListener('submit', async (e) => {
 
         e.preventDefault();
 
         const form = e.target;
         const data = new FormData(form);
 
+        // 🔥 CRITICAL FIX: force date into payload
+        const fechaInput = form.querySelector('[name="fecha_nacimiento"]');
+        if (fechaInput) {
+            data.set('fecha_nacimiento', fechaInput.value);
+        }
+
         const select = form.querySelector('#editMatriculasSelect');
 
         if (select) {
-
-            const matriculas = Array.from(select.options)
-                .map(opt => opt.value);
+            const matriculas = Array.from(select.options).map(opt => opt.value);
 
             data.delete('matriculas[]');
 
@@ -282,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!btn) return;
 
         const modal = document.querySelector('#deleteModal');
+        if (!modal) return;
 
         modal.querySelector('[name="id"]').value = btn.dataset.id;
         modal.querySelector('[name="nombre"]').value = btn.dataset.nombre;
@@ -291,6 +308,13 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.querySelector('[name="telefono"]').value = btn.dataset.telefono;
         modal.querySelector('[name="email"]').value = btn.dataset.email;
         modal.querySelector('[name="rol"]').value = btn.dataset.rol;
+
+        const fechaDelete = modal.querySelector('[name="fecha_nacimiento"]');
+        if (fechaDelete) {
+            fechaDelete.value = btn.dataset.fecha_nacimiento
+                ? btn.dataset.fecha_nacimiento.split('T')[0]
+                : '';
+        }
 
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
 
