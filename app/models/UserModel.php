@@ -134,23 +134,25 @@ class UserModel {
     // =========================
     public function crearUsuario($datos) {
 
-        $stmt = $this->db->prepare("
-            INSERT INTO Usuario 
-            (nombre, apellidos, nombre_usuario, contraseña, dni, telefono, email, rol)
-            VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol)
-        ");
+    $stmt = $this->db->prepare("
+        INSERT INTO Usuario 
+        (nombre, apellidos, nombre_usuario, contraseña, dni, telefono, email, rol)
+        VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol)
+    ");
 
-        return $stmt->execute([
-            ':nombre' => $datos['nombre'],
-            ':apellidos' => $datos['apellidos'],
-            ':usuario' => $datos['nombre_usuario'],
-            ':password' => password_hash($datos['contraseña'], PASSWORD_DEFAULT),
-            ':dni' => $datos['dni'],
-            ':telefono' => $datos['telefono'],
-            ':email' => $datos['email'],
-            ':rol' => $datos['rol']
-        ]);
-    }
+    $stmt->execute([
+        ':nombre' => $datos['nombre'],
+        ':apellidos' => $datos['apellidos'],
+        ':usuario' => $datos['nombre_usuario'],
+        ':password' => password_hash($datos['contraseña'], PASSWORD_DEFAULT),
+        ':dni' => $datos['dni'],
+        ':telefono' => $datos['telefono'],
+        ':email' => $datos['email'],
+        ':rol' => $datos['rol']
+    ]);
+
+    return $this->db->lastInsertId(); // 🔥 IMPORTANT FIX
+}
 
     // =========================
     // EDIT USER + SYNC MATRICULAS
@@ -161,7 +163,7 @@ class UserModel {
         $this->db->beginTransaction();
 
         // =========================
-        // 1. UPDATE USER (unchanged)
+        // UPDATE USER
         // =========================
         $stmt = $this->db->prepare("
             UPDATE Usuario SET
@@ -187,23 +189,27 @@ class UserModel {
         ]);
 
         // =========================
-        // 2. UPDATE MATRICULAS (FIXED)
+        // FIXED: DELETE + INSERT (REAL REST STYLE)
         // =========================
-        if (!empty($datos['matriculas']) && is_array($datos['matriculas'])) {
 
-            $stmtUpdate = $this->db->prepare("
-                UPDATE matriculas
-                SET matricula = :matricula
-                WHERE id_matricula = :id_matricula
+        if (isset($datos['matriculas']) && is_array($datos['matriculas'])) {
+
+            // delete old
+            $this->db->prepare("
+                DELETE FROM matriculas WHERE id_usuario = :id
+            ")->execute([':id' => $datos['id']]);
+
+            // insert new
+            $stmtMat = $this->db->prepare("
+                INSERT INTO matriculas (id_usuario, matricula)
+                VALUES (:id_usuario, :matricula)
             ");
 
-            foreach ($datos['matriculas'] as $id_matricula => $matricula) {
-
-                // skip empty values
+            foreach ($datos['matriculas'] as $matricula) {
                 if (empty($matricula)) continue;
 
-                $stmtUpdate->execute([
-                    ':id_matricula' => $id_matricula,
+                $stmtMat->execute([
+                    ':id_usuario' => $datos['id'],
                     ':matricula' => $matricula
                 ]);
             }

@@ -94,7 +94,9 @@ class User extends Controller
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        if (empty($_POST['id'])) {
+        $id = $_POST['id'] ?? null;
+
+        if (!$id) {
             echo json_encode([
                 "success" => false,
                 "message" => "ID requerido"
@@ -103,15 +105,17 @@ class User extends Controller
         }
 
         $model = new UserModel();
-        $ok = $model->removeUser($_POST['id']);
+        $ok = $model->removeUser($id);
 
-        echo json_encode(["success" => (bool)$ok]);
+        echo json_encode([
+            "success" => (bool)$ok
+        ]);
 
         exit;
     }
 
     // =========================
-    // ADD USER (WITH MATRICULAS)
+    // ADD USER + MATRICULAS (FIXED)
     // =========================
     public function addUser()
     {
@@ -127,8 +131,10 @@ class User extends Controller
 
         $model = new UserModel();
 
-        // Crear usuario
-        $ok = $model->crearUsuario([
+        // =========================
+        // 1. CREATE USER
+        // =========================
+        $userId = $model->crearUsuario([
             'nombre' => $_POST['nombre'] ?? '',
             'apellidos' => $_POST['apellidos'] ?? '',
             'nombre_usuario' => $_POST['usuario'] ?? '',
@@ -139,41 +145,51 @@ class User extends Controller
             'rol' => $_POST['rol'] ?? ''
         ]);
 
-        // 👉 NUEVO: guardar matrículas (string separadas por coma)
-        if ($ok && !empty($_POST['matriculas'])) {
+        if (!$userId) {
+            echo json_encode([
+                "success" => false,
+                "message" => "Error creando usuario"
+            ]);
+            exit;
+        }
+
+        // =========================
+        // 2. ADD MATRICULAS (FIXED)
+        // =========================
+        if (!empty($_POST['matriculas'])) {
 
             $matriculas = explode(',', $_POST['matriculas']);
 
             foreach ($matriculas as $m) {
                 $m = trim($m);
-                if (!empty($m)) {
-                    $model->addMatricula($_POST['id'] ?? null, $m);
+
+                if ($m !== '') {
+                    $model->addMatricula($userId, $m);
                 }
             }
         }
 
         echo json_encode([
-            "success" => (bool)$ok
+            "success" => true,
+            "id_usuario" => $userId
         ]);
 
         exit;
     }
 
     // =========================
-    // EDIT USER (FINAL VERSION)
+    // EDIT USER
     // =========================
     public function editUser()
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        // ✅ recibir array desde JS
         $matriculas = $_POST['matriculas'] ?? [];
 
         if (!is_array($matriculas)) {
             $matriculas = [$matriculas];
         }
 
-        // limpiar valores vacíos
         $matriculas = array_values(array_filter(array_map('trim', $matriculas)));
 
         $datos = [
@@ -199,11 +215,6 @@ class User extends Controller
         $model = new UserModel();
 
         try {
-            // ⚠️ IMPORTANTE:
-            // El model debe encargarse de:
-            // - NO borrar
-            // - INSERTAR solo nuevas
-            // - IGNORAR duplicadas
             $ok = $model->editUser($datos);
 
             echo json_encode([
@@ -211,7 +222,6 @@ class User extends Controller
             ]);
 
         } catch (Throwable $e) {
-
             http_response_code(500);
 
             echo json_encode([
