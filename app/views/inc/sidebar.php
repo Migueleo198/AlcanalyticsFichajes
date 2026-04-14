@@ -23,7 +23,7 @@
     <!-- NUEVO: DETALLE (PAUSAS) -->
     <a href="<?= RUTA_URL ?>/Fichaje/detalle"
        class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/detalle') ? 'active' : '' ?>">
-      <i class="bi bi-list-check me-2"></i>Detalle de Jornadas
+      <i class="bi bi-list-check me-2"></i>Detalle de Fichajes
     </a>
 
     <!-- ===================== -->
