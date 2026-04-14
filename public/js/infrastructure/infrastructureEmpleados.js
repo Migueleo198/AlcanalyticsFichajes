@@ -119,42 +119,42 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
 
                     <td>
-                        <button 
-                            class="btn btn-outline-secondary btn-sm btn-editar"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editModal"
-                            data-id="${usuario.id_usuario}"
-                            data-nombre="${usuario.nombre}"
-                            data-apellidos="${usuario.apellidos}"
-                            data-usuario="${usuario.nombre_usuario}"
-                            data-dni="${usuario.dni}"
-                            data-telefono="${usuario.telefono}"
-                            data-email="${usuario.email}"
-                            data-rol="${usuario.rol}"
-                            data-matriculas='${JSON.stringify(matriculas)}'
-                        >
-                            ✏️
-                        </button>
-                    </td>
+    <button 
+        class="btn btn-outline-primary btn-sm btn-editar"
+        data-bs-toggle="modal"
+        data-bs-target="#editModal"
+        data-id="${usuario.id_usuario}"
+        data-nombre="${usuario.nombre}"
+        data-apellidos="${usuario.apellidos}"
+        data-usuario="${usuario.nombre_usuario}"
+        data-dni="${usuario.dni}"
+        data-telefono="${usuario.telefono}"
+        data-email="${usuario.email}"
+        data-rol="${usuario.rol}"
+        data-matriculas='${JSON.stringify(matriculas)}'
+    >
+        <i class="bi bi-pencil-square"></i>
+    </button>
+</td>
 
-                    <td>
-                        <button 
-                            class="btn btn-outline-secondary btn-sm btn-eliminar"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal"
-                            data-id="${usuario.id_usuario}"
-                            data-nombre="${usuario.nombre}"
-                            data-apellidos="${usuario.apellidos}"
-                            data-usuario="${usuario.nombre_usuario}"
-                            data-dni="${usuario.dni}"
-                            data-telefono="${usuario.telefono}"
-                            data-email="${usuario.email}"
-                            data-rol="${usuario.rol}"
-                            data-matriculas='${JSON.stringify(matriculas)}'
-                        >
-                            🗑️
-                        </button>
-                    </td>
+<td>
+    <button 
+        class="btn btn-outline-danger btn-sm btn-eliminar"
+        data-bs-toggle="modal"
+        data-bs-target="#deleteModal"
+        data-id="${usuario.id_usuario}"
+        data-nombre="${usuario.nombre}"
+        data-apellidos="${usuario.apellidos}"
+        data-usuario="${usuario.nombre_usuario}"
+        data-dni="${usuario.dni}"
+        data-telefono="${usuario.telefono}"
+        data-email="${usuario.email}"
+        data-rol="${usuario.rol}"
+        data-matriculas='${JSON.stringify(matriculas)}'
+    >
+        <i class="bi bi-trash"></i>
+    </button>
+</td>
                 `;
 
                 fragment.appendChild(tr);

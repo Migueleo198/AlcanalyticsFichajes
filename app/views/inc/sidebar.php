@@ -23,7 +23,7 @@
     <!-- NUEVO: DETALLE (PAUSAS) -->
     <a href="<?= RUTA_URL ?>/Fichaje/detalle"
        class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/detalle') ? 'active' : '' ?>">
-      <i class="bi bi-list-check me-2"></i>Detalle de Jornadas
+      <i class="bi bi-list-check me-2"></i>Detalle de Fichajes
     </a>
 
     <!-- ===================== -->
@@ -39,23 +39,51 @@
     <?php endif; ?>
 
     <!-- ===================== -->
-    <!-- GESTIÓN -->
+    <!-- JORNADAS -->
     <!-- ===================== -->
-    <a href="<?= RUTA_URL ?>/Jornadas/index"
-       class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
-      <i class="bi bi-kanban me-2"></i>Gestión de Jornadas
+    <a data-bs-toggle="collapse" href="#jornadasMenu" role="button"
+       aria-expanded="false" aria-controls="jornadasMenu">
+      <i class="bi bi-kanban me-2"></i>Jornadas
+      <i class="bi bi-chevron-down float-end"></i>
     </a>
 
+    <div class="collapse ps-3" id="jornadasMenu">
+
+      <a href="<?= RUTA_URL ?>/Jornadas/index"
+         class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
+        <i class="bi bi-list-check me-2"></i>Gestión de jornadas
+      </a>
+
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
+
+  <a href="<?= RUTA_URL ?>/AsignarJornadas/index"
+     class="<?= ($_SERVER['REQUEST_URI'] == '/AsignarJornadas/index') ? 'active' : '' ?>">
+    <i class="bi bi-person-check me-2"></i>Asignar jornadas
+  </a>
+
+<?php endif; ?>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- INFORMES -->
+    <!-- ===================== -->
     <a href="<?= RUTA_URL ?>/Informes/index"
        class="<?= ($_SERVER['REQUEST_URI'] == '/Informes/index') ? 'active' : '' ?>">
       <i class="bi bi-file-text me-2"></i>Informes
     </a>
 
+    <!-- ===================== -->
+    <!-- REGISTRO TAREAS -->
+    <!-- ===================== -->
     <a href="<?= RUTA_URL ?>/RegistroTareas/index"
        class="<?= ($_SERVER['REQUEST_URI'] == '/RegistroTareas/index') ? 'active' : '' ?>">
       <i class="bi bi-list-check me-2"></i>Registro de Tareas
     </a>
 
+    <!-- ===================== -->
+    <!-- VACACIONES -->
+    <!-- ===================== -->
     <a href="<?= RUTA_URL ?>/Vacaciones/index"
        class="<?= ($_SERVER['REQUEST_URI'] == '/Vacaciones/index') ? 'active' : '' ?>">
       <i class="bi bi-calendar me-2"></i>Vacaciones
