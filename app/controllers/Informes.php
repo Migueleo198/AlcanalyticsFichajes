@@ -70,11 +70,12 @@ class Informes extends Controller {
         exit;
     }
 
-    $desde = $_GET['desde'] ?? null;
-    $hasta = $_GET['hasta'] ?? null;
+    $desde = $_GET['desde'] ?? '';
+    $hasta = $_GET['hasta'] ?? '';
     $usuario = $_GET['usuario'] ?? null;
 
-    if (!$desde || !$hasta) {
+    // ✅ FIX: strict validation
+    if (empty($desde) || empty($hasta)) {
         die("Faltan fechas");
     }
 
@@ -84,10 +85,8 @@ class Informes extends Controller {
     $modelo = new InformeModel($conexion);
     $filas = $modelo->obtenerInforme($desde, $hasta, $usuario);
 
-    // 👉 AQUÍ VA 👇
     require_once __DIR__ . '/../../../vendor/autoload.php';
 
-    // DomPDF
     $dompdf = new Dompdf\Dompdf();
 
     ob_start();

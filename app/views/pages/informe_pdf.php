@@ -57,6 +57,11 @@ th {
 <body>
 
 <?php
+// =========================
+// SAFE INIT
+// =========================
+$filas = $filas ?? [];
+
 $totalHoras = 0;
 $totalExtras = 0;
 ?>
@@ -67,12 +72,12 @@ $totalExtras = 0;
 </div>
 
 <div class="info">
-    <strong>Desde:</strong> <?= $desde ?> |
-    <strong>Hasta:</strong> <?= $hasta ?> |
+    <strong>Desde:</strong> <?= $desde ?? '' ?> |
+    <strong>Hasta:</strong> <?= $hasta ?? '' ?> |
     <strong>Generado:</strong> <?= date('d/m/Y H:i') ?>
 </div>
 
-<!-- TABLA -->
+<!-- TABLE -->
 <table>
 <thead>
 <tr>
@@ -91,40 +96,51 @@ $totalExtras = 0;
 
 <tbody>
 
+<?php if (empty($filas)): ?>
+<tr>
+    <td colspan="10">No hay datos</td>
+</tr>
+<?php else: ?>
+
 <?php foreach ($filas as $fila): ?>
 
 <?php
 $horas = $fila['horas_ordinarias'] ?? 0;
 $extras = $fila['horas_extra'] ?? 0;
+$descanso = $fila['horas_descanso'] ?? 0;
 
 $totalHoras += $horas;
 $totalExtras += $extras;
 ?>
 
 <tr>
-    <td><?= $fila['nombre'] . ' ' . $fila['apellidos'] ?></td>
-    <td><?= $fila['dni'] ?></td>
-    <td><?= $fila['fecha'] ?></td>
-    <td><?= $fila['hora_entrada'] ?></td>
-    <td><?= $fila['hora_salida'] ?></td>
+    <td><?= ($fila['nombre'] ?? '') . ' ' . ($fila['apellidos'] ?? '') ?></td>
+    <td><?= $fila['dni'] ?? '' ?></td>
+    <td><?= $fila['fecha'] ?? '' ?></td>
+    <td><?= $fila['hora_entrada'] ?? '' ?></td>
+    <td><?= $fila['hora_salida'] ?? '' ?></td>
+
     <td><?= $horas ?>h</td>
     <td><?= $extras ?>h</td>
-    <td><?= round($fila['horas_descanso'], 2) ?>h</td>
+
+    <td><?= round((float)$descanso, 2) ?>h</td>
 
     <td>
-        <?php if ($fila['estado'] == 'cerrado'): ?>
+        <?php if (($fila['estado'] ?? '') == 'cerrado'): ?>
             <span class="badge success">Cerrado</span>
-        <?php elseif ($fila['estado'] == 'abierto'): ?>
+        <?php elseif (($fila['estado'] ?? '') == 'abierto'): ?>
             <span class="badge warning">Abierto</span>
         <?php else: ?>
-            <span class="badge danger"><?= $fila['estado'] ?></span>
+            <span class="badge danger"><?= $fila['estado'] ?? '' ?></span>
         <?php endif; ?>
     </td>
 
-    <td><?= $fila['incidencia'] ?: '-' ?></td>
+    <td><?= !empty($fila['incidencia']) ? $fila['incidencia'] : '-' ?></td>
 </tr>
 
 <?php endforeach; ?>
+
+<?php endif; ?>
 
 </tbody>
 </table>

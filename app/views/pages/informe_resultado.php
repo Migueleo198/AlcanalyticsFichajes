@@ -7,31 +7,38 @@
 <div class="content">
 
 <?php
-$filas = $datos['datos'] ?? [];
-$desde = $datos['desde'] ?? '';
-$hasta = $datos['hasta'] ?? '';
+// =========================
+// FIX: accept BOTH formats (controller mismatch safe)
+// =========================
+
+// if controller sends raw array -> use it directly
+// if controller sends ["datos"=>...] -> fallback
+$filas = $datos['datos'] ?? $datos ?? [];
+
+$desde = $datos['desde'] ?? ($desde ?? '');
+$hasta = $datos['hasta'] ?? ($hasta ?? '');
 
 $totalHoras = 0;
 $totalExtras = 0;
+
+// PDF URL SAFE
+$pdfUrl = RUTA_URL . "/informes/generarPDF?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
 ?>
 
 <!-- TOPBAR -->
-  <div class="topbar d-flex justify-content-between align-items-center">
+<div class="topbar d-flex justify-content-between align-items-center">
   <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar un informea...">
 
   <div class="d-flex align-items-center">
 
-    <!-- NOTIFICACIONES -->
     <div class="dropdown me-3 position-relative">
       <i class="bi bi-bell fs-5" id="notificacionesIcon" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
-      
-      <!-- Badge -->
-      <span id="contadorNotificaciones" 
-      class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
-       3
+
+      <span id="contadorNotificaciones"
+            class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+        3
       </span>
 
-      <!-- Dropdown -->
       <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
         <li class="fw-bold mb-2">Notificaciones</li>
         <li class="dropdown-item">Nuevo fichaje registrado</li>
@@ -40,15 +47,18 @@ $totalExtras = 0;
       </ul>
     </div>
 
-    <!-- PERFIL -->
-    <i class="bi bi-person-circle fs-5 profile"></i>
+    <i class="bi bi-person-circle fs-5 profile"
+       data-user-id="<?= $_SESSION['id_usuario'] ?>"></i>
+
   </div>
 </div>
 
 <!-- HEADER -->
 <h3>Informe de Fichajes</h3>
+
 <p class="text-muted">
-    Desde <strong><?= $desde ?></strong> hasta <strong><?= $hasta ?></strong>
+    Desde <strong><?= htmlspecialchars($desde) ?></strong>
+    hasta <strong><?= htmlspecialchars($hasta) ?></strong>
 </p>
 
 <!-- CARDS -->
@@ -75,10 +85,9 @@ $totalExtras = 0;
     </div>
 </div>
 
-<!-- TABLA -->
+<!-- TABLE -->
 <div class="card card-custom p-3">
 
-    <!-- HEADER CARD -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Detalle de fichajes</h5>
 
@@ -87,14 +96,14 @@ $totalExtras = 0;
                 <i class="bi bi-printer"></i>
             </button>
 
-            <a href="<?= RUTA_URL ?>/informes/generarPDF?desde=<?= $desde ?>&hasta=<?= $hasta ?>" 
-               class="btn btn-danger btn-sm" target="_blank">
+            <a href="<?= $pdfUrl ?>"
+               class="btn btn-danger btn-sm"
+               target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> PDF
             </a>
         </div>
     </div>
 
-    <!-- TABLA RESPONSIVE -->
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
@@ -110,6 +119,7 @@ $totalExtras = 0;
                     <th>Incidencia</th>
                 </tr>
             </thead>
+
             <tbody>
 
             <?php if (empty($filas)): ?>
@@ -143,13 +153,13 @@ $totalExtras = 0;
                             <?php elseif (($fila['estado'] ?? '') === 'abierto'): ?>
                                 <span class="badge bg-warning">Abierto</span>
                             <?php else: ?>
-                                <span class="badge bg-danger"><?= $fila['estado'] ?? '' ?></span>
+                                <span class="badge bg-secondary"><?= $fila['estado'] ?? '' ?></span>
                             <?php endif; ?>
                         </td>
 
                         <td>
-                            <?= !empty($fila['incidencia']) 
-                                ? $fila['incidencia'] 
+                            <?= !empty($fila['incidencia'])
+                                ? $fila['incidencia']
                                 : '<span class="text-muted">-</span>' ?>
                         </td>
                     </tr>
@@ -163,7 +173,7 @@ $totalExtras = 0;
     </div>
 </div>
 
-<!-- TOTALES -->
+<!-- TOTALS -->
 <div class="row mt-3">
     <div class="col-md-6">
         <div class="card card-custom p-3">
