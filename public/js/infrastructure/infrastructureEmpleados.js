@@ -113,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${usuario.telefono}</td>
                     <td>${usuario.email}</td>
                     <td>${fechaFormateada}</td>
-
                     <td>${matriculasHTML}</td>
 
                     <td>
@@ -197,10 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.querySelector('[name="email"]').value = btn.dataset.email;
         modal.querySelector('[name="rol"]').value = btn.dataset.rol;
 
-        // =========================
-        // 📅 FECHA NACIMIENTO FIX
-        // =========================
         const fechaEdit = modal.querySelector('[name="fecha_nacimiento"]');
+
         if (fechaEdit) {
             fechaEdit.value = btn.dataset.fecha_nacimiento
                 ? btn.dataset.fecha_nacimiento.split('T')[0]
@@ -248,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =========================
-    // 💾 SUBMIT EDIT USER (FIXED)
+    // 💾 SUBMIT EDIT USER (FINAL FIX)
     // =========================
     document.querySelector('#editModal form')?.addEventListener('submit', async (e) => {
 
@@ -257,10 +254,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const form = e.target;
         const data = new FormData(form);
 
-        // 🔥 CRITICAL FIX: force date into payload
+        // 🔥 FIX DEFINITIVO FECHA (CORRECT VERSION)
         const fechaInput = form.querySelector('[name="fecha_nacimiento"]');
+
         if (fechaInput) {
-            data.set('fecha_nacimiento', fechaInput.value);
+            let fecha = fechaInput.value;
+
+            if (!fecha || fecha.trim() === "") {
+                data.set('fecha_nacimiento', '');
+            } else {
+                // ✅ DO NOT use Date() — already correct format
+                data.set('fecha_nacimiento', fecha);
+            }
         }
 
         const select = form.querySelector('#editMatriculasSelect');
