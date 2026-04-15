@@ -12,7 +12,7 @@ document.addEventListener('tableReady', () => {
     let filteredTable = [...fullTable];
 
     let currentPage = 0;
-    const rowsPerPage = 5;
+    const rowsPerPage = 10;
 
     // =========================
     // EXPOSE DATA GLOBALLY (SAFE)
