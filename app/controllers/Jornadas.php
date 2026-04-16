@@ -19,15 +19,19 @@ class Jornadas extends Controller
         $db = new Database();
         $conexion = $db->conectar();
 
-      
         $this->modelo = new JornadasModel($conexion);
     }
 
-  
     public function index()
     {
-      
-        $jornadas = $this->modelo->getJornadas();
+        $rol = $_SESSION['rol'];
+        $userId = $_SESSION['id_usuario'];
+
+        if ($rol === "Administrador") {
+            $jornadas = $this->modelo->getJornadas();
+        } else {
+            $jornadas = $this->modelo->getJornadasByUser($userId);
+        }
 
         $datos = [
             'title' => 'Jornadas',
@@ -37,14 +41,20 @@ class Jornadas extends Controller
         $this->load_view('jornadas', $datos);
     }
 
-    
     public function getJornadas()
     {
         header('Content-Type: application/json');
 
         try {
 
-            $jornadas = $this->modelo->getJornadas();
+            $rol = $_SESSION['rol'];
+            $userId = $_SESSION['id_usuario'];
+
+            if ($rol === "Administrador") {
+                $jornadas = $this->modelo->getJornadas();
+            } else {
+                $jornadas = $this->modelo->getJornadasByUser($userId);
+            }
 
             echo json_encode([
                 "success" => true,

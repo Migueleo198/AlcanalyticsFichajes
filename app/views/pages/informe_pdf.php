@@ -58,9 +58,12 @@ th {
 
 <?php
 // =========================
-// SAFE INIT
+// SAFE INIT (ROBUSTO)
 // =========================
-$filas = $filas ?? [];
+$filas = $filas ?? $datos ?? [];
+
+$desde = $desde ?? '';
+$hasta = $hasta ?? '';
 
 $totalHoras = 0;
 $totalExtras = 0;
@@ -72,8 +75,8 @@ $totalExtras = 0;
 </div>
 
 <div class="info">
-    <strong>Desde:</strong> <?= $desde ?? '' ?> |
-    <strong>Hasta:</strong> <?= $hasta ?? '' ?> |
+    <strong>Desde:</strong> <?= htmlspecialchars($desde) ?> |
+    <strong>Hasta:</strong> <?= htmlspecialchars($hasta) ?> |
     <strong>Generado:</strong> <?= date('d/m/Y H:i') ?>
 </div>
 
@@ -105,37 +108,44 @@ $totalExtras = 0;
 <?php foreach ($filas as $fila): ?>
 
 <?php
-$horas = $fila['horas_ordinarias'] ?? 0;
-$extras = $fila['horas_extra'] ?? 0;
-$descanso = $fila['horas_descanso'] ?? 0;
+$horas = (float)($fila['horas_ordinarias'] ?? 0);
+$extras = (float)($fila['horas_extra'] ?? 0);
+$descanso = (float)($fila['horas_descanso'] ?? 0);
 
 $totalHoras += $horas;
 $totalExtras += $extras;
 ?>
 
 <tr>
-    <td><?= ($fila['nombre'] ?? '') . ' ' . ($fila['apellidos'] ?? '') ?></td>
-    <td><?= $fila['dni'] ?? '' ?></td>
-    <td><?= $fila['fecha'] ?? '' ?></td>
-    <td><?= $fila['hora_entrada'] ?? '' ?></td>
-    <td><?= $fila['hora_salida'] ?? '' ?></td>
+    <td><?= htmlspecialchars(($fila['nombre'] ?? '') . ' ' . ($fila['apellidos'] ?? '')) ?></td>
+    <td><?= htmlspecialchars($fila['dni'] ?? '') ?></td>
+    <td><?= htmlspecialchars($fila['fecha'] ?? '') ?></td>
+    <td><?= htmlspecialchars($fila['hora_entrada'] ?? '') ?></td>
+    <td><?= htmlspecialchars($fila['hora_salida'] ?? '') ?></td>
 
     <td><?= $horas ?>h</td>
     <td><?= $extras ?>h</td>
-
-    <td><?= round((float)$descanso, 2) ?>h</td>
+    <td><?= round($descanso, 2) ?>h</td>
 
     <td>
-        <?php if (($fila['estado'] ?? '') == 'cerrado'): ?>
-            <span class="badge success">Cerrado</span>
-        <?php elseif (($fila['estado'] ?? '') == 'abierto'): ?>
-            <span class="badge warning">Abierto</span>
-        <?php else: ?>
-            <span class="badge danger"><?= $fila['estado'] ?? '' ?></span>
-        <?php endif; ?>
+        <?php
+        $estado = $fila['estado'] ?? '';
+
+        if ($estado === 'cerrado') {
+            echo '<span class="badge success">Cerrado</span>';
+        } elseif ($estado === 'abierto') {
+            echo '<span class="badge warning">Abierto</span>';
+        } else {
+            echo '<span class="badge danger">' . htmlspecialchars($estado) . '</span>';
+        }
+        ?>
     </td>
 
-    <td><?= !empty($fila['incidencia']) ? $fila['incidencia'] : '-' ?></td>
+    <td>
+        <?= !empty($fila['incidencia'])
+            ? htmlspecialchars($fila['incidencia'])
+            : '-' ?>
+    </td>
 </tr>
 
 <?php endforeach; ?>

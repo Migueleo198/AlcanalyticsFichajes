@@ -99,6 +99,11 @@
 const RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
+<script>
+    const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
+    const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+</script>
+
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureJornadas.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
