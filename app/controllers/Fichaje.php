@@ -192,4 +192,30 @@ class Fichaje extends Controller {
 
         echo json_encode(['ok' => true]);
     }
+
+    public function horasTotales() {
+
+    header('Content-Type: application/json');
+    $this->checkSession();
+
+    $id_usuario = $_SESSION['id_usuario'];
+
+    $segundos = $this->modelo->getHorasTotalesUsuario($id_usuario);
+
+    // Convertir a formato H:i:s
+    $horas = floor($segundos / 3600);
+    $minutos = floor(($segundos % 3600) / 60);
+    $segundos_restantes = $segundos % 60;
+
+    $tiempo_formateado = sprintf('%02d:%02d:%02d', $horas, $minutos, $segundos_restantes);
+
+    echo json_encode([
+        'ok' => true,
+        'segundos' => $segundos,
+        'tiempo' => $tiempo_formateado
+    ]);
+    }
+
+
+    
 }
