@@ -254,4 +254,56 @@ public function getFichajesUsuarioDetalle($id_usuario) {
     return $fichajes;
 }
 
+public function getHorasTotalesUsuario($id_usuario) {
+
+    $sql = "
+        SELECT SUM(
+            TIMESTAMPDIFF(
+                SECOND,
+                f.hora_entrada,
+                f.hora_salida
+            ) - IFNULL((
+                SELECT SUM(
+                    TIMESTAMPDIFF(SECOND, d.hora_inicio, d.hora_fin)
+                )
+                FROM Descanso d
+                WHERE d.id_fichaje = f.id_fichaje
+            ), 0)
+        ) as total_segundos
+        FROM Fichaje f
+        WHERE f.id_usuario = ?
+        AND f.estado = 'cerrado'
+    ";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_usuario]);
+
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $resultado['total_segundos'] ?? 0;
+}
+
+
+public function getTiempoDescansoHoy($id_usuario) {
+
+    $sql = "SELECT 
+                SUM(
+                    TIME_TO_SEC(
+                        TIMEDIFF(
+                            IFNULL(hora_fin, CURTIME()),
+                            hora_inicio
+                        )
+                    )
+                ) as total
+            FROM Descanso d
+            INNER JOIN Fichaje f ON f.id_fichaje = d.id_fichaje
+            WHERE f.id_usuario = ?
+            AND f.fecha = CURDATE()";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_usuario]);
+
+    return $stmt->fetch()['total'] ?? 0;
+}
+
 }

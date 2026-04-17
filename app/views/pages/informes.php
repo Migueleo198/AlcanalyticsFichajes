@@ -86,11 +86,11 @@
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Usuario</label>
-        <select id="usuario" class="form-select">
+        <label class="form-label">Usuarios</label>
+
+        <select id="usuario" class="form-select" multiple size="5">
 
           <?php if ($_SESSION['rol'] === 'Administrador'): ?>
-            <option value="">Todos</option>
 
             <?php foreach ($datos['usuarios'] as $u): ?>
               <option value="<?= $u['id_usuario'] ?>">
@@ -99,12 +99,20 @@
             <?php endforeach; ?>
 
           <?php else: ?>
+
+            <!-- Usuario normal: solo él mismo -->
             <option value="<?= $_SESSION['id_usuario'] ?>" selected>
               <?= $_SESSION['nombre'] ?? 'Mi usuario' ?>
             </option>
+
           <?php endif; ?>
 
         </select>
+
+        <small class="text-muted">
+          Mantén Ctrl (o Cmd en Mac) para seleccionar varios usuarios
+        </small>
+
       </div>
 
     </div>
@@ -121,7 +129,7 @@
       </button>
 
       <button id="btnGenerarInforme" class="btn btn-primary">
-        <i class="bi bi-download"></i> Descagar PDF
+        <i class="bi bi-download"></i> Descargar PDF
       </button>
 
       <button id="btnLimpiarFiltros" class="btn btn-outline-secondary">

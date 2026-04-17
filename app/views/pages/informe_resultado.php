@@ -8,11 +8,9 @@
 
 <?php
 // =========================
-// FIX: accept BOTH formats (controller mismatch safe)
+// FIX ROBUSTO MULTI-USUARIO
 // =========================
 
-// if controller sends raw array -> use it directly
-// if controller sends ["datos"=>...] -> fallback
 $filas = $datos['datos'] ?? $datos ?? [];
 
 $desde = $datos['desde'] ?? ($desde ?? '');
@@ -21,25 +19,33 @@ $hasta = $datos['hasta'] ?? ($hasta ?? '');
 $totalHoras = 0;
 $totalExtras = 0;
 
-// PDF URL SAFE
+// =========================
+// PDF URL (MULTI-USUARIO SAFE)
+// =========================
 $pdfUrl = RUTA_URL . "/informes/generarPDF?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
+
+// si hubiera usuarios en el futuro
+if (!empty($_GET['usuarios'])) {
+    foreach ($_GET['usuarios'] as $u) {
+        $pdfUrl .= "&usuarios[]=" . urlencode($u);
+    }
+}
 ?>
 
 <!-- TOPBAR -->
 <div class="topbar d-flex justify-content-between align-items-center">
-  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar un informea...">
+  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar informe...">
 
   <div class="d-flex align-items-center">
 
     <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5" id="notificacionesIcon" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
+      <i class="bi bi-bell fs-5" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
 
-      <span id="contadorNotificaciones"
-            class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+      <span class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
         3
       </span>
 
-      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
+      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;">
         <li class="fw-bold mb-2">Notificaciones</li>
         <li class="dropdown-item">Nuevo fichaje registrado</li>
         <li class="dropdown-item">Contrato por vencer</li>
@@ -131,35 +137,42 @@ $pdfUrl = RUTA_URL . "/informes/generarPDF?desde=" . urlencode($desde) . "&hasta
                 <?php foreach ($filas as $fila): ?>
 
                     <?php
-                        $horas = $fila['horas_ordinarias'] ?? 0;
-                        $extras = $fila['horas_extra'] ?? 0;
+                        $horas = (float)($fila['horas_ordinarias'] ?? 0);
+                        $extras = (float)($fila['horas_extra'] ?? 0);
 
                         $totalHoras += $horas;
                         $totalExtras += $extras;
                     ?>
 
                     <tr>
-                        <td><?= ($fila['nombre'] ?? '') . ' ' . ($fila['apellidos'] ?? '') ?></td>
-                        <td><?= $fila['fecha'] ?? '' ?></td>
-                        <td><?= $fila['hora_entrada'] ?? '' ?></td>
-                        <td><?= $fila['hora_salida'] ?? '' ?></td>
+                        <td>
+                            <?= htmlspecialchars(($fila['nombre'] ?? '') . ' ' . ($fila['apellidos'] ?? '')) ?>
+                        </td>
+                        <td><?= htmlspecialchars($fila['fecha'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($fila['hora_entrada'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($fila['hora_salida'] ?? '') ?></td>
+
                         <td><?= $horas ?> h</td>
                         <td><?= $extras ?> h</td>
+
                         <td><?= round($fila['horas_descanso'] ?? 0, 2) ?> h</td>
 
                         <td>
-                            <?php if (($fila['estado'] ?? '') === 'cerrado'): ?>
-                                <span class="badge bg-success">Cerrado</span>
-                            <?php elseif (($fila['estado'] ?? '') === 'abierto'): ?>
-                                <span class="badge bg-warning">Abierto</span>
-                            <?php else: ?>
-                                <span class="badge bg-secondary"><?= $fila['estado'] ?? '' ?></span>
-                            <?php endif; ?>
+                            <?php
+                                $estado = $fila['estado'] ?? '';
+                                if ($estado === 'cerrado') {
+                                    echo '<span class="badge bg-success">Cerrado</span>';
+                                } elseif ($estado === 'abierto') {
+                                    echo '<span class="badge bg-warning">Abierto</span>';
+                                } else {
+                                    echo '<span class="badge bg-secondary">' . htmlspecialchars($estado) . '</span>';
+                                }
+                            ?>
                         </td>
 
                         <td>
                             <?= !empty($fila['incidencia'])
-                                ? $fila['incidencia']
+                                ? htmlspecialchars($fila['incidencia'])
                                 : '<span class="text-muted">-</span>' ?>
                         </td>
                     </tr>

@@ -9,11 +9,11 @@ class JornadasModel
         require_once __DIR__ . '/../config/Database.php';
 
         $database = new Database();
-        $this->db = $database->conectar(); // ✅ FIX REAL
+        $this->db = $database->conectar();
     }
 
     // =========================
-    // GET ALL JORNADAS
+    // GET ALL JORNADAS (ADMIN)
     // =========================
     public function getJornadas()
     {
@@ -29,6 +29,29 @@ class JornadasModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // =========================
+    // GET JORNADAS BY USER (NORMAL USER)
+    // =========================
+    public function getJornadasByUser($userId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                j.*,
+                u.nombre AS nombre_usuario,
+                u.apellidos
+            FROM Jornada j
+            INNER JOIN Usuario u ON j.id_usuario = u.id_usuario
+            WHERE j.id_usuario = :user_id
+            ORDER BY j.id_jornada DESC
+        ");
+
+        $stmt->execute([
+            ':user_id' => $userId
+        ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

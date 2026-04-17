@@ -43,42 +43,59 @@
   <h3>Bienvenido, <?php echo $_SESSION['nombre']?> </h3>
   <p>Resumen de fichajes de empleados</p>
 
-  <!-- CARDS KPI -->
   <div class="row g-3 mb-4">
-     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
+
+  <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
+
+    <!-- ADMIN: Empleados primero -->
     <div class="col-md-3">
-    <a href="<?= RUTA_URL ?>/empleado/index" class="text-decoration-none">
+      <a href="<?= RUTA_URL ?>/empleado/index" class="text-decoration-none">
+        <div class="card card-custom p-3 cardhov">
+          <h6>Empleados activos</h6>
+          <h3><?= $datos['empleadosActivos'] ?? 0 ?></h3>
+        </div>
+      </a>
+    </div>
+
+  <?php endif; ?>
+
+
+  <!-- COMUNES -->
+  <div class="col-md-3">
     <div class="card card-custom p-3 cardhov">
-      <h6>Empleados activos</h6>
-      <h3><?= $datos['empleadosActivos'] ?? 0 ?></h3>
+      <h6>Fichajes hoy</h6>
+      <h3><?= $datos['fichajesHoy'] ?? 0 ?></h3>
     </div>
-  </a>
   </div>
-  <?php endif ?>
-  
 
-    <div class="col-md-3">
-      <div class="card card-custom p-3 cardhov">
-        <h6>Fichajes hoy</h6>
-        <h3><?= $datos['fichajesHoy'] ?? 0 ?></h3>
-      </div>
+  <div class="col-md-3">
+    <div class="card card-custom p-3 cardhov">
+      <h6>Horas trabajadas</h6>
+      <h3><?= round($datos['horasHoy'] ?? 0, 2) ?>h</h3>
     </div>
-
-    <div class="col-md-3">
-      <div class="card card-custom p-3 cardhov">
-        <h6>Horas trabajadas</h6>
-        <h3><?= round($datos['horasHoy'] ?? 0, 2) ?>h</h3>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card card-custom p-3 cardhov">
-        <h6>Retrasos</h6>
-        <h3><?= $datos['retrasosHoy'] ?? 0 ?></h3>
-      </div>
-    </div>
-
   </div>
+
+  <div class="col-md-3">
+    <div class="card card-custom p-3 cardhov">
+      <h6>Retrasos</h6>
+      <h3><?= $datos['retrasosHoy'] ?? 0 ?></h3>
+    </div>
+  </div>
+
+
+  <?php if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Administrador'): ?>
+
+    <!-- USUARIO: descanso al FINAL -->
+    <div class="col-md-3">
+      <div class="card card-custom p-3 cardhov">
+        <h6>Tiempo de descanso</h6>
+        <h3><?= gmdate("H:i:s", $datos['tiempoDescanso'] ?? 0) ?></h3>
+      </div>
+    </div>
+
+  <?php endif; ?>
+
+</div>
 
   <!-- TABLA -->
   <div class="card card-custom p-3">
