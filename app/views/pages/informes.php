@@ -42,26 +42,32 @@
   <p class="text-muted">Descarga informes de fichajes por usuario y rango de fechas</p>
 
   <!-- CARDS -->
-  <div class="row g-3 mb-4">
+ 
+<div class="row g-3 mb-4">
+
+  <?php if ($_SESSION['rol'] === 'Administrador') { ?>
     <div class="col-md-4">
       <div class="card card-custom p-3 cardhov">
-        <h6>Total empleados</h6>
-        <h3><?= count($datos['usuarios']) ?></h3>
+        <h6>Panel Admin</h6>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card card-custom p-3 cardhov">
-        <h6>Informes disponibles</h6>
-        <h3>3</h3>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card card-custom p-3 cardhov">
-        <h6>Exportación</h6>
-        <h3>PDF</h3>
-      </div>
+ 
+
+  <div class="col-md-4">
+    <div class="card card-custom p-3 cardhov">
+      <h6>Total empleados</h6>
+      <h3><?= count($datos['usuarios']) ?></h3>
     </div>
   </div>
+ <?php } ?>
+  <div class="col-md-4">
+    <div class="card card-custom p-3 cardhov">
+      <h6>Exportación</h6>
+      <h3>PDF</h3>
+    </div>
+  </div>
+
+</div>
 
   <!-- FORM -->
   <div class="card card-custom p-4">
@@ -143,6 +149,11 @@
 </div>
 
 </div>
+
+<script>
+    const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
+    const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+</script>
 
 <script>
     const RUTA_URL = "<?= RUTA_URL ?>";
