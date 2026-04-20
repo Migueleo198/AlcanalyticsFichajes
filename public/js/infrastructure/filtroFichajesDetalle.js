@@ -9,36 +9,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tabla) return;
 
     const tbody = tabla.querySelector("tbody");
-    const filas = Array.from(tbody.querySelectorAll("tr"));
+
+    // ✅ CRITICAL FIX: immutable dataset (DO NOT MODIFY)
+    const filasOriginales = Array.from(tbody.querySelectorAll("tr"));
 
     function aplicarFiltros() {
 
-        const texto = buscador?.value.toLowerCase().trim() || "";
-        const estado = filterEstado?.value.toLowerCase().trim() || "";
-        const fecha = filterFecha?.value || "";
+        const usuarioSeleccionado = buscador?.value || "";
+        const estadoSeleccionado = filterEstado?.value.toLowerCase().trim() || "";
+        const fechaSeleccionada = filterFecha?.value || "";
 
-        const filtradas = filas.filter(row => {
+        const filtradas = filasOriginales.filter(row => {
 
             const cols = row.querySelectorAll("td");
 
             const fechaTxt = cols[0]?.innerText.trim() || "";
-            const usuarioTxt = cols[1]?.innerText.toLowerCase() || "";
-            const estadoTxt = cols[4]?.innerText.toLowerCase() || "";
+            const usuarioTxt = cols[1]?.innerText.toLowerCase().trim() || "";
+            const estadoTxt = cols[4]?.innerText.toLowerCase().trim() || "";
 
             return (
-                (texto === "" || usuarioTxt.includes(texto)) &&
-                (estado === "" || estadoTxt.includes(estado)) &&
-                (fecha === "" || fechaTxt === fecha)
+                (usuarioSeleccionado === "" || usuarioTxt === usuarioSeleccionado) &&
+                (estadoSeleccionado === "" || estadoTxt.includes(estadoSeleccionado)) &&
+                (fechaSeleccionada === "" || fechaTxt === fechaSeleccionada)
             );
         });
 
+        // ✅ SAFE REBUILD EVERY TIME
         tbody.innerHTML = "";
         filtradas.forEach(row => tbody.appendChild(row));
 
         document.dispatchEvent(new Event("tableReady"));
     }
 
-    buscador?.addEventListener("input", aplicarFiltros);
+    // =========================
+    // EVENTS
+    // =========================
+    buscador?.addEventListener("change", aplicarFiltros);
     filterEstado?.addEventListener("change", aplicarFiltros);
     filterFecha?.addEventListener("input", aplicarFiltros);
 
@@ -49,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (filterFecha) filterFecha.value = "";
 
         tbody.innerHTML = "";
-        filas.forEach(row => tbody.appendChild(row));
+        filasOriginales.forEach(row => tbody.appendChild(row));
 
         document.dispatchEvent(new Event("tableReady"));
     });

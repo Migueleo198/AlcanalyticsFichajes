@@ -82,11 +82,38 @@
 
         <div class="dropdown-menu p-3" style="width: 300px;">
 
+          <!-- ========================= -->
+          <!-- EMPLEADO DROPDOWN -->
+          <!-- ========================= -->
           <div class="mb-2">
-            <label class="form-label">Empleado / Buscar</label>
-            <input type="text" id="buscadorTablaF" class="form-control" placeholder="Nombre...">
+            <label class="form-label">Empleado</label>
+
+            <select id="buscadorTablaF" class="form-select">
+              <option value="">Todos los empleados</option>
+
+              <?php 
+                $empleadosUnicos = [];
+
+                foreach ($fichajes ?? [] as $f) {
+                    $nombreCompleto = trim(($f['nombre'] ?? '') . ' ' . ($f['apellidos'] ?? ''));
+                    if ($nombreCompleto !== '') {
+                        $empleadosUnicos[$nombreCompleto] = $nombreCompleto;
+                    }
+                }
+
+                ksort($empleadosUnicos);
+
+                foreach ($empleadosUnicos as $nombre):
+              ?>
+                <option value="<?= strtolower($nombre) ?>">
+                  <?= htmlspecialchars($nombre) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+
           </div>
 
+          <!-- ESTADO -->
           <div class="mb-2">
             <label class="form-label">Estado</label>
             <select id="filterEstado" class="form-select">
@@ -96,6 +123,7 @@
             </select>
           </div>
 
+          <!-- FECHA -->
           <div class="mb-2">
             <label class="form-label">Fecha</label>
             <input type="date" id="filterFecha" class="form-control">
@@ -110,6 +138,7 @@
 
     </div>
 
+    <!-- TABLE -->
     <table id="tablaFichajes" class="table table-hover align-middle">
       <thead>
         <tr>
