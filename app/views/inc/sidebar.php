@@ -94,16 +94,11 @@
     <!-- ===================== -->
     <a data-bs-toggle="collapse" href="#bajasMenu" role="button"
        aria-expanded="false" aria-controls="bajasMenu">
-      <i class="bi bi-person-dash me-2"></i>Ausencias y Bajas
+      <i class="bi bi-person-dash me-2"></i>Ausencias
       <i class="bi bi-chevron-down float-end"></i>
     </a>
 
     <div class="collapse ps-3" id="bajasMenu">
-
-      <a href="<?= RUTA_URL ?>/Bajas/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/index') ? 'active' : '' ?>">
-        <i class="bi bi-plus-circle me-2"></i>Bajas
-      </a>
 
       <a href="<?= RUTA_URL ?>/Ausencias/index"
          class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
