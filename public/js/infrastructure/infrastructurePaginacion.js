@@ -1,129 +1,155 @@
 document.addEventListener('tableReady', () => {
 
     const TABLE = document.querySelector('table');
+    if (!TABLE) return;
+
     const TBODY = TABLE.querySelector('tbody');
     const CONTAINER = TABLE.closest('.card');
 
     const buscador = document.getElementById('buscadorTabla');
 
-    // Master data (ALL rows)
-    const fullTable = Array.from(TBODY.querySelectorAll('tr'));
-
-    let filteredTable = [...fullTable];
-
-    let currentPage = 0;
     const rowsPerPage = 10;
 
-    // =========================
-    // EXPOSE DATA GLOBALLY (SAFE)
-    // =========================
-    window.paginationData = {
-        get fullTable() {
-            return fullTable;
-        },
-        get filteredTable() {
-            return filteredTable;
-        },
-        setFilteredTable(newFiltered) {
-            if (!Array.isArray(newFiltered)) return;
-            filteredTable = newFiltered;
-            currentPage = 0;
-            renderPage(0);
-        }
-    };
+    let fullTable = [];
+    let filteredTable = [];
+    let currentPage = 0;
+    let totalPages = 1;
 
-    // =========================
-    // PAGINATION UI
-    // =========================
-    let paginationWrapper = document.getElementById('paginationWrapper');
-
-    if (!paginationWrapper) {
-        paginationWrapper = document.createElement('div');
-        paginationWrapper.id = 'paginationWrapper';
-        paginationWrapper.className = 'd-flex justify-content-center mt-3';
-
-        paginationWrapper.innerHTML = `
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item" id="prevBtn">
-                        <button class="page-link">&laquo;</button>
-                    </li>
-
-                    <li class="page-item disabled">
-                        <span class="page-link" id="pageIndicator">1</span>
-                    </li>
-
-                    <li class="page-item" id="nextBtn">
-                        <button class="page-link">&raquo;</button>
-                    </li>
-                </ul>
-            </nav>
-        `;
-
-        CONTAINER.appendChild(paginationWrapper);
+    function snapshot() {
+        return Array.from(TBODY.querySelectorAll('tr')).map(r => r.cloneNode(true));
     }
 
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const pageIndicator = document.getElementById('pageIndicator');
+    // =========================
+    // CREATE PAGINATION IF MISSING
+    // =========================
+    function ensurePaginationUI() {
+
+        let wrapper = document.getElementById('paginationWrapper');
+
+        if (!wrapper) {
+            wrapper = document.createElement('div');
+            wrapper.id = 'paginationWrapper';
+            wrapper.className = 'd-flex justify-content-center mt-3';
+
+            wrapper.innerHTML = `
+                <nav>
+                    <ul class="pagination mb-0">
+
+                        <li class="page-item" id="prevBtn">
+                            <button class="page-link">&laquo;</button>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <span class="page-link" id="pageIndicator">1 / 1</span>
+                        </li>
+
+                        <li class="page-item" id="nextBtn">
+                            <button class="page-link">&raquo;</button>
+                        </li>
+
+                    </ul>
+                </nav>
+            `;
+
+            CONTAINER.appendChild(wrapper);
+        }
+
+        return wrapper;
+    }
 
     // =========================
-    // RENDER
+    // CORE STATE UPDATE
     // =========================
-    function renderPage(page) {
-        const totalPages = Math.ceil(filteredTable.length / rowsPerPage) || 1;
+    function recalc() {
+        totalPages = Math.max(1, Math.ceil(filteredTable.length / rowsPerPage));
 
-        if (page < 0) page = 0;
-        if (page >= totalPages) page = totalPages - 1;
+        if (currentPage >= totalPages) currentPage = totalPages - 1;
+        if (currentPage < 0) currentPage = 0;
+    }
 
-        currentPage = page;
+    function render() {
+
+        recalc();
 
         TBODY.innerHTML = "";
 
-        const start = page * rowsPerPage;
+        const start = currentPage * rowsPerPage;
         const end = start + rowsPerPage;
 
-        filteredTable.slice(start, end).forEach(row => {
-            TBODY.appendChild(row);
-        });
+        filteredTable
+            .slice(start, end)
+            .forEach(row => TBODY.appendChild(row.cloneNode(true)));
 
-        pageIndicator.textContent = `${currentPage + 1} de ${totalPages}`;
+        const indicator = document.getElementById('pageIndicator');
+        if (indicator) {
+            indicator.textContent = `${currentPage + 1} de ${totalPages}`;
+        }
 
-        prevBtn.classList.toggle('disabled', currentPage === 0);
-        nextBtn.classList.toggle('disabled', currentPage === totalPages - 1);
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (prevBtn) prevBtn.classList.toggle('disabled', currentPage === 0);
+        if (nextBtn) nextBtn.classList.toggle('disabled', currentPage >= totalPages - 1);
     }
 
     // =========================
-    // FILTER FUNCTION (UNCHANGED)
+    // FILTER
     // =========================
     function applyFilter() {
-        const filtro = buscador.value.toLowerCase().trim();
 
-        filteredTable = fullTable.filter(row => {
-            return row.textContent.toLowerCase().includes(filtro);
-        });
+        const value = (buscador?.value || "").toLowerCase().trim();
+
+        fullTable = snapshot();
+
+        filteredTable = fullTable.filter(row =>
+            row.textContent.toLowerCase().includes(value)
+        );
 
         currentPage = 0;
-        renderPage(0);
+
+        render();
     }
-
-    // =========================
-    // EVENTS
-    // =========================
-    buscador.addEventListener('input', applyFilter);
-
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 0) renderPage(currentPage - 1);
-    });
-
-    nextBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredTable.length / rowsPerPage);
-        if (currentPage < totalPages - 1) renderPage(currentPage + 1);
-    });
 
     // =========================
     // INIT
     // =========================
-    renderPage(0);
+    function init() {
 
+        ensurePaginationUI();
+
+        fullTable = snapshot();
+        filteredTable = [...fullTable];
+
+        attachEvents();
+        render();
+    }
+
+    // =========================
+    // EVENTS (SAFE BINDING)
+    // =========================
+    function attachEvents() {
+
+        buscador?.addEventListener('input', applyFilter);
+
+        document.addEventListener('click', (e) => {
+
+            if (e.target.closest('#nextBtn')) {
+                recalc();
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    render();
+                }
+            }
+
+            if (e.target.closest('#prevBtn')) {
+                recalc();
+                if (currentPage > 0) {
+                    currentPage--;
+                    render();
+                }
+            }
+        });
+    }
+
+    init();
 });

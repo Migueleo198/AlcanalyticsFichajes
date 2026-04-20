@@ -1,5 +1,13 @@
 <?php require_once RUTA_APP . '/views/inc/headerHome.php'; ?>
 
+<?php
+$mesActual = date('Y-m');
+
+$fichajesMes = array_filter($fichajes ?? [], function($f) use ($mesActual) {
+    return isset($f['fecha']) && strpos($f['fecha'], $mesActual) === 0;
+});
+?>
+
 <div class="main-wrapper">
 
 <?php require_once RUTA_APP . '/views/inc/sidebar.php'; ?>
@@ -43,25 +51,25 @@
 
     <div class="col-md-4">
       <div class="card card-custom p-3 cardhov">
-        <h6>Total fichajes</h6>
-        <h3><?= count($fichajes ?? []) ?></h3>
+        <h6>Total fichajes este mes</h6>
+        <h3><?= count($fichajesMes) ?></h3>
       </div>
     </div>
 
     <div class="col-md-4">
       <div class="card card-custom p-3 cardhov">
-        <h6>Activos</h6>
+        <h6>Activos este mes</h6>
         <h3>
-          <?= count(array_filter($fichajes ?? [], fn($f) => ($f['estado'] ?? '') === 'abierto')) ?>
+          <?= count(array_filter($fichajesMes, fn($f) => ($f['estado'] ?? '') === 'abierto')) ?>
         </h3>
       </div>
     </div>
 
     <div class="col-md-4">
       <div class="card card-custom p-3 cardhov">
-        <h6>Cerrados</h6>
+        <h6>Cerrados este mes</h6>
         <h3>
-          <?= count(array_filter($fichajes ?? [], fn($f) => ($f['estado'] ?? '') === 'cerrado')) ?>
+          <?= count(array_filter($fichajesMes, fn($f) => ($f['estado'] ?? '') === 'cerrado')) ?>
         </h3>
       </div>
     </div>
@@ -74,7 +82,7 @@
     <div class="d-flex justify-content-between mb-3">
       <h5>Listado de Fichajes</h5>
 
-      <!-- FILTRO -->
+      <!-- FILTERS -->
       <div class="dropdown">
         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
           <i class="bi bi-funnel"></i> Filtrar
@@ -82,9 +90,7 @@
 
         <div class="dropdown-menu p-3" style="width: 300px;">
 
-          <!-- ========================= -->
-          <!-- EMPLEADO DROPDOWN -->
-          <!-- ========================= -->
+          <!-- EMPLEADO -->
           <div class="mb-2">
             <label class="form-label">Empleado</label>
 
@@ -139,7 +145,7 @@
     </div>
 
     <!-- TABLE -->
-    <table id="tablaFichajes" class="table table-hover align-middle">
+    <table id="tablaFichajes" class="table table-hover align-middle" data-pagination="true">
       <thead>
         <tr>
           <th>Fecha</th>
@@ -205,8 +211,18 @@
 </div>
 </div>
 
+<!-- SCRIPTS -->
 <script>
 const RUTA_URL = "<?= RUTA_URL ?>";
+</script>
+
+<!-- FIX: ensure tableReady always triggers AFTER DOM + modules -->
+<script>
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        document.dispatchEvent(new Event("tableReady"));
+    }, 50);
+});
 </script>
 
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
