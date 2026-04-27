@@ -59,6 +59,61 @@ document.addEventListener("DOMContentLoaded", function () {
 
   PROFILE.addEventListener('click', loadProfile);
 
+  // =========================
+  // 🚗 MATRÍCULAS HELPERS
+  // =========================
+  function createMatriculaRow(value = '') {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'd-flex gap-2 mb-1 align-items-center matricula-row';
+    wrapper.innerHTML = `
+      <input
+        type="text"
+        name="matriculas[]"
+        class="form-control form-control-sm"
+        value="${value.replace(/"/g, '&quot;')}"
+        placeholder="Ej: 1234 ABC"
+        maxlength="10"
+      >
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm matricula-remove"
+        title="Eliminar matrícula"
+        aria-label="Eliminar matrícula"
+      >&times;</button>
+    `;
+
+    wrapper.querySelector('.matricula-remove').addEventListener('click', () => {
+      wrapper.remove();
+    });
+
+    return wrapper;
+  }
+
+  function renderMatriculas(container, matriculas = []) {
+    container.innerHTML = '';
+
+    if (matriculas.length === 0) {
+      // Render one empty row so the user can add at least one
+      container.appendChild(createMatriculaRow());
+    } else {
+      matriculas.forEach(m => {
+        container.appendChild(createMatriculaRow(m.matricula ?? m));
+      });
+    }
+
+    // "Add" button — appended once at the bottom
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn btn-outline-secondary btn-sm mt-1';
+    addBtn.textContent = '+ Añadir matrícula';
+    addBtn.addEventListener('click', () => {
+      // Insert before the button itself
+      container.insertBefore(createMatriculaRow(), addBtn);
+    });
+
+    container.appendChild(addBtn);
+  }
+
   async function loadProfile() {
 
     const userId = PROFILE?.dataset?.userId;
@@ -162,32 +217,23 @@ document.addEventListener("DOMContentLoaded", function () {
       const form = modalEl.querySelector('form');
 
       // =========================
-      // USER FIELDS (FIX ID CORRECTO)
+      // USER FIELDS
       // =========================
-      form.querySelector('[name="id"]').value = user.id_usuario ?? '';
-      form.querySelector('[name="nombre"]').value = user.nombre ?? '';
-      form.querySelector('[name="apellidos"]').value = user.apellidos ?? '';
-      form.querySelector('[name="usuario"]').value = user.nombre_usuario ?? '';
-      form.querySelector('[name="dni"]').value = user.dni ?? '';
-      form.querySelector('[name="telefono"]').value = user.telefono ?? '';
-      form.querySelector('[name="email"]').value = user.email ?? '';
-      form.querySelector('[name="rol"]').value = user.rol ?? '';
+      form.querySelector('[name="id"]').value       = user.id_usuario     ?? '';
+      form.querySelector('[name="nombre"]').value   = user.nombre         ?? '';
+      form.querySelector('[name="apellidos"]').value = user.apellidos     ?? '';
+      form.querySelector('[name="usuario"]').value  = user.nombre_usuario ?? '';
+      form.querySelector('[name="dni"]').value      = user.dni            ?? '';
+      form.querySelector('[name="telefono"]').value = user.telefono       ?? '';
+      form.querySelector('[name="email"]').value    = user.email          ?? '';
+      form.querySelector('[name="rol"]').value      = user.rol            ?? '';
 
       // =========================
-      // MATRÍCULAS (FROM BACKEND)
+      // MATRÍCULAS — editable inputs
       // =========================
       const contenedor = document.getElementById('matriculasContainer');
-
       if (contenedor) {
-        if (matriculas.length === 0) {
-          contenedor.innerHTML = `<span class="text-muted">Sin matrículas registradas</span>`;
-        } else {
-          contenedor.innerHTML = matriculas.map(m => `
-            <div class="d-flex justify-content-between border-bottom py-1">
-              <span> ${m.matricula}</span>
-            </div>
-          `).join('');
-        }
+        renderMatriculas(contenedor, matriculas);
       }
 
     } catch (err) {

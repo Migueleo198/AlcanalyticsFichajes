@@ -64,8 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    loadUsers().then((response) => {
-
+    function renderUsers(response) {
         const lista = document.getElementById('lista');
         if (!lista) return;
 
@@ -174,10 +173,75 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         document.dispatchEvent(new Event('tableReady'));
+    }
+
+    loadUsers().then(renderUsers);
+
+    // =========================
+    // ➕ ADD MODAL — reset on close
+    // =========================
+    const addModalEl = document.querySelector('#addModal');
+
+    addModalEl?.addEventListener('hidden.bs.modal', () => {
+        const form = addModalEl.querySelector('form');
+        form?.querySelector('.add-alert')?.remove();
+        const btn = form?.querySelector('button[type="submit"], button:not([type])');
+        if (btn && btn.dataset.originalText) {
+            btn.disabled = false;
+            btn.textContent = btn.dataset.originalText;
+        }
     });
 
     // =========================
-    // ✏️ EDIT MODAL
+    // ➕ SUBMIT ADD USER
+    // =========================
+    addModalEl?.querySelector('form')?.addEventListener('submit', async (e) => {
+
+        e.preventDefault();
+
+        const form = e.target;
+        const data = new FormData(form);
+
+        const submitBtn = form.querySelector('button[type="submit"], button:not([type])');
+        if (submitBtn) {
+            submitBtn.dataset.originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+        }
+
+        form.querySelector('.add-alert')?.remove();
+
+        try {
+            const res  = await fetch('/user/addUser', { method: 'POST', body: data });
+            const json = await res.json();
+
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert mt-3 add-alert ${json.success ? 'alert-success' : 'alert-danger'}`;
+            alertEl.textContent = json.message ?? (json.success ? 'Usuario creado.' : 'Error al crear.');
+            form.appendChild(alertEl);
+
+            if (json.success) {
+                form.reset();
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(addModalEl)?.hide();
+                    loadUsers().then(renderUsers);
+                }, 1500);
+            } else {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
+            }
+
+        } catch (err) {
+            console.error('Add error:', err);
+            const alertEl = document.createElement('div');
+            alertEl.className = 'alert alert-danger mt-3 add-alert';
+            alertEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+            form.appendChild(alertEl);
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
+        }
+    });
+
+    // =========================
+    // ✏️ EDIT MODAL — populate
     // =========================
     document.addEventListener('click', function (e) {
 
@@ -187,17 +251,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const modal = document.querySelector('#editModal');
         if (!modal) return;
 
-        modal.querySelector('[name="id"]').value = btn.dataset.id;
-        modal.querySelector('[name="nombre"]').value = btn.dataset.nombre;
+        modal.querySelector('[name="id"]').value        = btn.dataset.id;
+        modal.querySelector('[name="nombre"]').value    = btn.dataset.nombre;
         modal.querySelector('[name="apellidos"]').value = btn.dataset.apellidos;
-        modal.querySelector('[name="usuario"]').value = btn.dataset.usuario;
-        modal.querySelector('[name="dni"]').value = btn.dataset.dni;
-        modal.querySelector('[name="telefono"]').value = btn.dataset.telefono;
-        modal.querySelector('[name="email"]').value = btn.dataset.email;
-        modal.querySelector('[name="rol"]').value = btn.dataset.rol;
+        modal.querySelector('[name="usuario"]').value   = btn.dataset.usuario;
+        modal.querySelector('[name="dni"]').value       = btn.dataset.dni;
+        modal.querySelector('[name="telefono"]').value  = btn.dataset.telefono;
+        modal.querySelector('[name="email"]').value     = btn.dataset.email;
+        modal.querySelector('[name="rol"]').value       = btn.dataset.rol;
 
         const fechaEdit = modal.querySelector('[name="fecha_nacimiento"]');
-
         if (fechaEdit) {
             fechaEdit.value = btn.dataset.fecha_nacimiento
                 ? btn.dataset.fecha_nacimiento.split('T')[0]
@@ -205,9 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
-
         const select = modal.querySelector('#editMatriculasSelect');
-        const input = modal.querySelector('#editMatriculaInput');
+        const input  = modal.querySelector('#editMatriculaInput');
 
         if (select) {
             select.innerHTML = '';
@@ -220,9 +282,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 select.appendChild(option);
             });
 
-            select.onchange = () => {
-                input.value = select.value;
-            };
+            select.onchange = () => { input.value = select.value; };
+        }
+    });
+
+    // =========================
+    // ✏️ EDIT MODAL — reset on close
+    // =========================
+    const editModalEl = document.querySelector('#editModal');
+
+    editModalEl?.addEventListener('hidden.bs.modal', () => {
+        const form = editModalEl.querySelector('form');
+        form?.querySelector('.edit-alert')?.remove();
+        const btn = form?.querySelector('button[type="submit"], button:not([type])');
+        if (btn && btn.dataset.originalText) {
+            btn.disabled = false;
+            btn.textContent = btn.dataset.originalText;
         }
     });
 
@@ -232,12 +307,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('saveMatriculaBtn')?.addEventListener('click', () => {
 
         const select = document.getElementById('editMatriculasSelect');
-        const input = document.getElementById('editMatriculaInput');
+        const input  = document.getElementById('editMatriculaInput');
 
         if (!select || !input.value.trim()) return;
 
         const option = select.selectedOptions[0];
-
         if (option) {
             option.value = input.value.trim();
             option.textContent = input.value.trim();
@@ -245,57 +319,65 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =========================
-    // 💾 SUBMIT EDIT USER (FINAL FIX)
+    // 💾 SUBMIT EDIT USER
     // =========================
-    document.querySelector('#editModal form')?.addEventListener('submit', async (e) => {
+    editModalEl?.querySelector('form')?.addEventListener('submit', async (e) => {
 
         e.preventDefault();
 
         const form = e.target;
         const data = new FormData(form);
 
-        // 🔥 FIX DEFINITIVO FECHA (CORRECT VERSION)
         const fechaInput = form.querySelector('[name="fecha_nacimiento"]');
-
         if (fechaInput) {
-            let fecha = fechaInput.value;
-
-            if (!fecha || fecha.trim() === "") {
-                data.set('fecha_nacimiento', '');
-            } else {
-                // ✅ DO NOT use Date() — already correct format
-                data.set('fecha_nacimiento', fecha);
-            }
+            data.set('fecha_nacimiento', fechaInput.value?.trim() || '');
         }
 
         const select = form.querySelector('#editMatriculasSelect');
-
         if (select) {
-            const matriculas = Array.from(select.options).map(opt => opt.value);
-
             data.delete('matriculas[]');
-
-            matriculas.forEach(m => {
-                data.append('matriculas[]', m);
-            });
+            Array.from(select.options).forEach(opt => data.append('matriculas[]', opt.value));
         }
 
-        const res = await fetch('/user/editUser', {
-            method: 'POST',
-            body: data
-        });
+        const submitBtn = form.querySelector('button[type="submit"], button:not([type])');
+        if (submitBtn) {
+            submitBtn.dataset.originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+        }
 
-        const json = await res.json();
+        form.querySelector('.edit-alert')?.remove();
 
-        if (json.success) {
-            location.reload();
-        } else {
-            console.error(json);
+        try {
+            const res  = await fetch('/user/editUser', { method: 'POST', body: data });
+            const json = await res.json();
+
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert mt-3 edit-alert ${json.success ? 'alert-success' : 'alert-danger'}`;
+            alertEl.textContent = json.message ?? (json.success ? 'Cambios guardados.' : 'Error al guardar.');
+            form.appendChild(alertEl);
+
+            if (json.success) {
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(editModalEl)?.hide();
+                    loadUsers().then(renderUsers);
+                }, 1500);
+            } else {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
+            }
+
+        } catch (err) {
+            console.error('Submit error:', err);
+            const alertEl = document.createElement('div');
+            alertEl.className = 'alert alert-danger mt-3 edit-alert';
+            alertEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+            form.appendChild(alertEl);
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
         }
     });
 
     // =========================
-    // 🗑️ DELETE MODAL
+    // 🗑️ DELETE MODAL — populate
     // =========================
     document.addEventListener('click', function (e) {
 
@@ -305,14 +387,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const modal = document.querySelector('#deleteModal');
         if (!modal) return;
 
-        modal.querySelector('[name="id"]').value = btn.dataset.id;
-        modal.querySelector('[name="nombre"]').value = btn.dataset.nombre;
+        modal.querySelector('[name="id"]').value        = btn.dataset.id;
+        modal.querySelector('[name="nombre"]').value    = btn.dataset.nombre;
         modal.querySelector('[name="apellidos"]').value = btn.dataset.apellidos;
-        modal.querySelector('[name="usuario"]').value = btn.dataset.usuario;
-        modal.querySelector('[name="dni"]').value = btn.dataset.dni;
-        modal.querySelector('[name="telefono"]').value = btn.dataset.telefono;
-        modal.querySelector('[name="email"]').value = btn.dataset.email;
-        modal.querySelector('[name="rol"]').value = btn.dataset.rol;
+        modal.querySelector('[name="usuario"]').value   = btn.dataset.usuario;
+        modal.querySelector('[name="dni"]').value       = btn.dataset.dni;
+        modal.querySelector('[name="telefono"]').value  = btn.dataset.telefono;
+        modal.querySelector('[name="email"]').value     = btn.dataset.email;
+        modal.querySelector('[name="rol"]').value       = btn.dataset.rol;
 
         const fechaDelete = modal.querySelector('[name="fecha_nacimiento"]');
         if (fechaDelete) {
@@ -324,7 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const matriculas = JSON.parse(btn.dataset.matriculas || "[]");
 
         let container = modal.querySelector('#deleteMatriculasContainer');
-
         if (!container) {
             container = document.createElement('div');
             container.id = 'deleteMatriculasContainer';
@@ -335,6 +416,68 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = matriculas.length
             ? matriculas.map(m => `<div>🚗 ${m.matricula}</div>`).join('')
             : `<span class="text-muted">Sin matrículas</span>`;
+    });
+
+    // =========================
+    // 🗑️ DELETE MODAL — reset on close
+    // =========================
+    const deleteModalEl = document.querySelector('#deleteModal');
+
+    deleteModalEl?.addEventListener('hidden.bs.modal', () => {
+        const form = deleteModalEl.querySelector('form');
+        form?.querySelector('.delete-alert')?.remove();
+        const btn = form?.querySelector('button[type="submit"], button:not([type="button"])');
+        if (btn && btn.dataset.originalText) {
+            btn.disabled = false;
+            btn.textContent = btn.dataset.originalText;
+        }
+    });
+
+    // =========================
+    // 🗑️ SUBMIT DELETE USER
+    // =========================
+    deleteModalEl?.querySelector('form')?.addEventListener('submit', async (e) => {
+
+        e.preventDefault();
+
+        const form = e.target;
+        const data = new FormData(form);
+
+        const submitBtn = form.querySelector('button[type="submit"], button:not([type="button"])');
+        if (submitBtn) {
+            submitBtn.dataset.originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Eliminando...';
+        }
+
+        form.querySelector('.delete-alert')?.remove();
+
+        try {
+            const res  = await fetch('/user/removeUser', { method: 'POST', body: data });
+            const json = await res.json();
+
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert mt-3 delete-alert ${json.success ? 'alert-success' : 'alert-danger'}`;
+            alertEl.textContent = json.message ?? (json.success ? 'Usuario eliminado.' : 'Error al eliminar.');
+            form.appendChild(alertEl);
+
+            if (json.success) {
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(deleteModalEl)?.hide();
+                    loadUsers().then(renderUsers);
+                }, 1500);
+            } else {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
+            }
+
+        } catch (err) {
+            console.error('Delete error:', err);
+            const alertEl = document.createElement('div');
+            alertEl.className = 'alert alert-danger mt-3 delete-alert';
+            alertEl.textContent = 'Error de conexión. Inténtalo de nuevo.';
+            form.appendChild(alertEl);
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.originalText; }
+        }
     });
 
 });

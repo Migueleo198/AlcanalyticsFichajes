@@ -13,16 +13,17 @@ class User extends Controller
 
         $input = json_decode(file_get_contents("php://input"), true);
 
-        $usuario = $input['usuario'] ?? '';
+        $usuario     = $input['usuario']     ?? '';
         $contrasenya = $input['contrasenya'] ?? '';
 
         $model = new UserModel();
-        $user = $model->login($usuario, $contrasenya);
+        $user  = $model->login($usuario, $contrasenya);
 
         echo json_encode($user ? [
             "success" => true,
+            "message" => "Sesión iniciada correctamente",
             "usuario" => $user['nombre_usuario'],
-            "rol" => $user['rol']
+            "rol"     => $user['rol']
         ] : [
             "success" => false,
             "message" => "Credenciales incorrectas"
@@ -49,7 +50,7 @@ class User extends Controller
             exit;
         }
 
-        $model = new UserModel();
+        $model   = new UserModel();
         $usuario = $model->getUsuarioById($id);
 
         if (!$usuario) {
@@ -63,7 +64,7 @@ class User extends Controller
 
         echo json_encode([
             "success" => true,
-            "data" => $usuario
+            "data"    => $usuario
         ]);
 
         exit;
@@ -76,12 +77,12 @@ class User extends Controller
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        $model = new UserModel();
+        $model    = new UserModel();
         $usuarios = $model->getUsuarios();
 
         echo json_encode([
             "success" => true,
-            "data" => $usuarios ?: []
+            "data"    => $usuarios ?: []
         ]);
 
         exit;
@@ -105,17 +106,18 @@ class User extends Controller
         }
 
         $model = new UserModel();
-        $ok = $model->removeUser($id);
+        $ok    = $model->removeUser($id);
 
         echo json_encode([
-            "success" => (bool)$ok
+            "success" => (bool) $ok,
+            "message" => $ok ? "Usuario eliminado correctamente" : "Error al eliminar el usuario"
         ]);
 
         exit;
     }
 
     // =========================
-    // ADD USER + MATRICULAS (FIXED)
+    // ADD USER + MATRICULAS
     // =========================
     public function addUser()
     {
@@ -131,46 +133,42 @@ class User extends Controller
 
         $model = new UserModel();
 
-        // =========================
         // 1. CREATE USER
-        // =========================
         $userId = $model->crearUsuario([
-            'nombre' => $_POST['nombre'] ?? '',
-            'apellidos' => $_POST['apellidos'] ?? '',
-            'nombre_usuario' => $_POST['usuario'] ?? '',
-            'contraseña' => $_POST['contraseña'] ?? '',
-            'dni' => $_POST['dni'] ?? '',
-            'telefono' => $_POST['telefono'] ?? '',
-            'email' => $_POST['email'] ?? '',
-            'rol' => $_POST['rol'] ?? ''
+            'nombre'        => $_POST['nombre']     ?? '',
+            'apellidos'     => $_POST['apellidos']  ?? '',
+            'nombre_usuario'=> $_POST['usuario']    ?? '',
+            'contraseña'    => $_POST['contraseña'] ?? '',
+            'dni'           => $_POST['dni']        ?? '',
+            'telefono'      => $_POST['telefono']   ?? '',
+            'email'         => $_POST['email']      ?? '',
+            'rol'           => $_POST['rol']        ?? ''
         ]);
 
         if (!$userId) {
             echo json_encode([
                 "success" => false,
-                "message" => "Error creando usuario"
+                "message" => "Error al crear el usuario"
             ]);
             exit;
         }
 
-        // =========================
-        // 2. ADD MATRICULAS (FIXED)
-        // =========================
-        if (!empty($_POST['matriculas'])) {
+        // 2. ADD MATRICULAS — accepts both matriculas[] array and legacy comma-separated string
+        $raw = $_POST['matriculas'] ?? [];
 
-            $matriculas = explode(',', $_POST['matriculas']);
+        if (is_string($raw)) {
+            $matriculas = array_filter(array_map('trim', explode(',', $raw)));
+        } else {
+            $matriculas = array_filter(array_map('trim', (array) $raw));
+        }
 
-            foreach ($matriculas as $m) {
-                $m = trim($m);
-
-                if ($m !== '') {
-                    $model->addMatricula($userId, $m);
-                }
-            }
+        foreach ($matriculas as $m) {
+            $model->addMatricula($userId, $m);
         }
 
         echo json_encode([
-            "success" => true,
+            "success"    => true,
+            "message"    => "Usuario creado correctamente",
             "id_usuario" => $userId
         ]);
 
@@ -184,24 +182,26 @@ class User extends Controller
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        $matriculas = $_POST['matriculas'] ?? [];
+        $raw = $_POST['matriculas'] ?? [];
 
-        if (!is_array($matriculas)) {
-            $matriculas = [$matriculas];
+        if (is_string($raw)) {
+            $matriculas = array_filter(array_map('trim', explode(',', $raw)));
+        } else {
+            $matriculas = array_filter(array_map('trim', (array) $raw));
         }
 
-        $matriculas = array_values(array_filter(array_map('trim', $matriculas)));
+        $matriculas = array_values($matriculas);
 
         $datos = [
-            'id' => $_POST['id'] ?? null,
-            'nombre' => $_POST['nombre'] ?? '',
-            'apellidos' => $_POST['apellidos'] ?? '',
-            'nombre_usuario' => $_POST['usuario'] ?? '',
-            'dni' => $_POST['dni'] ?? '',
-            'telefono' => $_POST['telefono'] ?? '',
-            'email' => $_POST['email'] ?? '',
-            'rol' => $_POST['rol'] ?? '',
-            'matriculas' => $matriculas
+            'id'             => $_POST['id']        ?? null,
+            'nombre'         => $_POST['nombre']    ?? '',
+            'apellidos'      => $_POST['apellidos'] ?? '',
+            'nombre_usuario' => $_POST['usuario']   ?? '',
+            'dni'            => $_POST['dni']       ?? '',
+            'telefono'       => $_POST['telefono']  ?? '',
+            'email'          => $_POST['email']     ?? '',
+            'rol'            => $_POST['rol']       ?? '',
+            'matriculas'     => $matriculas
         ];
 
         if (!$datos['id']) {
@@ -218,7 +218,8 @@ class User extends Controller
             $ok = $model->editUser($datos);
 
             echo json_encode([
-                "success" => (bool)$ok
+                "success" => (bool) $ok,
+                "message" => $ok ? "Cambios guardados correctamente" : "Error al guardar los cambios"
             ]);
 
         } catch (Throwable $e) {
