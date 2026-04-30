@@ -135,14 +135,15 @@ class User extends Controller
 
         // 1. CREATE USER
         $userId = $model->crearUsuario([
-            'nombre'        => $_POST['nombre']     ?? '',
-            'apellidos'     => $_POST['apellidos']  ?? '',
-            'nombre_usuario'=> $_POST['usuario']    ?? '',
-            'contraseña'    => $_POST['contraseña'] ?? '',
-            'dni'           => $_POST['dni']        ?? '',
-            'telefono'      => $_POST['telefono']   ?? '',
-            'email'         => $_POST['email']      ?? '',
-            'rol'           => $_POST['rol']        ?? ''
+            'nombre'          => $_POST['nombre']           ?? '',
+            'apellidos'       => $_POST['apellidos']        ?? '',
+            'nombre_usuario'  => $_POST['usuario']          ?? '',
+            'contraseña'      => $_POST['contraseña']       ?? '',
+            'dni'             => $_POST['dni']              ?? '',
+            'telefono'        => $_POST['telefono']         ?? '',
+            'email'           => $_POST['email']            ?? '',
+            'rol'             => $_POST['rol']              ?? '',
+            'fecha_nacimiento'=> $_POST['fecha_nacimiento'] ?? ''  // ← ADDED
         ]);
 
         if (!$userId) {
@@ -193,15 +194,16 @@ class User extends Controller
         $matriculas = array_values($matriculas);
 
         $datos = [
-            'id'             => $_POST['id']        ?? null,
-            'nombre'         => $_POST['nombre']    ?? '',
-            'apellidos'      => $_POST['apellidos'] ?? '',
-            'nombre_usuario' => $_POST['usuario']   ?? '',
-            'dni'            => $_POST['dni']       ?? '',
-            'telefono'       => $_POST['telefono']  ?? '',
-            'email'          => $_POST['email']     ?? '',
-            'rol'            => $_POST['rol']       ?? '',
-            'matriculas'     => $matriculas
+            'id'              => $_POST['id']              ?? null,
+            'nombre'          => $_POST['nombre']          ?? '',
+            'apellidos'       => $_POST['apellidos']       ?? '',
+            'nombre_usuario'  => $_POST['usuario']         ?? '',
+            'dni'             => $_POST['dni']             ?? '',
+            'telefono'        => $_POST['telefono']        ?? '',
+            'email'           => $_POST['email']           ?? '',
+            'rol'             => $_POST['rol']             ?? '',
+            'fecha_nacimiento'=> $_POST['fecha_nacimiento']?? '',  // ← ADDED
+            'matriculas'      => $matriculas
         ];
 
         if (!$datos['id']) {

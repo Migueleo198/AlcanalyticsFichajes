@@ -202,6 +202,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const form = e.target;
         const data = new FormData(form);
 
+        // FIX: explicitly set fecha_nacimiento (mirrors edit form behaviour)
+        const fechaInput = form.querySelector('[name="fecha_nacimiento"]');
+        if (fechaInput) {
+            data.set('fecha_nacimiento', fechaInput.value?.trim() || '');
+        }
+
         const submitBtn = form.querySelector('button[type="submit"], button:not([type])');
         if (submitBtn) {
             submitBtn.dataset.originalText = submitBtn.textContent;
