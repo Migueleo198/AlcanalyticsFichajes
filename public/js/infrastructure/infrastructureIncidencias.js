@@ -27,7 +27,7 @@ async function loadIncidencias() {
 
 
 // =========================
-// RENDER TABLE (NO BUTTON GAP)
+// RENDER TABLE
 // =========================
 function renderIncidencias(response) {
 
@@ -36,11 +36,15 @@ function renderIncidencias(response) {
 
     lista.innerHTML = '';
 
-    if (response && response.success && response.data.length > 0) {
+    const data = Array.isArray(response)
+        ? response
+        : response?.data || [];
+
+    if (data.length > 0) {
 
         const fragment = document.createDocumentFragment();
 
-        response.data.forEach(incidencia => {
+        data.forEach(incidencia => {
 
             let fecha = incidencia.fecha;
 
@@ -57,6 +61,7 @@ function renderIncidencias(response) {
             tr.innerHTML = `
                 <td>${incidencia.id_incidencia}</td>
                 <td>${incidencia.id_fichaje}</td>
+                <td>${incidencia.nombre_usuario || '-'}</td>
                 <td>${incidencia.mensaje}</td>
                 <td>${incidencia.respuesta || '-'}</td>
 
@@ -72,33 +77,30 @@ function renderIncidencias(response) {
 
                 <td>${fecha || ''}</td>
 
-                <!-- SINGLE CELL, NO SEPARATION -->
                 <td class="text-center">
-                    <button 
-                        class="btn btn-outline-primary btn-sm btn-editar"
+                    <button class="btn btn-outline-primary btn-sm btn-editar"
                         data-bs-toggle="modal"
                         data-bs-target="#editModal"
                         data-id="${incidencia.id_incidencia}"
                         data-fichaje="${incidencia.id_fichaje}"
+                        data-usuario="${incidencia.nombre_usuario || ''}"
                         data-mensaje="${incidencia.mensaje}"
                         data-respuesta="${incidencia.respuesta || ''}"
                         data-estado="${incidencia.estado}"
-                        data-fecha="${incidencia.fecha}"
-                    >
+                        data-fecha="${incidencia.fecha}">
                         <i class="bi bi-pencil-square"></i>
                     </button>
 
-                    <button 
-                        class="btn btn-outline-danger btn-sm btn-eliminar"
+                    <button class="btn btn-outline-danger btn-sm btn-eliminar"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteModal"
                         data-id="${incidencia.id_incidencia}"
                         data-fichaje="${incidencia.id_fichaje}"
+                        data-usuario="${incidencia.nombre_usuario || ''}"
                         data-mensaje="${incidencia.mensaje}"
                         data-respuesta="${incidencia.respuesta || ''}"
                         data-estado="${incidencia.estado}"
-                        data-fecha="${incidencia.fecha}"
-                    >
+                        data-fecha="${incidencia.fecha}">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -112,7 +114,7 @@ function renderIncidencias(response) {
     } else {
         lista.innerHTML = `
             <tr>
-                <td colspan="7" class="text-center text-muted">
+                <td colspan="8" class="text-center text-muted">
                     No hay incidencias registradas
                 </td>
             </tr>
@@ -154,6 +156,11 @@ document.addEventListener("click", (e) => {
 
     modal.querySelector("[name='id']").value = btn.dataset.id;
     modal.querySelector("[name='id_fichaje']").value = btn.dataset.fichaje;
+
+    // NUEVO CAMPO USUARIO (readonly)
+    const usuarioInput = modal.querySelector("[name='usuario']");
+    if (usuarioInput) usuarioInput.value = btn.dataset.usuario;
+
     modal.querySelector("[name='mensaje']").value = btn.dataset.mensaje;
     modal.querySelector("[name='respuesta']").value = btn.dataset.respuesta || '';
     modal.querySelector("[name='estado']").value = btn.dataset.estado;
@@ -173,6 +180,10 @@ document.addEventListener("click", (e) => {
 
     modal.querySelector("[name='id']").value = btn.dataset.id;
     modal.querySelector("[name='id_fichaje']").value = btn.dataset.fichaje;
+
+    const usuarioInput = modal.querySelector("[name='usuario']");
+    if (usuarioInput) usuarioInput.value = btn.dataset.usuario;
+
     modal.querySelector("[name='mensaje']").value = btn.dataset.mensaje;
     modal.querySelector("[name='respuesta']").value = btn.dataset.respuesta || '';
     modal.querySelector("[name='estado']").value = btn.dataset.estado;
