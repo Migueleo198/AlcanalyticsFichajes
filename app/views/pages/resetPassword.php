@@ -34,7 +34,7 @@
                     name="nueva_password"
                     id="nueva_password"
                     required
-                    minlength="6"
+                    minlength="4"
                 >
 
                 <label for="nueva_password">
@@ -51,7 +51,7 @@
                     name="confirma_password"
                     id="confirma_password"
                     required
-                    minlength="6"
+                    minlength="4"
                 >
 
                 <label for="confirma_password">

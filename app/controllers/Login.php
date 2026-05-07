@@ -383,7 +383,7 @@ class Login extends Controller
             }
 
             // Basic password validation
-            if (strlen($nuevaPass) < 6) {
+            if (strlen($nuevaPass) < 4) {
 
                 echo json_encode([
                     'success' => false,
