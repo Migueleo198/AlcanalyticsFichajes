@@ -318,6 +318,45 @@ class UserModel {
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'] > 0;
     }
 
+    public function buscarTokensRecuperacion()
+{
+    $stmt = $this->db->prepare("
+        SELECT *
+        FROM recuperacion_password
+        WHERE usado = 0
+    ");
+
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+    public function getTokenByHash($token)
+{
+    $stmt = $this->db->prepare("
+        SELECT * FROM recuperacion_password
+        WHERE token = :token
+        LIMIT 1
+    ");
+
+    $stmt->execute([':token' => $token]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+public function getTokenByUser($id)
+{
+    $stmt = $this->db->prepare("
+        SELECT * FROM recuperacion_password
+        WHERE id_usuario = :id
+        ORDER BY id DESC
+        LIMIT 1
+    ");
+
+    $stmt->execute([':id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
     // =========================
     // PASSWORD RECOVERY
     // =========================
@@ -336,50 +375,44 @@ class UserModel {
     }
 
     public function guardarTokenRecuperacion($idUsuario, $token, $expira)
-    {
-        try {
-            $stmt = $this->db->prepare("
-                INSERT INTO recuperacion_password
-                    (id_usuario, token, expira_en)
-                VALUES
-                    (:id_usuario, :token, :expira_en)
-            ");
+{
+    try {
+        $stmt = $this->db->prepare("
+            INSERT INTO recuperacion_password
+            (id_usuario, token, expira_en)
+            VALUES (:id_usuario, :token, :expira_en)
+        ");
 
-            return $stmt->execute([
-                ':id_usuario' => $idUsuario,
-                ':token'      => $token,
-                ':expira_en'  => $expira
-            ]);
+        $ok = $stmt->execute([
+            ':id_usuario' => $idUsuario,
+            ':token' => $token,
+            ':expira_en' => $expira
+        ]);
 
-        } catch (PDOException $e) {
-            error_log('[guardarTokenRecuperacion] ' . $e->getMessage());
-            return false;
+        if (!$ok) {
+            error_log(print_r($stmt->errorInfo(), true));
         }
+
+        return $ok;
+
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return false;
     }
+}
 
-    public function buscarTokensRecuperacion()
-    {
-        $stmt = $this->db->prepare("
-            SELECT * FROM recuperacion_password
-            WHERE usado = 0
-        ");
+   public function marcarTokenUsado($token)
+{
+    $stmt = $this->db->prepare("
+        UPDATE recuperacion_password
+        SET usado = 1
+        WHERE token = :token
+    ");
 
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // ── FIX: was missing — marks all tokens for a user as used ───────────
-    public function marcarTokenUsado($idUsuario)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE recuperacion_password
-            SET usado = 1
-            WHERE id_usuario = :id_usuario
-        ");
-
-        return $stmt->execute([':id_usuario' => $idUsuario]);
-    }
+    return $stmt->execute([
+        ':token' => $token
+    ]);
+}
 
     // ── FIX: was missing — saves the new hashed password ─────────────────
     public function actualizarPassword($idUsuario, $nuevaPassword)

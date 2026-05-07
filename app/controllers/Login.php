@@ -27,7 +27,10 @@ class Login extends Controller
 
     public function index()
     {
-        $datos = ["title" => "login"];
+        $datos = [
+            "title" => "login"
+        ];
+
         $this->load_view('login', $datos);
     }
 
@@ -41,51 +44,91 @@ class Login extends Controller
     {
         header('Content-Type: application/json');
 
-        $raw  = file_get_contents("php://input");
-        $data = json_decode($raw, true);
+        try {
 
-        if (!$data) {
-            $data = $_POST;
-        }
+            $raw  = file_get_contents("php://input");
+            $data = json_decode($raw, true);
 
-        $usuario     = $data['usuario']     ?? '';
-        $contrasenya = $data['contrasenya'] ?? '';
+            if (!$data) {
+                $data = $_POST;
+            }
 
-        if (!$usuario || !$contrasenya) {
-            echo json_encode(['success' => false, 'message' => 'Datos vacíos']);
-            exit;
-        }
+            $usuario     = trim($data['usuario'] ?? '');
+            $contrasenya = $data['contrasenya'] ?? '';
 
-        $user = $this->userModel->login($usuario, $contrasenya);
+            if (!$usuario || !$contrasenya) {
 
-        if ($user) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Datos vacíos'
+                ]);
+
+                exit;
+            }
+
+            $user = $this->userModel->login(
+                $usuario,
+                $contrasenya
+            );
+
+            if (!$user) {
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Usuario o contraseña incorrectos'
+                ]);
+
+                exit;
+            }
+
+            // Regenerate session ID for security
+            session_regenerate_id(true);
+
             $_SESSION['id_usuario'] = $user['id_usuario'];
             $_SESSION['nombre']     = $user['nombre'];
             $_SESSION['rol']        = $user['rol'];
 
-            echo json_encode(['success' => true, 'usuario' => $user['nombre']]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Usuario o contraseña incorrectos']);
-        }
+            echo json_encode([
+                'success' => true,
+                'usuario' => $user['nombre']
+            ]);
 
-        exit;
+            exit;
+
+        } catch (Exception $e) {
+
+            error_log($e->getMessage());
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno'
+            ]);
+
+            exit;
+        }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | VIEW RECUPERACIÓN
+    | RECOVERY VIEW
     |--------------------------------------------------------------------------
     */
 
     public function recuperacion()
     {
-        $datos = ["title" => "Recuperación de contraseña"];
-        $this->load_view('recuperacionContraseña', $datos);
+        $datos = [
+            "title" => "Recuperación de contraseña"
+        ];
+
+        $this->load_view(
+            'recuperacionContraseña',
+            $datos
+        );
     }
 
     /*
     |--------------------------------------------------------------------------
-    | ENVIAR EMAIL RECUPERACIÓN
+    | SEND RECOVERY EMAIL
     |--------------------------------------------------------------------------
     */
 
@@ -93,29 +136,50 @@ class Login extends Controller
     {
         header('Content-Type: application/json');
 
-        // ── FIX: accept both JSON body and classic form POST ──────────────
-        $raw  = file_get_contents("php://input");
-        $data = json_decode($raw, true);
-        if (!$data) {
-            $data = $_POST;
-        }
+        try {
 
-        $email = trim($data['usuario_email'] ?? '');
+            $email = trim(
+                $_POST['usuario_email'] ?? ''
+            );
 
-        if (!$email) {
-            echo json_encode(['success' => false, 'message' => 'Email vacío']);
-            exit;
-        }
+            if (!$email) {
 
-        $usuario = $this->userModel->buscarPorEmail($email);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Email vacío'
+                ]);
 
-        if ($usuario) {
+                exit;
+            }
 
-            // Raw token goes in the URL — only the hash is stored in the DB
-            $token     = bin2hex(random_bytes(32));
-            $tokenHash = password_hash($token, PASSWORD_DEFAULT);
-            $expira    = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+            $usuario = $this->userModel->buscarPorEmail($email);
 
+            // Always return same response
+            if (!$usuario) {
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Si el correo existe, recibirás instrucciones'
+                ]);
+
+                exit;
+            }
+
+            // Generate raw token
+            $token = bin2hex(random_bytes(32));
+
+            // Hash for DB
+            $tokenHash = password_hash(
+                $token,
+                PASSWORD_DEFAULT
+            );
+
+            $expira = date(
+                'Y-m-d H:i:s',
+                strtotime('+15 minutes')
+            );
+
+            // Save token
             $ok = $this->userModel->guardarTokenRecuperacion(
                 $usuario['id_usuario'],
                 $tokenHash,
@@ -123,128 +187,157 @@ class Login extends Controller
             );
 
             if (!$ok) {
-                echo json_encode(['success' => false, 'message' => 'Error guardando token']);
-                exit;
+                throw new Exception('Error guardando token');
             }
 
-            $link = RUTA_URL . "/login/resetPassword?token=" . urlencode($token);
+            // URL with RAW token
+            $link = RUTA_URL .
+                "/login/resetPassword?token=" .
+                urlencode($token);
 
-            try {
-                $this->enviarCorreo($usuario['email'], $link);
-            } catch (\Exception $e) {
-                // Log real SMTP details server-side; never expose internals to the client
-                error_log('[enviarRecuperacion] SMTP error: ' . $e->getMessage());
-                echo json_encode(['success' => false, 'message' => 'Error enviando correo. Contacta con soporte.']);
-                exit;
-            }
+            // Send email
+            $this->enviarCorreo(
+                $usuario['email'],
+                $link
+            );
+
+        } catch (Exception $e) {
+
+            error_log($e->getMessage());
+
+            // Never expose errors
         }
 
-        // Generic response: do not reveal whether the email exists in the DB
         echo json_encode([
             'success' => true,
             'message' => 'Si el correo existe, recibirás instrucciones'
         ]);
+
         exit;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | ENVÍO EMAIL
+    | SEND EMAIL
     |--------------------------------------------------------------------------
     */
 
     private function enviarCorreo($destinatario, $link)
     {
-        $mail = new PHPMailer(true); // true = throw exceptions on error
+        $mail = new PHPMailer(true);
 
-        // No debug output — would corrupt JSON responses
-        $mail->SMTPDebug = 0;
+        try {
 
-        $mail->isSMTP();
-        $mail->Host     = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'miguel.alcanalytics@gmail.com';
-        $mail->Password = 'qquarvcvwmykndaw'; // Gmail App Password
+            $mail->SMTPDebug = 0;
 
-        // ── FIX 1: use port 587 + STARTTLS ──────────────────────────────
-        // Port 465/SMTPS is blocked on many hosting providers.
-        // 587/STARTTLS is the modern standard and is almost never blocked.
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+            $mail->isSMTP();
 
-        // ── FIX 2: disable SSL peer certificate verification ─────────────
-        // Servers with outdated CA bundles fail silently with
-        // "SMTP connect() failed" due to TLS handshake errors.
-        $mail->SMTPOptions = [
-            'ssl' => [
-                'verify_peer'       => false,
-                'verify_peer_name'  => false,
-                'allow_self_signed' => true,
-            ]
-        ];
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'miguel.alcanalytics@gmail.com';
+            $mail->Password   = 'qquarvcvwmykndaw';
 
-        $mail->setFrom('miguel.alcanalytics@gmail.com', 'Soporte');
-        $mail->addAddress($destinatario);
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
-        $mail->isHTML(true);
-        $mail->CharSet = 'UTF-8';
-        $mail->Subject = 'Recuperación de contraseña';
-        $mail->Body    = "
-            <h2>Recuperación de contraseña</h2>
-            <p>Haz click en el siguiente enlace para restablecer tu contraseña:</p>
-            <a href='{$link}'>Recuperar contraseña</a>
-            <p>Este enlace expira en 15 minutos.</p>
-        ";
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer'       => false,
+                    'verify_peer_name'  => false,
+                    'allow_self_signed' => true,
+                ]
+            ];
 
-        // Throws Exception on failure — the caller catches and logs it
-        $mail->send();
+            $mail->setFrom(
+                'miguel.alcanalytics@gmail.com',
+                'Soporte'
+            );
 
-        return true;
+            $mail->addAddress($destinatario);
+
+            $mail->isHTML(true);
+            $mail->CharSet = 'UTF-8';
+
+            $mail->Subject = 'Recuperación de contraseña';
+
+            $mail->Body = "
+                <h2>Recuperación de contraseña</h2>
+
+                <p>
+                    Haz click en el siguiente enlace para
+                    restablecer tu contraseña:
+                </p>
+
+                <p>
+                    <a href='{$link}'>
+                        Recuperar contraseña
+                    </a>
+                </p>
+
+                <p>
+                    Este enlace expira en 15 minutos.
+                </p>
+            ";
+
+            return $mail->send();
+
+        } catch (Exception $e) {
+
+            error_log($e->getMessage());
+
+            return false;
+        }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | RESET PASSWORD — validate token, show the new-password form
+    | RESET PASSWORD VIEW
     |--------------------------------------------------------------------------
     */
 
     public function resetPassword()
     {
-        $token = $_GET['token'] ?? '';
+        $token = trim($_GET['token'] ?? '');
 
         if (!$token) {
             die('Token inválido');
         }
 
-        $registros = $this->userModel->buscarTokensRecuperacion();
-        $valido    = false;
-        $usuarioId = null;
+        // Search valid token
+        $tokens = $this->userModel->buscarTokensRecuperacion();
 
-        foreach ($registros as $item) {
-            if (password_verify($token, $item['token'])) {
-                if (strtotime($item['expira_en']) > time() && $item['usado'] == 0) {
-                    $valido    = true;
-                    $usuarioId = $item['id_usuario'];
-                    break;
-                }
+        $registroValido = null;
+
+        foreach ($tokens as $registro) {
+
+            if (
+                password_verify($token, $registro['token'])
+                && strtotime($registro['expira_en']) > time()
+                && (int)$registro['usado'] === 0
+            ) {
+                $registroValido = $registro;
+                break;
             }
         }
 
-        if (!$valido) {
+        if (!$registroValido) {
             die('Token inválido o expirado');
         }
 
         $datos = [
-            'usuarioId' => $usuarioId,
+            'usuarioId' => $registroValido['id_usuario'],
             'token'     => $token
         ];
 
-        $this->load_view('nuevaPassword', $datos);
+        $this->load_view(
+            'resetPassword',
+            $datos
+        );
     }
 
     /*
     |--------------------------------------------------------------------------
-    | GUARDAR NUEVA PASSWORD — called by the nuevaPassword view form
+    | SAVE NEW PASSWORD
     |--------------------------------------------------------------------------
     */
 
@@ -252,61 +345,116 @@ class Login extends Controller
     {
         header('Content-Type: application/json');
 
-        $raw  = file_get_contents("php://input");
-        $data = json_decode($raw, true);
-        if (!$data) {
-            $data = $_POST;
-        }
+        try {
 
-        $token        = $data['token']             ?? '';
-        $usuarioId    = (int) ($data['usuarioId']  ?? 0);
-        $nuevaPass    = $data['nueva_password']    ?? '';
-        $confirmaPass = $data['confirma_password'] ?? '';
+            $data = json_decode(
+                file_get_contents("php://input"),
+                true
+            ) ?? $_POST;
 
-        if (!$token || !$usuarioId || !$nuevaPass) {
-            echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
-            exit;
-        }
+            $token        = trim($data['token'] ?? '');
+            $usuarioId    = (int)($data['usuarioId'] ?? 0);
+            $nuevaPass    = $data['nueva_password'] ?? '';
+            $confirmaPass = $data['confirma_password'] ?? '';
 
-        if ($nuevaPass !== $confirmaPass) {
-            echo json_encode(['success' => false, 'message' => 'Las contraseñas no coinciden']);
-            exit;
-        }
-
-        // Re-validate the token before actually changing the password
-        $registros = $this->userModel->buscarTokensRecuperacion();
-        $valido    = false;
-
-        foreach ($registros as $item) {
             if (
-                (int) $item['id_usuario'] === $usuarioId
-                && password_verify($token, $item['token'])
-                && strtotime($item['expira_en']) > time()
-                && $item['usado'] == 0
+                !$token ||
+                !$usuarioId ||
+                !$nuevaPass ||
+                !$confirmaPass
             ) {
-                $valido = true;
-                break;
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Datos incompletos'
+                ]);
+
+                exit;
             }
-        }
 
-        if (!$valido) {
-            echo json_encode(['success' => false, 'message' => 'Token inválido o expirado']);
+            if ($nuevaPass !== $confirmaPass) {
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Las contraseñas no coinciden'
+                ]);
+
+                exit;
+            }
+
+            // Basic password validation
+            if (strlen($nuevaPass) < 6) {
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'La contraseña es demasiado corta'
+                ]);
+
+                exit;
+            }
+
+            // Search latest token
+            $registro = $this->userModel->getTokenByUser(
+                $usuarioId
+            );
+
+            if (
+                !$registro ||
+                !password_verify($token, $registro['token']) ||
+                strtotime($registro['expira_en']) < time() ||
+                (int)$registro['usado'] === 1
+            ) {
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Token inválido'
+                ]);
+
+                exit;
+            }
+
+            // Update password
+            $ok = $this->userModel->actualizarPassword(
+                $usuarioId,
+                $nuevaPass
+            );
+
+            if (!$ok) {
+
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error actualizando contraseña'
+                ]);
+
+                exit;
+            }
+
+            // Mark token as used
+            $this->userModel->marcarTokenUsado(
+                $registro['token']
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Contraseña actualizada'
+            ]);
+
+            exit;
+
+        } catch (Exception $e) {
+
+            error_log($e->getMessage());
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error interno'
+            ]);
+
             exit;
         }
-
-        $ok = $this->userModel->actualizarPassword($usuarioId, $nuevaPass);
-
-        if (!$ok) {
-            echo json_encode(['success' => false, 'message' => 'Error actualizando contraseña']);
-            exit;
-        }
-
-        // Mark ALL tokens for this user as used so none can be reused
-        $this->userModel->marcarTokenUsado($usuarioId);
-
-        echo json_encode(['success' => true, 'message' => 'Contraseña actualizada correctamente']);
-        exit;
     }
+
+ 
 
     /*
     |--------------------------------------------------------------------------
@@ -320,7 +468,24 @@ class Login extends Controller
             session_start();
         }
 
-        session_unset();
+        $_SESSION = [];
+
+        // Delete session cookie
+        if (ini_get("session.use_cookies")) {
+
+            $params = session_get_cookie_params();
+
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+
         session_destroy();
 
         header("Location: /login");
