@@ -45,7 +45,7 @@ function renderIncidencias(response) {
         const fragment = document.createDocumentFragment();
 
         data.forEach(incidencia => {
-
+            if(incidencia.nombre_usuario === USER_NOMBRE || USER_ROL === 'Administrador') {
             let fecha = incidencia.fecha;
 
             if (fecha) {
@@ -107,6 +107,7 @@ function renderIncidencias(response) {
             `;
 
             fragment.appendChild(tr);
+                }
         });
 
         lista.appendChild(fragment);

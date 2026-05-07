@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   </div>
                   <div class="mb-2">
                     <label>Rol</label>
-                    <select name="rol" class="form-select">
+                    <select name="rol" class="form-select" disabled>
                       <option value="Administrador">Administrador</option>
                       <option value="Trabajador">Trabajador</option>
                     </select>

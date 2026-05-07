@@ -225,6 +225,7 @@
 <script>
   const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
   const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
+  const USER_NOMBRE = "<?= $_SESSION['nombre'] ?? '' ?>";
 </script>
 
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureIncidencias.js"></script>
