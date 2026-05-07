@@ -15,7 +15,7 @@
             <button type="submit">Iniciar Sesión</button>
         </form>
         <div class="help-text">
-            <a href="https://fichaje.alcanalytics.com/Recuperar_Contrasenya">¿Olvidaste tu contraseña?</a>
+            <a href="<?= RUTA_URL ?>/Login/recuperacion">¿Olvidaste tu contraseña?</a>
         </div>
     </div>
 </div>

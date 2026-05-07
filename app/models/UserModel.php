@@ -6,11 +6,11 @@ class UserModel {
 
     public function __construct() {
 
-        $host = 'localhost';
-        $port = '3306';
+        $host   = 'localhost';
+        $port   = '3306';
         $dbname = 'Fichajes2';
-        $user = 'admin_fichajes2';
-        $pass = '6%DfdlBrud5$jVg8';
+        $user   = 'admin_fichajes2';
+        $pass   = '6%DfdlBrud5$jVg8';
 
         try {
             $this->db = new PDO(
@@ -24,7 +24,7 @@ class UserModel {
         } catch (PDOException $e) {
             die(json_encode([
                 "success" => false,
-                "error" => "DB connection error"
+                "error"   => "DB connection error"
             ]));
         }
     }
@@ -35,8 +35,8 @@ class UserModel {
     public function login($usuario, $contrasenya) {
 
         $stmt = $this->db->prepare("
-            SELECT * FROM Usuario 
-            WHERE nombre_usuario = :usuario 
+            SELECT * FROM Usuario
+            WHERE nombre_usuario = :usuario
             LIMIT 1
         ");
 
@@ -52,6 +52,7 @@ class UserModel {
             return $user;
         }
 
+        // Plain-text legacy password — upgrade hash on the fly
         if ($contrasenya === $storedPassword) {
             $this->upgradePasswordHash($user['id_usuario'], $contrasenya);
             return $user;
@@ -63,14 +64,14 @@ class UserModel {
     private function upgradePasswordHash($id, $password) {
 
         $stmt = $this->db->prepare("
-            UPDATE Usuario 
-            SET contraseña = :password 
+            UPDATE Usuario
+            SET contraseña = :password
             WHERE id_usuario = :id
         ");
 
         $stmt->execute([
             ':password' => password_hash($password, PASSWORD_DEFAULT),
-            ':id' => $id
+            ':id'       => $id
         ]);
     }
 
@@ -80,7 +81,7 @@ class UserModel {
     public function getUsuarios() {
 
         $stmt = $this->db->prepare("
-            SELECT 
+            SELECT
                 id_usuario,
                 nombre,
                 apellidos,
@@ -105,10 +106,7 @@ class UserModel {
                 WHERE id_usuario = :id
             ");
 
-            $stmtMat->execute([
-                ':id' => $usuario['id_usuario']
-            ]);
-
+            $stmtMat->execute([':id' => $usuario['id_usuario']]);
             $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
@@ -121,7 +119,7 @@ class UserModel {
     public function getUsuarioById($id) {
 
         $stmt = $this->db->prepare("
-            SELECT 
+            SELECT
                 id_usuario,
                 nombre,
                 apellidos,
@@ -148,7 +146,6 @@ class UserModel {
         ");
 
         $stmtMat->execute([':id' => $id]);
-
         $usuario['matriculas'] = $stmtMat->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         return $usuario;
@@ -160,26 +157,25 @@ class UserModel {
     public function crearUsuario($datos) {
 
         $stmt = $this->db->prepare("
-            INSERT INTO Usuario 
+            INSERT INTO Usuario
             (nombre, apellidos, nombre_usuario, contraseña, dni, telefono, email, rol, fecha_nacimiento)
             VALUES (:nombre, :apellidos, :usuario, :password, :dni, :telefono, :email, :rol, :fecha_nacimiento)
         ");
 
         $stmt->execute([
-            ':nombre' => $datos['nombre'] ?? '',
-            ':apellidos' => $datos['apellidos'] ?? '',
-            ':usuario' => $datos['usuario'] ?? $datos['nombre_usuario'] ?? '',
-            ':password' => password_hash($datos['contraseña'] ?? '', PASSWORD_DEFAULT),
-            ':dni' => $datos['dni'] ?? '',
-            ':telefono' => $datos['telefono'] ?? '',
-            ':email' => $datos['email'] ?? '',
-            ':rol' => $datos['rol'] ?? '',
+            ':nombre'          => $datos['nombre']          ?? '',
+            ':apellidos'       => $datos['apellidos']       ?? '',
+            ':usuario'         => $datos['usuario']         ?? $datos['nombre_usuario'] ?? '',
+            ':password'        => password_hash($datos['contraseña'] ?? '', PASSWORD_DEFAULT),
+            ':dni'             => $datos['dni']             ?? '',
+            ':telefono'        => $datos['telefono']        ?? '',
+            ':email'           => $datos['email']           ?? '',
+            ':rol'             => $datos['rol']             ?? '',
             ':fecha_nacimiento' => !empty($datos['fecha_nacimiento']) ? $datos['fecha_nacimiento'] : null
         ]);
 
         $id_usuario = $this->db->lastInsertId();
 
-        // MATRICULAS
         if (!empty($datos['matriculas'])) {
 
             $matriculas = is_array($datos['matriculas'])
@@ -187,10 +183,8 @@ class UserModel {
                 : explode(',', $datos['matriculas']);
 
             foreach ($matriculas as $matricula) {
-
                 $matricula = trim($matricula);
                 if ($matricula === '') continue;
-
                 $this->addMatricula($id_usuario, $matricula);
             }
         }
@@ -199,7 +193,7 @@ class UserModel {
     }
 
     // =========================
-    // EDIT USER (SAFE + FIXED)
+    // EDIT USER (SAFE)
     // =========================
     public function editUser($datos) {
 
@@ -208,35 +202,33 @@ class UserModel {
 
             $stmt = $this->db->prepare("
                 UPDATE Usuario SET
-                    nombre = :nombre,
-                    apellidos = :apellidos,
-                    nombre_usuario = :usuario,
-                    dni = :dni,
-                    telefono = :telefono,
-                    email = :email,
-                    rol = :rol,
+                    nombre           = :nombre,
+                    apellidos        = :apellidos,
+                    nombre_usuario   = :usuario,
+                    dni              = :dni,
+                    telefono         = :telefono,
+                    email            = :email,
+                    rol              = :rol,
                     fecha_nacimiento = :fecha_nacimiento
                 WHERE id_usuario = :id
             ");
 
             $stmt->execute([
-                ':id' => $datos['id'] ?? 0,
-                ':nombre' => $datos['nombre'] ?? '',
-                ':apellidos' => $datos['apellidos'] ?? '',
-                ':usuario' => $datos['usuario'] ?? $datos['nombre_usuario'] ?? '',
-                ':dni' => $datos['dni'] ?? '',
-                ':telefono' => $datos['telefono'] ?? '',
-                ':email' => $datos['email'] ?? '',
-                ':rol' => $datos['rol'] ?? '',
+                ':id'              => $datos['id']       ?? 0,
+                ':nombre'          => $datos['nombre']   ?? '',
+                ':apellidos'       => $datos['apellidos'] ?? '',
+                ':usuario'         => $datos['usuario']  ?? $datos['nombre_usuario'] ?? '',
+                ':dni'             => $datos['dni']      ?? '',
+                ':telefono'        => $datos['telefono'] ?? '',
+                ':email'           => $datos['email']    ?? '',
+                ':rol'             => $datos['rol']      ?? '',
                 ':fecha_nacimiento' => !empty($datos['fecha_nacimiento']) ? $datos['fecha_nacimiento'] : null
             ]);
 
-            // DELETE OLD MATRICULAS
             $this->db->prepare("
                 DELETE FROM matriculas WHERE id_usuario = :id
             ")->execute([':id' => $datos['id']]);
 
-            // INSERT NEW
             if (!empty($datos['matriculas'])) {
 
                 $matriculas = is_array($datos['matriculas'])
@@ -249,31 +241,21 @@ class UserModel {
                 ");
 
                 foreach ($matriculas as $matricula) {
-
                     $matricula = trim($matricula);
                     if ($matricula === '') continue;
-
                     $stmtMat->execute([
                         ':id_usuario' => $datos['id'],
-                        ':matricula' => $matricula
+                        ':matricula'  => $matricula
                     ]);
                 }
             }
 
             $this->db->commit();
-
-            return [
-                "success" => true
-            ];
+            return ["success" => true];
 
         } catch (Exception $e) {
-
             $this->db->rollBack();
-
-            return [
-                "success" => false,
-                "error" => $e->getMessage()
-            ];
+            return ["success" => false, "error" => $e->getMessage()];
         }
     }
 
@@ -283,25 +265,18 @@ class UserModel {
     public function removeUser($id) {
 
         try {
-
             $this->db->prepare("
                 DELETE FROM matriculas WHERE id_usuario = :id
             ")->execute([':id' => $id]);
 
-            $stmt = $this->db->prepare("
+            $this->db->prepare("
                 DELETE FROM Usuario WHERE id_usuario = :id
-            ");
-
-            $stmt->execute([':id' => $id]);
+            ")->execute([':id' => $id]);
 
             return ["success" => true];
 
         } catch (Exception $e) {
-
-            return [
-                "success" => false,
-                "error" => $e->getMessage()
-            ];
+            return ["success" => false, "error" => $e->getMessage()];
         }
     }
 
@@ -317,15 +292,14 @@ class UserModel {
 
         return $stmt->execute([
             ':id_usuario' => $id_usuario,
-            ':matricula' => $matricula
+            ':matricula'  => $matricula
         ]);
     }
 
     public function deleteMatricula($id_matricula) {
 
         $stmt = $this->db->prepare("
-            DELETE FROM matriculas
-            WHERE id_matricula = :id
+            DELETE FROM matriculas WHERE id_matricula = :id
         ");
 
         return $stmt->execute([':id' => $id_matricula]);
@@ -342,5 +316,83 @@ class UserModel {
         $stmt->execute([':matricula' => $matricula]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'] > 0;
+    }
+
+    // =========================
+    // PASSWORD RECOVERY
+    // =========================
+    public function buscarPorEmail($email)
+    {
+        $stmt = $this->db->prepare("
+            SELECT * FROM Usuario
+            WHERE email = :email
+            LIMIT 1
+        ");
+
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function guardarTokenRecuperacion($idUsuario, $token, $expira)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO recuperacion_password
+                    (id_usuario, token, expira_en)
+                VALUES
+                    (:id_usuario, :token, :expira_en)
+            ");
+
+            return $stmt->execute([
+                ':id_usuario' => $idUsuario,
+                ':token'      => $token,
+                ':expira_en'  => $expira
+            ]);
+
+        } catch (PDOException $e) {
+            error_log('[guardarTokenRecuperacion] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function buscarTokensRecuperacion()
+    {
+        $stmt = $this->db->prepare("
+            SELECT * FROM recuperacion_password
+            WHERE usado = 0
+        ");
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ── FIX: was missing — marks all tokens for a user as used ───────────
+    public function marcarTokenUsado($idUsuario)
+    {
+        $stmt = $this->db->prepare("
+            UPDATE recuperacion_password
+            SET usado = 1
+            WHERE id_usuario = :id_usuario
+        ");
+
+        return $stmt->execute([':id_usuario' => $idUsuario]);
+    }
+
+    // ── FIX: was missing — saves the new hashed password ─────────────────
+    public function actualizarPassword($idUsuario, $nuevaPassword)
+    {
+        $stmt = $this->db->prepare("
+            UPDATE Usuario
+            SET contraseña = :password
+            WHERE id_usuario = :id
+        ");
+
+        return $stmt->execute([
+            ':password' => password_hash($nuevaPassword, PASSWORD_DEFAULT),
+            ':id'       => $idUsuario
+        ]);
     }
 }

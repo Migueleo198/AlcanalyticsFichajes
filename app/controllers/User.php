@@ -224,6 +224,8 @@ class User extends Controller
                 "message" => $ok ? "Cambios guardados correctamente" : "Error al guardar los cambios"
             ]);
 
+            
+
         } catch (Throwable $e) {
             http_response_code(500);
 
