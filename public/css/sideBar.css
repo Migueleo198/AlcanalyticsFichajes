@@ -1,7 +1,144 @@
-.sidebar [data-bs-toggle="collapse"] .bi-chevron-down {
-  transition: transform 0.3s ease;
+/* ================================
+   COLLAPSE ICON ROTATION
+================================ */
+
+.sidebar a[data-bs-toggle="collapse"] .bi-chevron-down {
+    transition: transform 0.3s ease;
 }
 
-.sidebar [data-bs-toggle="collapse"][aria-expanded="true"] .bi-chevron-down {
-  transform: rotate(180deg);
+.sidebar a[data-bs-toggle="collapse"][aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* ================================
+   DESKTOP SIDEBAR
+================================ */
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid #e5e7eb;
+}
+
+/* ================================
+   LINKS
+================================ */
+
+.sidebar a,
+.sidebar-mobile a {
+    display: block;
+    padding: 12px 20px;
+    margin: 4px 8px;
+    border-radius: 8px;
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sidebar a:hover,
+.sidebar-mobile a:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.sidebar a.active,
+.sidebar-mobile a.active {
+    background: #2563eb;
+    color: white;
+}
+
+/* ================================
+   TEXT
+================================ */
+
+.sidebar h4,
+.offcanvas-title {
+    color: #111827;
+}
+
+/* ================================
+   CONTENT OFFSET
+================================ */
+
+.main-content,
+.content,
+main {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+}
+
+/* ================================
+   MOBILE TOPBAR
+================================ */
+
+.mobile-topbar {
+    display: none;
+}
+
+@media (max-width: 991px) {
+
+    .sidebar {
+        display: none !important;
+    }
+
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: #ffffff;
+        padding: 0 16px;
+        z-index: 1040;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mobile-topbar button {
+        border: none;
+        background: transparent;
+        font-size: 1.5rem;
+        color: #111827;
+    }
+
+    .main-content,
+    .content,
+    main {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 60px;
+    }
+}
+
+/* ================================
+   OFFCANVAS (WHITE FIX)
+================================ */
+
+.offcanvas {
+    background: #ffffff !important;
+}
+
+.offcanvas-body {
+    background: #ffffff !important;
+}
+
+/* mobile links */
+.sidebar-mobile a {
+    color: #374151;
+}
+
+.sidebar-mobile a:hover {
+    background: #f3f4f6;
 }

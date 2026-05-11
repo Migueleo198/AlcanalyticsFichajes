@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   loadFichajes();
-
 });
 
 // =========================
@@ -9,89 +7,163 @@ document.addEventListener("DOMContentLoaded", () => {
 // =========================
 async function loadFichajes() {
 
+  const lista = document.getElementById("lista");
+
+  if (!lista) {
+    console.error("No existe #lista");
+    return;
+  }
+
+  lista.innerHTML = `
+    <tr>
+      <td colspan="7" class="text-center">
+        Cargando fichajes...
+      </td>
+    </tr>
+  `;
+
   try {
 
     const res = await fetch(RUTA_URL + '/Fichaje/listFichajes');
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
     const text = await res.text();
 
-    //console.log("Respuesta RAW:", text);
+    console.log("Respuesta RAW:", text);
 
     let data;
 
     try {
+
       data = JSON.parse(text);
+      console.log("JSON PARSEADO:", data);
+
     } catch (e) {
+
       console.error("NO ES JSON:", text);
-      return;
-    }
 
-    const lista = document.getElementById("lista");
+      lista.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-danger text-center">
+            Error: el servidor no devolvió JSON válido
+          </td>
+        </tr>
+      `;
 
-    if (!lista) {
-      console.error("No existe #lista");
       return;
     }
 
     lista.innerHTML = "";
 
-    if (data.status === "success") {
+    // =========================
+    // VALIDAR RESPUESTA
+    // =========================
+    if (
+      (data.success || data.status === "success") &&
+      Array.isArray(data.data)
+    ) {
+
+      if (data.data.length === 0) {
+
+        lista.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center">
+              No hay fichajes
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
 
       data.data.forEach((f, index) => {
 
         const tr = document.createElement("tr");
 
+        const estadoClass =
+          f.estado === 'cerrado' ? 'bg-success' :
+          f.estado === 'abierto' ? 'bg-primary' :
+          f.estado === 'incidencia' ? 'bg-danger' :
+          'bg-secondary';
+
         tr.innerHTML = `
           <td>${index + 1}</td>
-          <td>${f.nombre} ${f.apellidos}</td>
-          <td>${f.fecha}</td>
-          <td>${f.hora_entrada ?? '-'}</td>
-          <td>${f.hora_salida ?? '-'}</td>
 
           <td>
-            <span class="badge ${
-              f.estado === 'cerrado' ? 'bg-success' :
-              f.estado === 'abierto' ? 'bg-primary' :
-              f.estado === 'incidencia' ? 'bg-danger' :
-              'bg-secondary'
-            }">
-              ${f.estado}
+            ${(f.nombre || '')} ${(f.apellidos || '')}
+          </td>
+
+          <td>${f.fecha || '-'}</td>
+
+          <td>${f.hora_entrada || '-'}</td>
+
+          <td>${f.hora_salida || '-'}</td>
+
+          <td>
+            <span class="badge ${estadoClass}">
+              ${f.estado || 'desconocido'}
             </span>
           </td>
 
-          <td>
+          <td class="d-flex gap-2">
+
             <button 
               class="btn btn-outline-primary btn-sm btn-incidencia"
-              data-bs-toggle="modal" 
+              data-bs-toggle="modal"
               data-bs-target="#incidenciaModal"
-              data-fichaje="${f.id_fichaje}"
-              data-nombre="${f.nombre} ${f.apellidos}"
+              data-fichaje="${f.id_fichaje || ''}"
+              data-nombre="${(f.nombre || '')} ${(f.apellidos || '')}"
             >
               Añadir Incidencia
             </button>
 
             <button 
               class="btn btn-outline-secondary btn-sm btn-ver-incidencias"
-              data-bs-toggle="modal" 
+              data-bs-toggle="modal"
               data-bs-target="#verIncidenciaModal"
-              data-fichaje="${f.id_fichaje}"
+              data-fichaje="${f.id_fichaje || ''}"
             >
               Ver Incidencias
             </button>
+
           </td>
         `;
 
         lista.appendChild(tr);
       });
-      
 
     } else {
-      lista.innerHTML = `<tr><td colspan="7">No hay fichajes</td></tr>`;
+
+      console.warn("Respuesta inesperada:", data);
+
+      lista.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center text-muted">
+            No hay fichajes disponibles
+          </td>
+        </tr>
+      `;
     }
 
   } catch (err) {
+
     console.error("Fetch error:", err);
+
+    lista.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-danger text-center">
+          Error cargando fichajes
+        </td>
+      </tr>
+    `;
+
+  } finally {
+
+    document.dispatchEvent(new Event('tableReady'));
   }
-   document.dispatchEvent(new Event('tableReady'));
 }
 
 
@@ -101,15 +173,29 @@ async function loadFichajes() {
 document.addEventListener('click', function (e) {
 
   const btn = e.target.closest('.btn-incidencia');
+
   if (!btn) return;
 
-  document.getElementById('inc_usuario').value = btn.dataset.nombre;
-  document.getElementById('inc_id_fichaje').value = btn.dataset.fichaje;
+  const usuarioInput = document.getElementById('inc_usuario');
+  const fichajeInput = document.getElementById('inc_id_fichaje');
+  const fechaInput = document.querySelector('[name="fecha"]');
 
-  const now = new Date();
-  const formatted = now.toISOString().slice(0, 16);
-  document.querySelector('[name="fecha"]').value = formatted;
+  if (usuarioInput) {
+    usuarioInput.value = btn.dataset.nombre || '';
+  }
 
+  if (fichajeInput) {
+    fichajeInput.value = btn.dataset.fichaje || '';
+  }
+
+  if (fechaInput) {
+
+    const now = new Date();
+
+    const formatted = now.toISOString().slice(0, 16);
+
+    fechaInput.value = formatted;
+  }
 });
 
 
@@ -119,9 +205,11 @@ document.addEventListener('click', function (e) {
 document.addEventListener('click', async function (e) {
 
   const btn = e.target.closest('.btn-ver-incidencias');
+
   if (!btn) return;
 
   const idFichaje = btn.dataset.fichaje;
+
   const contenedor = document.getElementById('listaIncidencias');
 
   if (!contenedor) {
@@ -129,28 +217,51 @@ document.addEventListener('click', async function (e) {
     return;
   }
 
-  contenedor.innerHTML = `<div class="text-center">Cargando...</div>`;
+  contenedor.innerHTML = `
+    <div class="text-center">
+      Cargando incidencias...
+    </div>
+  `;
 
   try {
 
-    const res = await fetch(`${RUTA_URL}/incidencias/getByFichaje?id=${idFichaje}`);
+    const res = await fetch(
+      `${RUTA_URL}/incidencias/getByFichaje?id=${idFichaje}`
+    );
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
     const text = await res.text();
+
+    console.log("RAW incidencias:", text);
 
     let data;
 
     try {
+
       data = JSON.parse(text);
+      console.log("JSON incidencias:", data);
+
     } catch (e) {
+
       console.error("NO ES JSON incidencias:", text);
+
       contenedor.innerHTML = `
         <div class="text-danger text-center">
           Error de formato en servidor
         </div>
       `;
+
       return;
     }
 
-    if (data.success && data.data.length > 0) {
+    if (
+      data.success &&
+      Array.isArray(data.data) &&
+      data.data.length > 0
+    ) {
 
       let html = `
         <table class="table table-sm table-striped">
@@ -167,29 +278,42 @@ document.addEventListener('click', async function (e) {
 
       data.data.forEach(inc => {
 
-        let fecha = inc.fecha 
-          ? inc.fecha.replace('T', ' ').substring(0, 16) 
-          : '';
+        const estadoClass =
+          inc.estado === 'resuelto'
+            ? 'bg-success'
+            : inc.estado === 'pendiente'
+            ? 'bg-warning'
+            : 'bg-secondary';
+
+        let fecha = '-';
+
+        if (inc.fecha) {
+          fecha = inc.fecha.replace('T', ' ').substring(0, 16);
+        }
 
         html += `
           <tr>
-            <td>${inc.mensaje}</td>
+
+            <td>${inc.mensaje || '-'}</td>
+
             <td>${inc.respuesta || '-'}</td>
+
             <td>
-              <span class="badge ${
-                inc.estado === 'resuelto' ? 'bg-success' :
-                inc.estado === 'pendiente' ? 'bg-warning' :
-                'bg-secondary'
-              }">
-                ${inc.estado}
+              <span class="badge ${estadoClass}">
+                ${inc.estado || '-'}
               </span>
             </td>
+
             <td>${fecha}</td>
+
           </tr>
         `;
       });
 
-      html += `</tbody></table>`;
+      html += `
+          </tbody>
+        </table>
+      `;
 
       contenedor.innerHTML = html;
 
@@ -204,7 +328,7 @@ document.addEventListener('click', async function (e) {
 
   } catch (err) {
 
-    console.error(err);
+    console.error("Error incidencias:", err);
 
     contenedor.innerHTML = `
       <div class="text-danger text-center">
@@ -212,6 +336,4 @@ document.addEventListener('click', async function (e) {
       </div>
     `;
   }
- 
-
 });

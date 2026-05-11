@@ -59,7 +59,7 @@
 
   <?php endif; ?>
 
-
+    <?php if (!isset($_SESSION['rol']) || $_SESSION['rol'] == 'Administrador'): ?>
   <!-- COMUNES -->
   <div class="col-md-3">
     <div class="card card-custom p-3 cardhov">
@@ -67,7 +67,7 @@
       <h3><?= $datos['fichajesHoy'] ?? 0 ?></h3>
     </div>
   </div>
-
+    <?php endif; ?>
   <div class="col-md-3">
     <div class="card card-custom p-3 cardhov">
       <h6>Horas trabajadas</h6>
