@@ -181,14 +181,6 @@
       <a href="<?= RUTA_URL ?>/incidencias/index">Incidencias</a>
       <a href="#">Configuración</a>
 
-      <div class="p-3">
-        <a href="<?= RUTA_URL ?>/login/logout" class="text-danger">
-          Cerrar sesión
-        </a>
-      </div>
-
-    </div>
-
   </div>
 
 </div>
