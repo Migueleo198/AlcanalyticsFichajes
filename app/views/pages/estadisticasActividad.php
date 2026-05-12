@@ -58,7 +58,7 @@ $maxHoraEntradas = max($horasData ?: [1]);
     <div class="col-6 col-md-3"><div class="kpi-card kpi-green"><div class="kpi-icon"><i class="bi bi-calendar2-check-fill"></i></div><div class="kpi-value"><?= $ra['dias_con_actividad'] ?? 0 ?></div><div class="kpi-label">Días con actividad</div></div></div>
     <div class="col-6 col-md-3"><div class="kpi-card kpi-teal"><div class="kpi-icon"><i class="bi bi-calendar-x-fill"></i></div><div class="kpi-value"><?= $av['total_ausencias'] ?? 0 ?></div><div class="kpi-label">Ausencias</div></div></div>
     <div class="col-6 col-md-3"><div class="kpi-card kpi-indigo"><div class="kpi-icon"><i class="bi bi-umbrella-fill"></i></div><div class="kpi-value"><?= $av['vacaciones_aprobadas'] ?? 0 ?></div><div class="kpi-label">Vacaciones aprobadas</div></div></div>
-  </div>
+  </div> 
 
   <!-- CHART ACTIVIDAD DIARIA -->
   <div class="chart-card mb-4">
