@@ -150,7 +150,7 @@
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody id='lista'>
+       <tbody id='lista'>
         <!-- Se rellena por JS -->
       </tbody>
     </table>
