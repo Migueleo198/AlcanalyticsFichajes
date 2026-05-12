@@ -153,7 +153,8 @@
       <?php endif; ?>
 
       <!-- INCIDENCIAS -->
-      <a href="<?= RUTA_URL ?>/incidencias/index">
+      <a href="<?= RUTA_URL ?>/incidencias/index"
+        class="<?= (strpos($_SERVER['REQUEST_URI'], '/incidencias/index') !== false) ? 'active' : '' ?>">
         <i class="bi bi-exclamation-triangle me-2"></i>Incidencias
       </a>
 
@@ -316,7 +317,8 @@
       <?php endif; ?>
 
       <!-- INCIDENCIAS -->
-      <a href="<?= RUTA_URL ?>/incidencias/index">
+      <a href="<?= RUTA_URL ?>/incidencias/index"
+        class="<?= (strpos($_SERVER['REQUEST_URI'], '/incidencias/index') !== false) ? 'active' : '' ?>">
         <i class="bi bi-exclamation-triangle me-2"></i>Incidencias
       </a>
 
