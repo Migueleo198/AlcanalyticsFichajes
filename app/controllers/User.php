@@ -4,6 +4,28 @@ require_once '../app/models/UserModel.php';
 
 class User extends Controller
 {
+    private function checkAuth()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['id_usuario'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'No autorizado']);
+            exit;
+        }
+    }
+
+    private function checkAdmin()
+    {
+        $this->checkAuth();
+        if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Administrador') {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado']);
+            exit;
+        }
+    }
+
     // =========================
     // LOGIN
     // =========================
@@ -37,6 +59,7 @@ class User extends Controller
     // =========================
     public function getUser()
     {
+        $this->checkAuth();
         header('Content-Type: application/json; charset=utf-8');
 
         $id = $_GET['id'] ?? null;
@@ -75,6 +98,7 @@ class User extends Controller
     // =========================
     public function getUsers()
     {
+        $this->checkAuth();
         header('Content-Type: application/json; charset=utf-8');
 
         $model    = new UserModel();
@@ -93,6 +117,7 @@ class User extends Controller
     // =========================
     public function removeUser()
     {
+        $this->checkAdmin();
         header('Content-Type: application/json; charset=utf-8');
 
         $id = $_POST['id'] ?? null;
@@ -121,6 +146,7 @@ class User extends Controller
     // =========================
     public function addUser()
     {
+        $this->checkAdmin();
         header('Content-Type: application/json; charset=utf-8');
 
         if (empty($_POST)) {
@@ -181,6 +207,7 @@ class User extends Controller
     // =========================
     public function editUser()
     {
+        $this->checkAuth();
         header('Content-Type: application/json; charset=utf-8');
 
         $raw = $_POST['matriculas'] ?? [];

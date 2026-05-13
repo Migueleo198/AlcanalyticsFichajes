@@ -34,10 +34,16 @@ class BajasModel
     ]);
     }
 
-    public function obtenerBajas(){
-        $sql = "SELECT * FROM Bajas";
-
-        $stmt = $this -> conexion -> prepare($sql);
+    public function obtenerBajas()
+    {
+        $sql = "SELECT b.*, u.nombre AS usuario, m.nombre AS motivo
+                FROM Bajas b
+                JOIN Usuario u ON b.id_usuario = u.id_usuario
+                JOIN MotivoAlta m ON b.id_motivo = m.id_motivo
+                ORDER BY b.fecha_solicitud DESC";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerBajasPorUsuario($id_usuario)

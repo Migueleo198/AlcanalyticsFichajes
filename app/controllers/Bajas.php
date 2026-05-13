@@ -7,8 +7,9 @@ class Bajas extends Controller
 {
     private function checkSession()
     {
-        session_start();
-
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");
             exit;

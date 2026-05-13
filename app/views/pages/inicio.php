@@ -40,7 +40,7 @@
 </div>
 
   <!-- HEADER -->
-  <h3>Bienvenido, <?php echo $_SESSION['nombre']?> </h3>
+  <h3>Bienvenido, <?= htmlspecialchars($_SESSION['nombre'] ?? '') ?></h3>
   <p>Resumen de fichajes de empleados</p>
 
   <div class="row g-3 mb-4">

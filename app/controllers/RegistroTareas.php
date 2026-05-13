@@ -6,15 +6,20 @@ require_once __DIR__ . '/../models/FichajeModel.php';
 
 class RegistroTareas extends Controller
 {
-    
-    public function index()
+    private function checkAuth()
     {
-        session_start();
-
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");
             exit;
         }
+    }
+
+    public function index()
+    {
+        $this->checkAuth();
 
         $db = new Database();
         $conexion = $db->conectar();
@@ -40,12 +45,7 @@ class RegistroTareas extends Controller
     // =========================
     public function getTasks()
     {
-        session_start();
-
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: " . RUTA_URL . "/login");
-            exit;
-        }
+        $this->checkAuth();
 
         header('Content-Type: application/json');
 
@@ -66,13 +66,8 @@ class RegistroTareas extends Controller
     // CREATE
     // =========================
     public function create()
-{
-    session_start();
-
-    if (!isset($_SESSION['id_usuario'])) {
-        header("Location: " . RUTA_URL . "/login");
-        exit;
-    }
+    {
+        $this->checkAuth();
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -105,13 +100,8 @@ class RegistroTareas extends Controller
     // UPDATE
     // =========================
     public function update()
-{
-    session_start();
-
-    if (!isset($_SESSION['id_usuario'])) {
-        header("Location: " . RUTA_URL . "/login");
-        exit;
-    }
+    {
+        $this->checkAuth();
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -144,13 +134,8 @@ class RegistroTareas extends Controller
     // DELETE
     // =========================
     public function delete()
-{
-    session_start();
-
-    if (!isset($_SESSION['id_usuario'])) {
-        header("Location: " . RUTA_URL . "/login");
-        exit;
-    }
+    {
+        $this->checkAuth();
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
