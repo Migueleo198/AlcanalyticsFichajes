@@ -107,7 +107,7 @@
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/visualizar') ? 'active' : '' ?>">
+           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/gestionar') ? 'active' : '' ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
