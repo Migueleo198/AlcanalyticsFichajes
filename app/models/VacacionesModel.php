@@ -88,10 +88,57 @@ class VacacionesModel
 
     public function getAll()
     {
-    return $this->obtenerTodasVacaciones();
+        return $this->obtenerTodasVacaciones();
     }
 
-    
+    public function add($data)
+    {
+        return $this->insertarVacacion($data);
+    }
+
+    public function updateEstado($id, $estado)
+    {
+        return $this->actualizarEstado($id, $estado);
+    }
+
+    public function delete($id)
+    {
+        return $this->eliminarVacacion($id);
+    }
+
+    public function getByUsuario($id_usuario)
+    {
+        return $this->obtenerVacacionesPorUsuario($id_usuario);
+    }
+
+    public function getResumen($id_usuario = null)
+    {
+        if ($id_usuario) {
+            $sql = "SELECT
+                        COUNT(*) AS total,
+                        SUM(CASE WHEN estado = 'pendiente'  THEN 1 ELSE 0 END) AS pendientes,
+                        SUM(CASE WHEN estado = 'aprobada'   THEN 1 ELSE 0 END) AS aprobadas,
+                        SUM(CASE WHEN estado = 'rechazada'  THEN 1 ELSE 0 END) AS rechazadas,
+                        COALESCE(SUM(CASE WHEN estado = 'aprobada' THEN dias_solicitados ELSE 0 END), 0) AS dias_aprobados
+                    FROM Vacaciones
+                    WHERE id_usuario = :id";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->execute([':id' => $id_usuario]);
+        } else {
+            $sql = "SELECT
+                        COUNT(*) AS total,
+                        SUM(CASE WHEN estado = 'pendiente'  THEN 1 ELSE 0 END) AS pendientes,
+                        SUM(CASE WHEN estado = 'aprobada'   THEN 1 ELSE 0 END) AS aprobadas,
+                        SUM(CASE WHEN estado = 'rechazada'  THEN 1 ELSE 0 END) AS rechazadas,
+                        COALESCE(SUM(CASE WHEN estado = 'aprobada' THEN dias_solicitados ELSE 0 END), 0) AS dias_aprobados
+                    FROM Vacaciones";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->execute();
+        }
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
     public function haySolapamiento($id_usuario, $inicio, $fin)
     {
         $sql = "SELECT *

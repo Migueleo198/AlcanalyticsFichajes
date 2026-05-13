@@ -13,15 +13,35 @@ class AsignarJornadas extends Controller
     }
 
     // =========================
+    // AUTH GUARD
+    // =========================
+    private function checkAdmin()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['id_usuario'])) {
+            header("Location: " . RUTA_URL . "/login");
+            exit;
+        }
+        if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Administrador') {
+            header("Location: " . RUTA_URL . "/home/index");
+            exit;
+        }
+    }
+
+    // =========================
     // INDEX VIEW
     // =========================
     public function index()
     {
+        $this->checkAdmin();
         $model = $this->model();
 
         $datos = [
+            'title'    => 'Asignar Jornadas',
             'jornadas' => $model->getJornadas(),
-            'usuarios' => $model->getUsuarios()
+            'usuarios' => $model->getUsuarios(),
         ];
 
         $this->load_view('asignar_jornadas', $datos);

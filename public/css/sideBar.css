@@ -56,6 +56,28 @@
     color: white;
 }
 
+/* Chevron stays rotated when parent-active (Bootstrap no longer manages this) */
+.sidebar a.parent-active .bi-chevron-down,
+.sidebar-mobile a.parent-active .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Parent toggle when a child is active — visually distinct from nav links */
+.sidebar a.parent-active,
+.sidebar-mobile a.parent-active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-left: 3px solid #2563eb;
+    padding-left: 17px; /* compensate the 3px border */
+    font-weight: 600;
+}
+
+.sidebar a.parent-active:hover,
+.sidebar-mobile a.parent-active:hover {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
 /* ================================
    TEXT
 ================================ */

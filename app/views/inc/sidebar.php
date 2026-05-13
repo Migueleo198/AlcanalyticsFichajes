@@ -1,3 +1,15 @@
+<?php
+// Strip query string for reliable active detection
+$currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+
+$jornadasActivo     = strpos($currentPath, '/Jornadas') === 0 || strpos($currentPath, '/AsignarJornadas') === 0;
+$ausenciasActivo    = strpos($currentPath, '/Ausencias') === 0 || strpos($currentPath, '/Bajas') === 0;
+$estadisticasActivo = strpos($currentPath, '/Estadisticas') === 0;
+
+function sideActive(string $path, string $currentPath): string {
+    return $currentPath === $path ? 'active' : '';
+}
+?>
 <div>
 
   <!-- ===================== -->
@@ -29,48 +41,51 @@
 
       <!-- DASHBOARD -->
       <a href="<?= RUTA_URL ?>/home/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/home/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/home/index', $currentPath) ?>">
         <i class="bi bi-house me-2"></i>Inicio
       </a>
 
       <!-- FICHAJES -->
       <a href="<?= RUTA_URL ?>/Fichaje/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Fichaje/index', $currentPath) ?>">
         <i class="bi bi-clock-history me-2"></i>Fichaje
       </a>
 
       <!-- DETALLE -->
       <a href="<?= RUTA_URL ?>/Fichaje/detalle"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/detalle') ? 'active' : '' ?>">
+         class="<?= sideActive('/Fichaje/detalle', $currentPath) ?>">
         <i class="bi bi-list-check me-2"></i>Detalle de Fichajes
       </a>
 
       <!-- ADMIN -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
         <a href="<?= RUTA_URL ?>/empleado/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/empleado/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/empleado/index', $currentPath) ?>">
           <i class="bi bi-people me-2"></i>Empleados
         </a>
       <?php endif; ?>
 
       <!-- JORNADAS -->
-      <?php $jornadasActivo = (strpos($_SERVER['REQUEST_URI'], '/Jornadas') !== false || strpos($_SERVER['REQUEST_URI'], '/AsignarJornadas') !== false); ?>
-      <a data-bs-toggle="collapse" href="#jornadasMenu" role="button"
-         class="<?= $jornadasActivo ? 'active' : '' ?>">
+      <a <?= !$jornadasActivo ? 'data-bs-toggle="collapse" href="#jornadasMenu"' : '' ?>
+         role="button"
+         aria-expanded="<?= $jornadasActivo ? 'true' : 'false' ?>"
+         class="<?= $jornadasActivo ? 'parent-active' : '' ?>">
         <i class="bi bi-kanban me-2"></i>Jornadas
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>" id="jornadasMenu">
+      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>"
+           id="jornadasMenu"
+           <?= $jornadasActivo ? 'style="display:block"' : '' ?>>
 
         <a href="<?= RUTA_URL ?>/Jornadas/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/Jornadas/index', $currentPath) ?>">
           <i class="bi bi-calendar-week me-2"></i>Gestión de jornadas
         </a>
 
         <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
           <a href="<?= RUTA_URL ?>/AsignarJornadas/index"
-             class="<?= ($_SERVER['REQUEST_URI'] == '/AsignarJornadas/index') ? 'active' : '' ?>">
+             class="<?= sideActive('/AsignarJornadas/index', $currentPath) ?>">
             <i class="bi bi-person-check me-2"></i>Asignar jornadas
           </a>
         <?php endif; ?>
@@ -79,39 +94,42 @@
 
       <!-- INFORMES -->
       <a href="<?= RUTA_URL ?>/Informes/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Informes/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Informes/index', $currentPath) ?>">
         <i class="bi bi-file-earmark-text me-2"></i>Informes
       </a>
 
       <!-- TAREAS -->
       <a href="<?= RUTA_URL ?>/RegistroTareas/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/RegistroTareas/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/RegistroTareas/index', $currentPath) ?>">
         <i class="bi bi-check2-square me-2"></i>Tareas
       </a>
 
       <!-- VACACIONES -->
       <a href="<?= RUTA_URL ?>/Vacaciones/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Vacaciones/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Vacaciones/index', $currentPath) ?>">
         <i class="bi bi-airplane me-2"></i>Vacaciones
       </a>
 
       <!-- AUSENCIAS -->
-      <?php $ausenciasActivo = (strpos($_SERVER['REQUEST_URI'], '/Ausencias') !== false || strpos($_SERVER['REQUEST_URI'], '/Bajas') !== false); ?>
-      <a data-bs-toggle="collapse" href="#bajasMenu" role="button"
-         class="<?= $ausenciasActivo ? 'active' : '' ?>">
+      <a <?= !$ausenciasActivo ? 'data-bs-toggle="collapse" href="#bajasMenu"' : '' ?>
+         role="button"
+         aria-expanded="<?= $ausenciasActivo ? 'true' : 'false' ?>"
+         class="<?= $ausenciasActivo ? 'parent-active' : '' ?>">
         <i class="bi bi-person-dash me-2"></i>Ausencias
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>" id="bajasMenu">
+      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>"
+           id="bajasMenu"
+           <?= $ausenciasActivo ? 'style="display:block"' : '' ?>>
 
         <a href="<?= RUTA_URL ?>/Ausencias/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/Ausencias/index', $currentPath) ?>">
           <i class="bi bi-calendar-x me-2"></i>Ausencias
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/visualizar') ? 'active' : '' ?>">
+           class="<?= sideActive('/Bajas/visualizar', $currentPath) ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
@@ -120,37 +138,40 @@
       <!-- ESTADÍSTICAS -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
 
-        <?php $estadisticasActivo = (strpos($_SERVER['REQUEST_URI'], '/Estadisticas') !== false); ?>
-        <a data-bs-toggle="collapse" href="#reportesMenu" role="button"
-           class="<?= $estadisticasActivo ? 'active' : '' ?>">
+        <a <?= !$estadisticasActivo ? 'data-bs-toggle="collapse" href="#reportesMenu"' : '' ?>
+           role="button"
+           aria-expanded="<?= $estadisticasActivo ? 'true' : 'false' ?>"
+           class="<?= $estadisticasActivo ? 'parent-active' : '' ?>">
           <i class="bi bi-bar-chart me-2"></i>Estadísticas
           <i class="bi bi-chevron-down float-end"></i>
         </a>
 
-        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>" id="reportesMenu">
+        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>"
+             id="reportesMenu"
+             <?= $estadisticasActivo ? 'style="display:block"' : '' ?>>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/resumen"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/resumen') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/resumen', $currentPath) ?>">
             <i class="bi bi-grid-fill me-2"></i>Resumen
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/fichajes"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/fichajes') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/fichajes', $currentPath) ?>">
             <i class="bi bi-clock-history me-2"></i>Fichajes
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/horas"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/horas') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/horas', $currentPath) ?>">
             <i class="bi bi-hourglass-split me-2"></i>Horas
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/retrasos"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/retrasos') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/retrasos', $currentPath) ?>">
             <i class="bi bi-alarm me-2"></i>Retrasos
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/actividad"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/actividad') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/actividad', $currentPath) ?>">
             <i class="bi bi-activity me-2"></i>Actividad
           </a>
 
@@ -160,12 +181,12 @@
 
       <!-- INCIDENCIAS -->
       <a href="<?= RUTA_URL ?>/incidencias/index"
-        class="<?= (strpos($_SERVER['REQUEST_URI'], '/incidencias/index') !== false) ? 'active' : '' ?>">
+         class="<?= sideActive('/incidencias/index', $currentPath) ?>">
         <i class="bi bi-exclamation-triangle me-2"></i>Incidencias
       </a>
 
       <!-- CONFIG -->
-      <a href="#">
+      <a href="javascript:void(0)">
         <i class="bi bi-gear me-2"></i>Configuración
       </a>
 
@@ -199,47 +220,51 @@
 
       <!-- DASHBOARD -->
       <a href="<?= RUTA_URL ?>/home/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/home/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/home/index', $currentPath) ?>">
         <i class="bi bi-house me-2"></i>Inicio
       </a>
 
       <!-- FICHAJE -->
       <a href="<?= RUTA_URL ?>/Fichaje/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Fichaje/index', $currentPath) ?>">
         <i class="bi bi-clock-history me-2"></i>Fichaje
       </a>
 
       <!-- DETALLE -->
       <a href="<?= RUTA_URL ?>/Fichaje/detalle"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Fichaje/detalle') ? 'active' : '' ?>">
+         class="<?= sideActive('/Fichaje/detalle', $currentPath) ?>">
         <i class="bi bi-list-check me-2"></i>Detalle de Fichajes
       </a>
 
       <!-- ADMIN -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
         <a href="<?= RUTA_URL ?>/empleado/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/empleado/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/empleado/index', $currentPath) ?>">
           <i class="bi bi-people me-2"></i>Empleados
         </a>
       <?php endif; ?>
 
       <!-- JORNADAS -->
-      <a data-bs-toggle="collapse" href="#mobileJornadasMenu" role="button"
-         class="<?= $jornadasActivo ? 'active' : '' ?>">
+      <a <?= !$jornadasActivo ? 'data-bs-toggle="collapse" href="#mobileJornadasMenu"' : '' ?>
+         role="button"
+         aria-expanded="<?= $jornadasActivo ? 'true' : 'false' ?>"
+         class="<?= $jornadasActivo ? 'parent-active' : '' ?>">
         <i class="bi bi-kanban me-2"></i>Jornadas
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>" id="mobileJornadasMenu">
+      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>"
+           id="mobileJornadasMenu"
+           <?= $jornadasActivo ? 'style="display:block"' : '' ?>>
 
         <a href="<?= RUTA_URL ?>/Jornadas/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/Jornadas/index', $currentPath) ?>">
           <i class="bi bi-calendar-week me-2"></i>Gestión de jornadas
         </a>
 
         <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
           <a href="<?= RUTA_URL ?>/AsignarJornadas/index"
-             class="<?= ($_SERVER['REQUEST_URI'] == '/AsignarJornadas/index') ? 'active' : '' ?>">
+             class="<?= sideActive('/AsignarJornadas/index', $currentPath) ?>">
             <i class="bi bi-person-check me-2"></i>Asignar jornadas
           </a>
         <?php endif; ?>
@@ -248,38 +273,42 @@
 
       <!-- INFORMES -->
       <a href="<?= RUTA_URL ?>/Informes/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Informes/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Informes/index', $currentPath) ?>">
         <i class="bi bi-file-earmark-text me-2"></i>Informes
       </a>
 
       <!-- TAREAS -->
       <a href="<?= RUTA_URL ?>/RegistroTareas/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/RegistroTareas/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/RegistroTareas/index', $currentPath) ?>">
         <i class="bi bi-check2-square me-2"></i>Tareas
       </a>
 
       <!-- VACACIONES -->
       <a href="<?= RUTA_URL ?>/Vacaciones/index"
-         class="<?= ($_SERVER['REQUEST_URI'] == '/Vacaciones/index') ? 'active' : '' ?>">
+         class="<?= sideActive('/Vacaciones/index', $currentPath) ?>">
         <i class="bi bi-airplane me-2"></i>Vacaciones
       </a>
 
       <!-- AUSENCIAS -->
-      <a data-bs-toggle="collapse" href="#mobileBajasMenu" role="button"
-         class="<?= $ausenciasActivo ? 'active' : '' ?>">
+      <a <?= !$ausenciasActivo ? 'data-bs-toggle="collapse" href="#mobileBajasMenu"' : '' ?>
+         role="button"
+         aria-expanded="<?= $ausenciasActivo ? 'true' : 'false' ?>"
+         class="<?= $ausenciasActivo ? 'parent-active' : '' ?>">
         <i class="bi bi-person-dash me-2"></i>Ausencias
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>" id="mobileBajasMenu">
+      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>"
+           id="mobileBajasMenu"
+           <?= $ausenciasActivo ? 'style="display:block"' : '' ?>>
 
         <a href="<?= RUTA_URL ?>/Ausencias/index"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
+           class="<?= sideActive('/Ausencias/index', $currentPath) ?>">
           <i class="bi bi-calendar-x me-2"></i>Ausencias
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/visualizar') ? 'active' : '' ?>">
+           class="<?= sideActive('/Bajas/visualizar', $currentPath) ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
@@ -288,36 +317,40 @@
       <!-- ESTADÍSTICAS -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
 
-        <a data-bs-toggle="collapse" href="#mobileReportesMenu" role="button"
-           class="<?= $estadisticasActivo ? 'active' : '' ?>">
+        <a <?= !$estadisticasActivo ? 'data-bs-toggle="collapse" href="#mobileReportesMenu"' : '' ?>
+           role="button"
+           aria-expanded="<?= $estadisticasActivo ? 'true' : 'false' ?>"
+           class="<?= $estadisticasActivo ? 'parent-active' : '' ?>">
           <i class="bi bi-bar-chart me-2"></i>Estadísticas
           <i class="bi bi-chevron-down float-end"></i>
         </a>
 
-        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>" id="mobileReportesMenu">
+        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>"
+             id="mobileReportesMenu"
+             <?= $estadisticasActivo ? 'style="display:block"' : '' ?>>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/resumen"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/resumen') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/resumen', $currentPath) ?>">
             <i class="bi bi-grid-fill me-2"></i>Resumen
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/fichajes"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/fichajes') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/fichajes', $currentPath) ?>">
             <i class="bi bi-clock-history me-2"></i>Fichajes
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/horas"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/horas') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/horas', $currentPath) ?>">
             <i class="bi bi-hourglass-split me-2"></i>Horas
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/retrasos"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/retrasos') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/retrasos', $currentPath) ?>">
             <i class="bi bi-alarm me-2"></i>Retrasos
           </a>
 
           <a href="<?= RUTA_URL ?>/Estadisticas/actividad"
-             class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/actividad') !== false) ? 'active' : '' ?>">
+             class="<?= sideActive('/Estadisticas/actividad', $currentPath) ?>">
             <i class="bi bi-activity me-2"></i>Actividad
           </a>
 
@@ -327,12 +360,12 @@
 
       <!-- INCIDENCIAS -->
       <a href="<?= RUTA_URL ?>/incidencias/index"
-        class="<?= (strpos($_SERVER['REQUEST_URI'], '/incidencias/index') !== false) ? 'active' : '' ?>">
+         class="<?= sideActive('/incidencias/index', $currentPath) ?>">
         <i class="bi bi-exclamation-triangle me-2"></i>Incidencias
       </a>
 
       <!-- CONFIG -->
-      <a href="#">
+      <a href="javascript:void(0)">
         <i class="bi bi-gear me-2"></i>Configuración
       </a>
 
