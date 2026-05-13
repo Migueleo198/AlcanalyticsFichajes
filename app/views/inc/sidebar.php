@@ -129,7 +129,7 @@ function sideActive(string $path, string $currentPath): string {
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= sideActive('/Bajas/visualizar', $currentPath) ?>">
+           class="<?= ($currentPath === '/Bajas/visualizar' || $currentPath === '/Bajas/gestionar') ? 'active' : '' ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
@@ -186,7 +186,8 @@ function sideActive(string $path, string $currentPath): string {
       </a>
 
       <!-- CONFIG -->
-      <a href="javascript:void(0)">
+      <a href="<?= RUTA_URL ?>/Configuracion/index"
+         class="<?= sideActive('/Configuracion/index', $currentPath) ?>">
         <i class="bi bi-gear me-2"></i>Configuración
       </a>
 
@@ -308,7 +309,7 @@ function sideActive(string $path, string $currentPath): string {
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= sideActive('/Bajas/visualizar', $currentPath) ?>">
+           class="<?= ($currentPath === '/Bajas/visualizar' || $currentPath === '/Bajas/gestionar') ? 'active' : '' ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
@@ -365,7 +366,8 @@ function sideActive(string $path, string $currentPath): string {
       </a>
 
       <!-- CONFIG -->
-      <a href="javascript:void(0)">
+      <a href="<?= RUTA_URL ?>/Configuracion/index"
+         class="<?= sideActive('/Configuracion/index', $currentPath) ?>">
         <i class="bi bi-gear me-2"></i>Configuración
       </a>
 

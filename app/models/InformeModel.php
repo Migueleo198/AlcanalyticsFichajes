@@ -30,15 +30,17 @@ class InformeModel {
                 f.fecha,
                 f.hora_entrada,
                 f.hora_salida,
-                f.tiempo_total,
-                f.horas_ordinarias,
-                f.horas_extra,
                 f.estado,
 
+                CASE WHEN f.hora_salida IS NOT NULL
+                    THEN ROUND(TIMESTAMPDIFF(MINUTE, f.hora_entrada, f.hora_salida) / 60.0, 2)
+                    ELSE 0 END AS horas_brutas,
+
                 COALESCE((
-                    SELECT SUM(TIMESTAMPDIFF(MINUTE, d.hora_inicio, d.hora_fin)) / 60
+                    SELECT ROUND(SUM(TIMESTAMPDIFF(MINUTE, d.hora_inicio, d.hora_fin)) / 60.0, 2)
                     FROM Descanso d
                     WHERE d.id_fichaje = f.id_fichaje
+                    AND d.hora_fin IS NOT NULL
                 ), 0) AS horas_descanso,
 
                 i.mensaje AS incidencia,
@@ -79,7 +81,20 @@ class InformeModel {
 
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($filas as &$f) {
+            $brutas   = (float)($f['horas_brutas']   ?? 0);
+            $descanso = (float)($f['horas_descanso'] ?? 0);
+            $netas    = max(0, round($brutas - $descanso, 2));
+
+            $f['horas_netas']      = $netas;
+            $f['horas_ordinarias'] = round(min($netas, 7.5), 2);
+            $f['horas_extra']      = round(max(0, $netas - 7.5), 2);
+        }
+        unset($f);
+
+        return $filas;
     }
 
     public function obtenerUsuarios() {
