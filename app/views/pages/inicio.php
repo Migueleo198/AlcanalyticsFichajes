@@ -68,16 +68,25 @@
     </div>
   </div>
     <?php endif; ?>
+  <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
   <div class="col-md-3">
     <div class="card card-custom p-3 cardhov">
-      <h6>Horas trabajadas</h6>
-      <h3><?= round($datos['horasHoy'] ?? 0, 2) ?>h</h3>
+      <h6>Horas hoy (total)</h6>
+      <h3><?= round($datos['horasHoy'] ?? 0, 1) ?>h</h3>
     </div>
   </div>
+  <?php else: ?>
+  <div class="col-md-3">
+    <div class="card card-custom p-3 cardhov">
+      <h6>Mis horas esta semana</h6>
+      <h3><?= round($datos['horasSemana'] ?? 0, 1) ?>h</h3>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <div class="col-md-3">
     <div class="card card-custom p-3 cardhov">
-      <h6>Retrasos</h6>
+      <h6>Retrasos<?= (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador') ? ' hoy' : '' ?></h6>
       <h3><?= $datos['retrasosHoy'] ?? 0 ?></h3>
     </div>
   </div>
@@ -146,6 +155,7 @@
           <th>Fecha</th>
           <th>Entrada</th>
           <th>Salida</th>
+          <th>Horas</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -245,18 +255,13 @@
 </div>
 
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
-</script>
-
-<!-- JS -->
-<script>
-const fichajeActivo = <?php echo json_encode($datos['fichajeActivo'] ?? null); ?>;
+var RUTA_URL = "<?= RUTA_URL ?>";
+var fichajeActivo = <?= json_encode($datos['fichajeActivo'] ?? null) ?>;
 </script>
 
 <script type='module' src="<?= RUTA_URL ?>/js/application/homeLoadCounterUseCases.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructureHome.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
-<script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtroFichajes.js"></script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>

@@ -91,8 +91,13 @@ $r = $datos['resumen'];
         <table class="table table-hover stats-table mb-0">
           <thead><tr><th>#</th><th>Empleado</th><th>Horas ordinarias</th><th>Horas extra</th><th>Total horas</th><th>Progreso</th></tr></thead>
           <tbody>
+            <?php
+            $allHoras = array_column($datos['topEmpleados'], 'total_horas');
+            $maxH = !empty($allHoras) ? (float)max($allHoras) : 0;
+            $maxH = $maxH > 0 ? $maxH : 1;
+            ?>
             <?php foreach ($datos['topEmpleados'] as $i => $emp): ?>
-            <?php $maxH = max(array_column($datos['topEmpleados'], 'total_horas') ?: [1]); $pct = $maxH > 0 ? ($emp['total_horas'] / $maxH * 100) : 0; ?>
+            <?php $pct = (float)($emp['total_horas'] ?? 0) / $maxH * 100; ?>
             <tr>
               <td><?php if($i===0): ?><span class="badge bg-warning text-dark"><i class="bi bi-trophy-fill"></i> 1</span><?php elseif($i===1): ?><span class="badge bg-secondary">2</span><?php elseif($i===2): ?><span class="badge" style="background:#cd7f32">3</span><?php else: ?><span class="text-muted"><?= $i+1 ?></span><?php endif; ?></td>
               <td class="fw-semibold"><?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellidos']) ?></td>

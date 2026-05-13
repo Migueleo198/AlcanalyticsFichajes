@@ -12,15 +12,15 @@ class FichajeModelo {
 
         if ($rol === 'Administrador') {
 
-            $sql = "SELECT 
+            $sql = "SELECT
                         f.id_fichaje,
                         f.fecha,
                         f.hora_entrada,
                         f.hora_salida,
-                        f.tiempo_total,
                         f.estado,
-                        f.horas_ordinarias,
-                        f.horas_extra,
+                        CASE WHEN f.hora_salida IS NOT NULL
+                            THEN ROUND(TIMESTAMPDIFF(MINUTE, f.hora_entrada, f.hora_salida) / 60.0, 2)
+                            ELSE NULL END AS horas_totales,
                         u.nombre,
                         u.apellidos,
                         m.nombre AS motivo
@@ -33,15 +33,15 @@ class FichajeModelo {
 
         } else {
 
-            $sql = "SELECT 
+            $sql = "SELECT
                         f.id_fichaje,
                         f.fecha,
                         f.hora_entrada,
                         f.hora_salida,
-                        f.tiempo_total,
                         f.estado,
-                        f.horas_ordinarias,
-                        f.horas_extra,
+                        CASE WHEN f.hora_salida IS NOT NULL
+                            THEN ROUND(TIMESTAMPDIFF(MINUTE, f.hora_entrada, f.hora_salida) / 60.0, 2)
+                            ELSE NULL END AS horas_totales,
                         u.nombre,
                         u.apellidos,
                         m.nombre AS motivo
@@ -159,20 +159,33 @@ class FichajeModelo {
     }
 
     public function getHorasHoy() {
-        $sql = "SELECT SUM(horas_ordinarias + horas_extra) as total 
-                FROM Fichaje 
+        $sql = "SELECT COALESCE(SUM(CASE WHEN hora_salida IS NOT NULL
+                    THEN ROUND(TIMESTAMPDIFF(MINUTE, hora_entrada, hora_salida) / 60.0, 2)
+                    ELSE 0 END), 0) AS total
+                FROM Fichaje
                 WHERE fecha = CURDATE()";
-
         return $this->db->query($sql)->fetch()['total'] ?? 0;
     }
 
     public function getRetrasosHoy() {
-        $sql = "SELECT COUNT(*) as total 
-                FROM Fichaje 
-                WHERE fecha = CURDATE() 
-                AND estado = 'retraso'";
+        $sql = "SELECT COUNT(*) as total
+                FROM Fichaje
+                WHERE fecha = CURDATE()
+                AND hora_entrada > '09:30:00'
+                AND HOUR(hora_entrada) BETWEEN 5 AND 12";
+        return $this->db->query($sql)->fetch()['total'] ?? 0;
+    }
 
-        return $this->db->query($sql)->fetch()['total'];
+    public function getHorasSemanalesUsuario($id_usuario) {
+        $sql = "SELECT COALESCE(SUM(CASE WHEN hora_salida IS NOT NULL
+                    THEN ROUND(TIMESTAMPDIFF(MINUTE, hora_entrada, hora_salida) / 60.0, 2)
+                    ELSE 0 END), 0) AS total
+                FROM Fichaje
+                WHERE id_usuario = ?
+                AND YEARWEEK(fecha, 1) = YEARWEEK(CURDATE(), 1)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id_usuario]);
+        return $stmt->fetch()['total'] ?? 0;
     }
 
     public function getByUserAndRange($userId, $desde, $hasta) {

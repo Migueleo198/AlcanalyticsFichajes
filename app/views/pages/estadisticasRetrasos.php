@@ -104,18 +104,21 @@ $empRetrasos = array_column($datos['retrasosEmpleado'], 'retrasos');
         <table class="table table-hover stats-table mb-0">
           <thead><tr><th>Empleado</th><th>Fichajes</th><th>Retrasos</th><th>% Retraso</th><th>Estado</th></tr></thead>
           <tbody>
-            <?php foreach ($datos['retrasosEmpleado'] as $e): ?>
+            <?php foreach ($datos['retrasosEmpleado'] as $e):
+              $pct = (float)($e['pct_retraso'] ?? 0);
+              $retrasos = (int)($e['retrasos'] ?? 0);
+            ?>
             <tr>
               <td class="fw-semibold"><?= htmlspecialchars($e['nombre'] . ' ' . $e['apellidos']) ?></td>
-              <td><?= $e['total_fichajes'] ?></td>
-              <td><?php if($e['retrasos']>0): ?><span class="badge bg-danger"><?= $e['retrasos'] ?></span><?php else: ?><span class="text-muted">0</span><?php endif; ?></td>
+              <td><?= (int)($e['total_fichajes'] ?? 0) ?></td>
+              <td><?php if($retrasos > 0): ?><span class="badge bg-danger"><?= $retrasos ?></span><?php else: ?><span class="text-muted">0</span><?php endif; ?></td>
               <td>
                 <div class="d-flex align-items-center gap-2">
-                  <div class="progress flex-grow-1" style="height:6px;"><div class="progress-bar <?= $e['pct_retraso']>20?'bg-danger':($e['pct_retraso']>10?'bg-warning':'bg-success') ?>" style="width:<?= min($e['pct_retraso'],100) ?>%"></div></div>
-                  <small><?= $e['pct_retraso'] ?? 0 ?>%</small>
+                  <div class="progress flex-grow-1" style="height:6px;"><div class="progress-bar <?= $pct > 20 ? 'bg-danger' : ($pct > 10 ? 'bg-warning' : 'bg-success') ?>" style="width:<?= min($pct, 100) ?>%"></div></div>
+                  <small><?= $pct ?>%</small>
                 </div>
               </td>
-              <td><?php if($e['retrasos']==0): ?><span class="badge bg-success-subtle text-success">Puntual</span><?php elseif($e['retrasos']<=2): ?><span class="badge bg-warning-subtle text-warning-emphasis">Ocasional</span><?php else: ?><span class="badge bg-danger-subtle text-danger">Frecuente</span><?php endif; ?></td>
+              <td><?php if($retrasos == 0): ?><span class="badge bg-success-subtle text-success">Puntual</span><?php elseif($retrasos <= 2): ?><span class="badge bg-warning-subtle text-warning-emphasis">Ocasional</span><?php else: ?><span class="badge bg-danger-subtle text-danger">Frecuente</span><?php endif; ?></td>
             </tr>
             <?php endforeach; ?>
             <?php if(empty($datos['retrasosEmpleado'])): ?><tr><td colspan="5" class="text-center text-muted py-4">No hay datos disponibles</td></tr><?php endif; ?>

@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const empleadoTxt = columns[1]?.innerText.toLowerCase() || "";
             const fechaTxt = columns[2]?.innerText || "";
-            const estadoTxt = columns[5]?.innerText.toLowerCase() || "";
+            const estadoTxt = columns[6]?.innerText.toLowerCase() || "";
 
             const rowText = row.textContent.toLowerCase();
 

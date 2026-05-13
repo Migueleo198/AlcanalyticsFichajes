@@ -7,7 +7,9 @@ class Home extends Controller
 {
     public function index()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");
@@ -19,21 +21,27 @@ class Home extends Controller
 
         $modelo = new FichajeModelo($conexion);
 
-        // 🔥 TIEMPO DE DESCANSO
-        $tiempoDescanso = 0;
+        $esAdmin = isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador';
 
-        if ($_SESSION['rol'] !== 'Administrador') {
-            $tiempoDescanso = $modelo->getTiempoDescansoHoy($_SESSION['id_usuario']);
+        $tiempoDescanso = 0;
+        $horasSemana    = 0;
+        $fichajeActivo  = null;
+
+        if (!$esAdmin) {
+            $id = $_SESSION['id_usuario'];
+            $tiempoDescanso = $modelo->getTiempoDescansoHoy($id);
+            $horasSemana    = $modelo->getHorasSemanalesUsuario($id);
+            $fichajeActivo  = $modelo->obtenerFichajeActivo($id);
         }
 
-        // 🔥 DATOS PRINCIPALES
         $datos = [
             "empleadosActivos" => $modelo->getEmpleadosActivos(),
             "fichajesHoy"      => $modelo->getFichajesHoy(),
             "horasHoy"         => $modelo->getHorasHoy(),
+            "horasSemana"      => $horasSemana,
             "retrasosHoy"      => $modelo->getRetrasosHoy(),
             "tiempoDescanso"   => $tiempoDescanso,
-            "fichajeActivo"    => null,
+            "fichajeActivo"    => $fichajeActivo,
             "title"            => "Inicio"
         ];
 

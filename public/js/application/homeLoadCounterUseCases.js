@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
         Tienes un fichaje activo 🔵 
         <strong id="contadorHome" class="ms-2">00:00:00</strong>
       </div>
-      <a href="/fichaje/index" class="btn btn-sm btn-primary">
-        Volver
+      <a href="${RUTA_URL}/Fichaje/index" class="btn btn-sm btn-primary">
+        Ir a fichaje
       </a>
     `;
 

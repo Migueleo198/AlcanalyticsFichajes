@@ -6,8 +6,6 @@ document.addEventListener('tableReady', () => {
     const TBODY = TABLE.querySelector('tbody');
     const CONTAINER = TABLE.closest('.card');
 
-    const buscador = document.getElementById('buscadorTabla');
-
     const rowsPerPage = 10;
 
     let fullTable = [];
@@ -62,7 +60,6 @@ document.addEventListener('tableReady', () => {
     // =========================
     function recalc() {
         totalPages = Math.max(1, Math.ceil(filteredTable.length / rowsPerPage));
-
         if (currentPage >= totalPages) currentPage = totalPages - 1;
         if (currentPage < 0) currentPage = 0;
     }
@@ -93,43 +90,34 @@ document.addEventListener('tableReady', () => {
     }
 
     // =========================
-    // FILTER
-    // =========================
-    function applyFilter() {
-
-        const value = (buscador?.value || "").toLowerCase().trim();
-
-        fullTable = snapshot();
-
-        filteredTable = fullTable.filter(row =>
-            row.textContent.toLowerCase().includes(value)
-        );
-
-        currentPage = 0;
-
-        render();
-    }
-
-    // =========================
     // INIT
     // =========================
     function init() {
 
         ensurePaginationUI();
 
+        // Snapshot once — never re-snapshot; fullTable is the source of truth
         fullTable = snapshot();
         filteredTable = [...fullTable];
+
+        // Expose API so filtroFichajes.js can drive filtering
+        window.paginationData = {
+            get fullTable() { return fullTable; },
+            setFilteredTable(rows) {
+                filteredTable = rows.map(r => r.cloneNode(true));
+                currentPage = 0;
+                render();
+            }
+        };
 
         attachEvents();
         render();
     }
 
     // =========================
-    // EVENTS (SAFE BINDING)
+    // EVENTS — navigation only
     // =========================
     function attachEvents() {
-
-        buscador?.addEventListener('input', applyFilter);
 
         document.addEventListener('click', (e) => {
 

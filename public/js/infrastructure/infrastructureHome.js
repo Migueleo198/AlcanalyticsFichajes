@@ -16,7 +16,7 @@ async function loadFichajes() {
 
   lista.innerHTML = `
     <tr>
-      <td colspan="7" class="text-center">
+      <td colspan="8" class="text-center">
         Cargando fichajes...
       </td>
     </tr>
@@ -47,7 +47,7 @@ async function loadFichajes() {
 
       lista.innerHTML = `
         <tr>
-          <td colspan="7" class="text-danger text-center">
+          <td colspan="8" class="text-danger text-center">
             Error: el servidor no devolvió JSON válido
           </td>
         </tr>
@@ -70,7 +70,7 @@ async function loadFichajes() {
 
         lista.innerHTML = `
           <tr>
-            <td colspan="7" class="text-center">
+            <td colspan="8" class="text-center">
               No hay fichajes
             </td>
           </tr>
@@ -89,6 +89,10 @@ async function loadFichajes() {
           f.estado === 'incidencia' ? 'bg-danger' :
           'bg-secondary';
 
+        const horasMostrar = f.horas_totales !== null && f.horas_totales !== undefined
+          ? `<span class="badge bg-light text-dark border">${parseFloat(f.horas_totales).toFixed(1)}h</span>`
+          : '<span class="text-muted">—</span>';
+
         tr.innerHTML = `
           <td>${index + 1}</td>
 
@@ -101,6 +105,8 @@ async function loadFichajes() {
           <td>${f.hora_entrada || '-'}</td>
 
           <td>${f.hora_salida || '-'}</td>
+
+          <td>${horasMostrar}</td>
 
           <td>
             <span class="badge ${estadoClass}">
@@ -141,7 +147,7 @@ async function loadFichajes() {
 
       lista.innerHTML = `
         <tr>
-          <td colspan="7" class="text-center text-muted">
+          <td colspan="8" class="text-center text-muted">
             No hay fichajes disponibles
           </td>
         </tr>
@@ -154,7 +160,7 @@ async function loadFichajes() {
 
     lista.innerHTML = `
       <tr>
-        <td colspan="7" class="text-danger text-center">
+        <td colspan="8" class="text-danger text-center">
           Error cargando fichajes
         </td>
       </tr>

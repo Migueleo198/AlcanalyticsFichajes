@@ -19,7 +19,7 @@ for ($i = 6; $i <= 21; $i++) {
     $horasLabels[] = sprintf('%02d:00', $i);
     $horasData[]   = $horasMap[$i] ?? 0;
 }
-$maxHoraEntradas = max($horasData ?: [1]);
+$maxHoraEntradas = max($horasData ?: [1]) ?: 1;
 ?>
 
 <div class="main-wrapper">
@@ -157,7 +157,7 @@ const DF=<?= json_encode(array_map('intval',$diasFich)) ?>;
 const DH=<?= json_encode(array_map('floatval',$diasHoras)) ?>;
 const HL=<?= json_encode($horasLabels) ?>;
 const HD=<?= json_encode($horasData) ?>;
-const maxH=<?= $maxHoraEntradas ?>;
+const maxH=Math.max(<?= $maxHoraEntradas ?>, 1);
 
 new Chart(document.getElementById('chartActDiaria'),{type:'line',data:{labels:DL,datasets:[
   {label:'Empleados activos',data:DE,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',tension:.4,fill:true,pointRadius:3},

@@ -54,12 +54,14 @@
       <?php endif; ?>
 
       <!-- JORNADAS -->
-      <a data-bs-toggle="collapse" href="#jornadasMenu" role="button">
+      <?php $jornadasActivo = (strpos($_SERVER['REQUEST_URI'], '/Jornadas') !== false || strpos($_SERVER['REQUEST_URI'], '/AsignarJornadas') !== false); ?>
+      <a data-bs-toggle="collapse" href="#jornadasMenu" role="button"
+         class="<?= $jornadasActivo ? 'active' : '' ?>">
         <i class="bi bi-kanban me-2"></i>Jornadas
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3" id="jornadasMenu">
+      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>" id="jornadasMenu">
 
         <a href="<?= RUTA_URL ?>/Jornadas/index"
            class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
@@ -94,12 +96,14 @@
       </a>
 
       <!-- AUSENCIAS -->
-      <a data-bs-toggle="collapse" href="#bajasMenu" role="button">
+      <?php $ausenciasActivo = (strpos($_SERVER['REQUEST_URI'], '/Ausencias') !== false || strpos($_SERVER['REQUEST_URI'], '/Bajas') !== false); ?>
+      <a data-bs-toggle="collapse" href="#bajasMenu" role="button"
+         class="<?= $ausenciasActivo ? 'active' : '' ?>">
         <i class="bi bi-person-dash me-2"></i>Ausencias
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3" id="bajasMenu">
+      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>" id="bajasMenu">
 
         <a href="<?= RUTA_URL ?>/Ausencias/index"
            class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
@@ -107,7 +111,7 @@
         </a>
 
         <a href="<?= RUTA_URL ?>/Bajas/visualizar"
-           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/gestionar') ? 'active' : '' ?>">
+           class="<?= ($_SERVER['REQUEST_URI'] == '/Bajas/visualizar') ? 'active' : '' ?>">
           <i class="bi bi-clipboard-data me-2"></i>Gestión
         </a>
 
@@ -116,12 +120,14 @@
       <!-- ESTADÍSTICAS -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
 
-        <a data-bs-toggle="collapse" href="#reportesMenu" role="button">
+        <?php $estadisticasActivo = (strpos($_SERVER['REQUEST_URI'], '/Estadisticas') !== false); ?>
+        <a data-bs-toggle="collapse" href="#reportesMenu" role="button"
+           class="<?= $estadisticasActivo ? 'active' : '' ?>">
           <i class="bi bi-bar-chart me-2"></i>Estadísticas
           <i class="bi bi-chevron-down float-end"></i>
         </a>
 
-        <div class="collapse ps-3" id="reportesMenu">
+        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>" id="reportesMenu">
 
           <a href="<?= RUTA_URL ?>/Estadisticas/resumen"
              class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/resumen') !== false) ? 'active' : '' ?>">
@@ -218,12 +224,13 @@
       <?php endif; ?>
 
       <!-- JORNADAS -->
-      <a data-bs-toggle="collapse" href="#mobileJornadasMenu" role="button">
+      <a data-bs-toggle="collapse" href="#mobileJornadasMenu" role="button"
+         class="<?= $jornadasActivo ? 'active' : '' ?>">
         <i class="bi bi-kanban me-2"></i>Jornadas
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3" id="mobileJornadasMenu">
+      <div class="collapse ps-3 <?= $jornadasActivo ? 'show' : '' ?>" id="mobileJornadasMenu">
 
         <a href="<?= RUTA_URL ?>/Jornadas/index"
            class="<?= ($_SERVER['REQUEST_URI'] == '/Jornadas/index') ? 'active' : '' ?>">
@@ -258,12 +265,13 @@
       </a>
 
       <!-- AUSENCIAS -->
-      <a data-bs-toggle="collapse" href="#mobileBajasMenu" role="button">
+      <a data-bs-toggle="collapse" href="#mobileBajasMenu" role="button"
+         class="<?= $ausenciasActivo ? 'active' : '' ?>">
         <i class="bi bi-person-dash me-2"></i>Ausencias
         <i class="bi bi-chevron-down float-end"></i>
       </a>
 
-      <div class="collapse ps-3" id="mobileBajasMenu">
+      <div class="collapse ps-3 <?= $ausenciasActivo ? 'show' : '' ?>" id="mobileBajasMenu">
 
         <a href="<?= RUTA_URL ?>/Ausencias/index"
            class="<?= ($_SERVER['REQUEST_URI'] == '/Ausencias/index') ? 'active' : '' ?>">
@@ -280,12 +288,13 @@
       <!-- ESTADÍSTICAS -->
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
 
-        <a data-bs-toggle="collapse" href="#mobileReportesMenu" role="button">
+        <a data-bs-toggle="collapse" href="#mobileReportesMenu" role="button"
+           class="<?= $estadisticasActivo ? 'active' : '' ?>">
           <i class="bi bi-bar-chart me-2"></i>Estadísticas
           <i class="bi bi-chevron-down float-end"></i>
         </a>
 
-        <div class="collapse ps-3" id="mobileReportesMenu">
+        <div class="collapse ps-3 <?= $estadisticasActivo ? 'show' : '' ?>" id="mobileReportesMenu">
 
           <a href="<?= RUTA_URL ?>/Estadisticas/resumen"
              class="<?= (strpos($_SERVER['REQUEST_URI'], '/Estadisticas/resumen') !== false) ? 'active' : '' ?>">
