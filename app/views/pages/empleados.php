@@ -3,7 +3,6 @@
 <div class="main-wrapper">
 <?php require_once RUTA_APP . '/views/inc/sidebar.php'; ?>
 
-<div class="main-wrapper container-fluid">
 <div class="content">
 
   <!-- TOPBAR -->
@@ -160,7 +159,6 @@
 
   </div>
 
-</div>
 </div>
 </div>
 

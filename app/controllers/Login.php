@@ -300,7 +300,8 @@ class Login extends Controller
         $token = trim($_GET['token'] ?? '');
 
         if (!$token) {
-            die('Token inválido');
+            header("Location: " . RUTA_URL . "/login?error=token");
+            exit;
         }
 
         // Search valid token
@@ -321,7 +322,8 @@ class Login extends Controller
         }
 
         if (!$registroValido) {
-            die('Token inválido o expirado');
+            header("Location: " . RUTA_URL . "/login?error=token_expirado");
+            exit;
         }
 
         $datos = [

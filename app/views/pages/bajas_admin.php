@@ -117,10 +117,10 @@
       <?php foreach ($datos['bajas'] as $baja): ?>
 
         <tr>
-          <td><?= $baja['usuario'] ?></td>
-          <td><?= $baja['motivo'] ?></td>
-          <td><?= $baja['fecha_inicio'] ?></td>
-          <td><?= $baja['fecha_fin'] ?? '-' ?></td>
+          <td><?= htmlspecialchars($baja['usuario'] ?? '') ?></td>
+          <td><?= htmlspecialchars($baja['motivo'] ?? '') ?></td>
+          <td><?= htmlspecialchars($baja['fecha_inicio'] ?? '') ?></td>
+          <td><?= htmlspecialchars($baja['fecha_fin'] ?? '-') ?></td>
 
           <td>
             <?php

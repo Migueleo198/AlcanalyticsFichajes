@@ -414,6 +414,44 @@ public function getTokenByUser($id)
     ]);
 }
 
+    // =========================
+    // ACTUALIZAR PERFIL PROPIO (solo campos seguros)
+    // =========================
+    public function actualizarPerfil($idUsuario, $datos)
+    {
+        $stmt = $this->db->prepare("
+            UPDATE Usuario SET
+                nombre           = :nombre,
+                apellidos        = :apellidos,
+                email            = :email,
+                telefono         = :telefono,
+                fecha_nacimiento = :fecha_nacimiento
+            WHERE id_usuario = :id
+        ");
+
+        return $stmt->execute([
+            ':nombre'           => $datos['nombre']           ?? '',
+            ':apellidos'        => $datos['apellidos']        ?? '',
+            ':email'            => $datos['email']            ?? '',
+            ':telefono'         => $datos['telefono']         ?? '',
+            ':fecha_nacimiento' => !empty($datos['fecha_nacimiento']) ? $datos['fecha_nacimiento'] : null,
+            ':id'               => $idUsuario,
+        ]);
+    }
+
+    // Verifica si la contraseña actual es correcta
+    public function verificarPassword($idUsuario, $password)
+    {
+        $stmt = $this->db->prepare("
+            SELECT contraseña FROM Usuario WHERE id_usuario = :id LIMIT 1
+        ");
+        $stmt->execute([':id' => $idUsuario]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) return false;
+        return password_verify($password, $row['contraseña']) || $password === $row['contraseña'];
+    }
+
     // ── FIX: was missing — saves the new hashed password ─────────────────
     public function actualizarPassword($idUsuario, $nuevaPassword)
     {

@@ -6,14 +6,20 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 
 class Informes extends Controller {
 
-    public function index() {
-
-        session_start();
-
+    private function checkAuth()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");
             exit;
         }
+    }
+
+    public function index() {
+
+        $this->checkAuth();
 
         $db = new Database();
         $conexion = $db->conectar();
@@ -31,29 +37,22 @@ class Informes extends Controller {
 
     public function generar() {
 
-        session_start();
-
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: " . RUTA_URL . "/login");
-            exit;
-        }
+        $this->checkAuth();
 
         $desde = $_GET['desde'] ?? null;
         $hasta = $_GET['hasta'] ?? null;
 
-        // ✅ NUEVO: múltiples usuarios
         $usuarios = $_GET['usuarios'] ?? [];
 
-        // 🔥 NORMALIZAR (evita errores)
         if (!is_array($usuarios)) {
             $usuarios = [$usuarios];
         }
 
-        // limpiar valores
         $usuarios = array_filter($usuarios, 'is_numeric');
 
         if (!$desde || !$hasta) {
-            die("Faltan fechas");
+            header("Location: " . RUTA_URL . "/Informes/index?error=fechas");
+            exit;
         }
 
         $db = new Database();
@@ -73,17 +72,11 @@ class Informes extends Controller {
 
     public function generarPDF() {
 
-        session_start();
-
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: " . RUTA_URL . "/login");
-            exit;
-        }
+        $this->checkAuth();
 
         $desde = $_GET['desde'] ?? '';
         $hasta = $_GET['hasta'] ?? '';
 
-        // ✅ NUEVO: múltiples usuarios
         $usuarios = $_GET['usuarios'] ?? [];
 
         if (!is_array($usuarios)) {
@@ -93,7 +86,8 @@ class Informes extends Controller {
         $usuarios = array_filter($usuarios, 'is_numeric');
 
         if (empty($desde) || empty($hasta)) {
-            die("Faltan fechas");
+            header("Location: " . RUTA_URL . "/Informes/index?error=fechas");
+            exit;
         }
 
         $db = new Database();
