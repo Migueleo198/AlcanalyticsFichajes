@@ -99,42 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // ─────────────────────────────────────────────
-  // 🔔 NOTIFICACIONES
-  // ─────────────────────────────────────────────
-  const notificaciones = [
-    "Nuevo fichaje registrado",
-    "Contrato por vencer",
-    "Actualización completada"
-  ];
-
-  function renderNotificaciones() {
-
-    const lista    = document.getElementById("listaNotificaciones");
-    const contador = document.getElementById("contadorNotificaciones");
-
-    if (!lista || !contador) return;
-
-    lista.innerHTML = `
-      <li class="fw-bold mb-2">
-        Notificaciones
-      </li>
-    `;
-
-    notificaciones.forEach(n => {
-
-      const li = document.createElement("li");
-
-      li.className = "dropdown-item";
-      li.textContent = n;
-
-      lista.appendChild(li);
-    });
-
-    contador.textContent = notificaciones.length;
-  }
-
-  renderNotificaciones();
+  // Notificaciones se inicializan fuera del guard (ver abajo)
 
   // ─────────────────────────────────────────────
   // 🚗 MATRÍCULAS HELPERS
@@ -420,4 +385,86 @@ document.addEventListener("DOMContentLoaded", function () {
     filtrarTabla
   );
 
+});
+
+// =============================================================
+// 🔔 NOTIFICACIONES — sin guard, corre en TODAS las páginas
+// =============================================================
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const lista    = document.getElementById("listaNotificaciones");
+  const contador = document.getElementById("contadorNotificaciones");
+
+  if (!lista || !contador) return;
+
+  // Estado de carga
+  contador.textContent = "…";
+  lista.innerHTML = `<li class="px-3 py-2 text-muted small">Cargando…</li>`;
+
+  try {
+    const res  = await fetch((typeof RUTA_URL !== "undefined" ? RUTA_URL : "") + "/Notificaciones/getNotificaciones");
+    const data = await res.json();
+
+    if (!data.success || !data.items) throw new Error("bad response");
+
+    if (data.total === 0) {
+      // Sin notificaciones
+      contador.style.display = "none";
+      lista.innerHTML = `
+        <li class="px-3 py-3 text-center text-muted small">
+          <i class="bi bi-check-circle me-1 text-success"></i>Sin notificaciones pendientes
+        </li>`;
+      return;
+    }
+
+    // Badge con total
+    contador.style.display = "";
+    contador.textContent   = data.total > 99 ? "99+" : data.total;
+
+    // Cabecera
+    lista.innerHTML = `
+      <li class="px-3 pb-2 pt-1">
+        <span class="fw-bold">Notificaciones</span>
+        <span class="badge bg-danger ms-1">${data.total}</span>
+      </li>
+      <li><hr class="dropdown-divider my-0"></li>`;
+
+    const colores = {
+      danger:  { bg: "#fef2f2", color: "#b91c1c" },
+      warning: { bg: "#fffbeb", color: "#92400e" },
+      success: { bg: "#f0fdf4", color: "#14532d" },
+      primary: { bg: "#eff6ff", color: "#1e40af" },
+      info:    { bg: "#f0f9ff", color: "#0c4a6e" },
+    };
+
+    data.items.forEach(item => {
+      const col = colores[item.tipo] || colores.primary;
+      const href = (typeof RUTA_URL !== "undefined" ? RUTA_URL : "") + item.url;
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 notif-item"
+           href="${href}"
+           style="border-left:3px solid ${col.color}; background:${col.bg};">
+          <i class="bi ${item.icono} fs-5" style="color:${col.color};flex-shrink:0"></i>
+          <span class="small flex-grow-1" style="color:#1f2937;">${item.mensaje}</span>
+          <span class="badge rounded-pill" style="background:${col.color}; color:#fff;">${item.count}</span>
+        </a>`;
+      lista.appendChild(li);
+    });
+
+    // Pie con enlace de gestión
+    const pieLi = document.createElement("li");
+    pieLi.innerHTML = `
+      <hr class="dropdown-divider my-0">
+      <a class="dropdown-item text-center small text-primary py-2" href="${(typeof RUTA_URL !== "undefined" ? RUTA_URL : "")}/home/index">
+        Ver todas
+      </a>`;
+    lista.appendChild(pieLi);
+
+  } catch (err) {
+    console.error("Error cargando notificaciones:", err);
+    contador.textContent = "!";
+    lista.innerHTML = `<li class="px-3 py-2 text-danger small">Error al cargar</li>`;
+  }
 });
