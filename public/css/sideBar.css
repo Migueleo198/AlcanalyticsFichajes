@@ -96,7 +96,12 @@
 main {
     margin-left: 260px;
     width: calc(100% - 260px);
-    min-height: 100vh;
+    min-height: 0; /* flex del body/main-wrapper gestiona la altura */
+}
+
+footer.footer-no-login {
+    margin-left: 260px;
+    width: calc(100% - 260px);
 }
 
 /* ================================
@@ -141,6 +146,12 @@ main {
         margin-left: 0;
         width: 100%;
         padding-top: 60px;
+        min-height: 0;
+    }
+
+    footer.footer-no-login {
+        margin-left: 0;
+        width: 100%;
     }
 }
 

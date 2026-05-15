@@ -12,17 +12,28 @@
 // =========================
 
 $filas = $datos['datos'] ?? $datos ?? [];
-
 $desde = $datos['desde'] ?? ($desde ?? '');
 $hasta = $datos['hasta'] ?? ($hasta ?? '');
 
-$totalHoras = 0;
-$totalExtras = 0;
+// Precalcular totales ANTES de renderizar las KPI cards
+$totalHoras   = 0;
+$totalExtras  = 0;
+$totalNetas   = 0;
+$totalDescanso = 0;
 
-// =========================
-// PDF URL (MULTI-USUARIO SAFE)
-// =========================
-$pdfUrl = RUTA_URL . "/informes/generarPDF?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
+foreach ($filas as $fila) {
+    $totalHoras    += (float)($fila['horas_ordinarias'] ?? 0);
+    $totalExtras   += (float)($fila['horas_extra']      ?? 0);
+    $totalNetas    += (float)($fila['horas_netas']      ?? 0);
+    $totalDescanso += (float)($fila['horas_descanso']   ?? 0);
+}
+$totalHoras    = round($totalHoras,    1);
+$totalExtras   = round($totalExtras,   1);
+$totalNetas    = round($totalNetas,    1);
+$totalDescanso = round($totalDescanso, 1);
+
+// URL del PDF (mayúsculas correctas para el router)
+$pdfUrl = RUTA_URL . "/Informes/generarPDF?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
 
 // si hubiera usuarios en el futuro
 if (!empty($_GET['usuarios'])) {
@@ -69,24 +80,28 @@ if (!empty($_GET['usuarios'])) {
 
 <!-- CARDS -->
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card card-custom p-3 cardhov">
-            <h6>Total registros</h6>
-            <h3><?= count($filas) ?></h3>
+    <div class="col-6 col-md-3">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Registros</h6>
+            <h3 class="mb-0"><?= count($filas) ?></h3>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card card-custom p-3 cardhov">
-            <h6>Horas ordinarias</h6>
-            <h3><?= $totalHoras ?>h</h3>
+    <div class="col-6 col-md-3">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">H. netas</h6>
+            <h3 class="mb-0 text-primary"><?= $totalNetas ?>h</h3>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card card-custom p-3 cardhov">
-            <h6>Horas extra</h6>
-            <h3><?= $totalExtras ?>h</h3>
+    <div class="col-6 col-md-3">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Ordinarias</h6>
+            <h3 class="mb-0 text-success"><?= $totalHoras ?>h</h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Horas extra</h6>
+            <h3 class="mb-0 <?= $totalExtras > 0 ? 'text-danger' : 'text-muted' ?>"><?= $totalExtras ?>h</h3>
         </div>
     </div>
 </div>
@@ -118,7 +133,8 @@ if (!empty($_GET['usuarios'])) {
                     <th>Fecha</th>
                     <th>Entrada</th>
                     <th>Salida</th>
-                    <th>Horas</th>
+                    <th>H. Netas</th>
+                    <th>Ordinarias</th>
                     <th>Extra</th>
                     <th>Descanso</th>
                     <th>Estado</th>
@@ -130,18 +146,16 @@ if (!empty($_GET['usuarios'])) {
 
             <?php if (empty($filas)): ?>
                 <tr>
-                    <td colspan="9" class="text-center">No hay datos</td>
+                    <td colspan="10" class="text-center text-muted py-4">No hay datos para el período seleccionado</td>
                 </tr>
             <?php else: ?>
 
                 <?php foreach ($filas as $fila): ?>
 
                     <?php
-                        $horas = (float)($fila['horas_ordinarias'] ?? 0);
-                        $extras = (float)($fila['horas_extra'] ?? 0);
-
-                        $totalHoras += $horas;
-                        $totalExtras += $extras;
+                        $horas  = round((float)($fila['horas_ordinarias'] ?? 0), 2);
+                        $extras = round((float)($fila['horas_extra']      ?? 0), 2);
+                        $netas  = round((float)($fila['horas_netas']      ?? 0), 2);
                     ?>
 
                     <tr>
@@ -150,12 +164,13 @@ if (!empty($_GET['usuarios'])) {
                         </td>
                         <td><?= htmlspecialchars($fila['fecha'] ?? '') ?></td>
                         <td><?= htmlspecialchars($fila['hora_entrada'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($fila['hora_salida'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($fila['hora_salida']  ?? '-') ?></td>
 
-                        <td><?= $horas ?> h</td>
-                        <td><?= $extras ?> h</td>
+                        <td class="fw-semibold text-primary"><?= $netas ?>h</td>
+                        <td class="text-success"><?= $horas ?>h</td>
+                        <td><?= $extras > 0 ? '<span class="badge bg-warning text-dark">'.$extras.'h</span>' : '<span class="text-muted">—</span>' ?></td>
 
-                        <td><?= round($fila['horas_descanso'] ?? 0, 2) ?> h</td>
+                        <td class="text-muted"><?= round($fila['horas_descanso'] ?? 0, 2) ?>h</td>
 
                         <td>
                             <?php
@@ -187,18 +202,23 @@ if (!empty($_GET['usuarios'])) {
 </div>
 
 <!-- TOTALS -->
-<div class="row mt-3">
-    <div class="col-md-6">
-        <div class="card card-custom p-3">
-            <h6>Total horas ordinarias</h6>
-            <h4><?= $totalHoras ?> h</h4>
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Total horas netas</h6>
+            <h4 class="mb-0 text-primary"><?= $totalNetas ?>h</h4>
         </div>
     </div>
-
-    <div class="col-md-6">
-        <div class="card card-custom p-3">
-            <h6>Total horas extra</h6>
-            <h4><?= $totalExtras ?> h</h4>
+    <div class="col-md-4">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Total ordinarias</h6>
+            <h4 class="mb-0 text-success"><?= $totalHoras ?>h</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom p-3 text-center">
+            <h6 class="text-muted small mb-1">Total horas extra</h6>
+            <h4 class="mb-0 <?= $totalExtras > 0 ? 'text-danger' : 'text-muted' ?>"><?= $totalExtras ?>h</h4>
         </div>
     </div>
 </div>
