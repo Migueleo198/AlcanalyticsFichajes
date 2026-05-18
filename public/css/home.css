@@ -20,16 +20,6 @@ body {
   border-right: 1px solid #e5e7eb;
 }
 
-#contadorNotificaciones {
-  font-size: 12px;
-  width: 17px;
-  height: 17px;
-  padding: 0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .badge-fix {
   font-size: 12px;
@@ -84,12 +74,6 @@ body {
 }
 
 /* CARDS */
-.cardhov {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
 .cardhov {
   border: none;
   border-radius: 12px;

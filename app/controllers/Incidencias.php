@@ -16,7 +16,9 @@ class Incidencias extends Controller
 
     private function checkAuth()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if (!isset($_SESSION['id_usuario'])) {
             header("Location: " . RUTA_URL . "/login");

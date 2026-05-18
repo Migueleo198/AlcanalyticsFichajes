@@ -1,3 +1,7 @@
+function escAttr(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 // =========================
 // LOAD TASKS
 // =========================
@@ -34,7 +38,7 @@ function renderTasks(response) {
 
             let acciones = '';
 
-            if (USER_ROL === 'Administrador' || USER_ID == tarea.id_usuario) {
+            if (USER_ROL === 'Administrador' || String(USER_ID) === String(tarea.id_usuario)) {
 
                 acciones = `
 <td>
@@ -45,8 +49,8 @@ function renderTasks(response) {
 
         data-id="${tarea.id_tarea}"
         data-id_fichaje="${tarea.id_fichaje}"
-        data-titulo="${tarea.titulo}"
-        data-descripcion="${tarea.descripcion}"
+        data-titulo="${escAttr(tarea.titulo)}"
+        data-descripcion="${escAttr(tarea.descripcion)}"
         data-hora_inicio="${tarea.hora_inicio}"
         data-hora_fin="${tarea.hora_fin}"
         data-tiempo_total="${tarea.tiempo_total}"
@@ -66,8 +70,8 @@ function renderTasks(response) {
 
         data-id="${tarea.id_tarea}"
         data-id_fichaje="${tarea.id_fichaje}"
-        data-titulo="${tarea.titulo}"
-        data-descripcion="${tarea.descripcion}"
+        data-titulo="${escAttr(tarea.titulo)}"
+        data-descripcion="${escAttr(tarea.descripcion)}"
         data-hora_inicio="${tarea.hora_inicio || ''}"
         data-hora_fin="${tarea.hora_fin || ''}"
         data-tiempo_total="${tarea.tiempo_total || ''}"
