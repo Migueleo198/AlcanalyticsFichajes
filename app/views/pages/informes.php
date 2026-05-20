@@ -72,76 +72,67 @@
   <!-- FORM -->
   <div class="card card-custom p-4">
 
-    <div class="d-flex justify-content-between mb-3">
-      <h5>Generar informe</h5>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="mb-0">Generar informe</h5>
       <button class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-file-earmark-text"></i> Opciones
+        <i class="bi bi-file-earmark-text me-1"></i>Opciones
       </button>
     </div>
 
     <div class="row g-3">
 
       <div class="col-md-4">
-        <label class="form-label">Desde</label>
+        <label class="form-label fw-semibold">Desde <span class="text-danger">*</span></label>
         <input type="date" id="desde" class="form-control">
+        <div class="mt-1 d-flex gap-1">
+          <button id="btnSemanal" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-calendar-week me-1"></i>Esta semana
+          </button>
+          <button id="btnMensual" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-calendar-month me-1"></i>Este mes
+          </button>
+        </div>
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Hasta</label>
+        <label class="form-label fw-semibold">Hasta <span class="text-danger">*</span></label>
         <input type="date" id="hasta" class="form-control">
+        <small id="diasSeleccionados" class="text-muted mt-1 d-block"></small>
       </div>
 
       <div class="col-md-4">
-        <label class="form-label">Usuarios</label>
-
+        <label class="form-label fw-semibold">
+          <?= $_SESSION['rol'] === 'Administrador' ? 'Empleados' : 'Empleado' ?>
+        </label>
         <select id="usuario" class="form-select" multiple size="5">
-
           <?php if ($_SESSION['rol'] === 'Administrador'): ?>
-
             <?php foreach ($datos['usuarios'] as $u): ?>
               <option value="<?= $u['id_usuario'] ?>">
-                <?= $u['nombre'] . " " . $u['apellidos'] ?>
+                <?= htmlspecialchars($u['nombre'] . ' ' . $u['apellidos']) ?>
               </option>
             <?php endforeach; ?>
-
           <?php else: ?>
-
-            <!-- Usuario normal: solo él mismo -->
-            <option value="<?= $_SESSION['id_usuario'] ?>" selected>
-              <?= $_SESSION['nombre'] ?? 'Mi usuario' ?>
+            <option value="<?= htmlspecialchars($_SESSION['id_usuario']) ?>" selected>
+              <?= htmlspecialchars($_SESSION['nombre'] ?? 'Mi usuario') ?>
             </option>
-
           <?php endif; ?>
-
         </select>
-
-        <small class="text-muted">
-          Mantén Ctrl (o Cmd en Mac) para seleccionar varios usuarios
-        </small>
-
+        <?php if ($_SESSION['rol'] === 'Administrador'): ?>
+        <small class="text-muted">Ctrl / Cmd para seleccionar varios</small>
+        <?php endif; ?>
       </div>
 
     </div>
 
-    <!-- BOTONES -->
-    <div class="mt-4 d-flex gap-2 flex-wrap">
-
-      <button id="btnSemanal" class="btn btn-success">
-        <i class="bi bi-calendar-week"></i> Semanal
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="mt-4 d-flex gap-2 align-items-center flex-wrap">
+      <button id="btnGenerarInforme" class="btn btn-primary px-4">
+        <i class="bi bi-play-fill me-1"></i>Generar
       </button>
-
-      <button id="btnMensual" class="btn btn-info">
-        <i class="bi bi-calendar-month"></i> Mensual
-      </button>
-
-      <button id="btnGenerarInforme" class="btn btn-primary">
-        <i class="bi bi-download"></i> Descargar PDF
-      </button>
-
       <button id="btnLimpiarFiltros" class="btn btn-outline-secondary">
-        Limpiar
+        <i class="bi bi-x me-1"></i>Limpiar
       </button>
-
+      <span id="infoModo" class="text-muted small ms-2"></span>
     </div>
 
   </div>
