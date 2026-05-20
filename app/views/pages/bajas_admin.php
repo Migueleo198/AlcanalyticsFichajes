@@ -172,6 +172,7 @@
 
 
           <script>
+var RUTA_URL = "<?= RUTA_URL ?>";
 document.addEventListener('DOMContentLoaded', () => {
     document.dispatchEvent(new Event('tableReady'));
 });
@@ -179,6 +180,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtroBajas.js"></script>
-
 
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>

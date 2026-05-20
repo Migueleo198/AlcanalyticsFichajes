@@ -7,11 +7,28 @@
 
   <!-- TOPBAR -->
   <div class="topbar d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Vacaciones</h5>
     <div class="d-flex align-items-center gap-2">
+      <h5 class="mb-0">Vacaciones</h5>
       <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vacacionesModal">
         <i class="bi bi-plus-lg me-1"></i>Solicitar vacaciones
       </button>
+    </div>
+    <div class="d-flex align-items-center">
+      <!-- NOTIFICACIONES -->
+      <div class="dropdown me-3 position-relative">
+        <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon"
+           data-bs-toggle="dropdown" style="cursor:pointer;"></i>
+        <span id="contadorNotificaciones"
+              class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+          0
+        </span>
+        <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
+          <li class="fw-bold mb-2">Notificaciones</li>
+        </ul>
+      </div>
+      <!-- PERFIL -->
+      <i class="bi bi-person-circle fs-5 profile"
+         data-user-id="<?= htmlspecialchars($_SESSION['id_usuario'] ?? '') ?>"></i>
     </div>
   </div>
 
@@ -173,19 +190,21 @@
         <h5 class="modal-title"><i class="bi bi-airplane me-2"></i>Solicitar vacaciones</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="<?= RUTA_URL ?>/Vacaciones/add">
+      <form method="POST" action="<?= RUTA_URL ?>/Vacaciones/add" data-validate>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label fw-semibold">Fecha inicio</label>
-            <input type="date" name="fecha_inicio" class="form-control" required>
+            <label class="form-label fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
+            <input type="date" name="fecha_inicio" id="vac_inicio" class="form-control" required
+                   min="<?= date('Y-m-d') ?>">
           </div>
           <div class="mb-3">
-            <label class="form-label fw-semibold">Fecha fin</label>
-            <input type="date" name="fecha_fin" class="form-control" required>
+            <label class="form-label fw-semibold">Fecha fin <span class="text-danger">*</span></label>
+            <input type="date" name="fecha_fin" class="form-control" required
+                   data-date-after="vac_inicio" min="<?= date('Y-m-d') ?>">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Comentario <span class="text-muted fw-normal">(opcional)</span></label>
-            <textarea name="comentario" class="form-control" rows="2" placeholder="Motivo o notas…"></textarea>
+            <textarea name="comentario" class="form-control" rows="2" placeholder="Motivo o notas…" data-no-valid></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -226,5 +245,7 @@ document.getElementById('buscadorVac')?.addEventListener('input', function () {
 .vac-table tbody tr:last-child td{border-bottom:none;}
 .vac-table tbody tr:hover{background:#f8fafc;}
 </style>
+
+<script>var RUTA_URL = "<?= RUTA_URL ?>";</script>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php' ?>

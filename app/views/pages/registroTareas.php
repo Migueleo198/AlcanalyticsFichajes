@@ -384,7 +384,7 @@
 <script>
   const USER_ROL = "<?= $_SESSION['rol'] ?? '' ?>";
   const USER_ID = "<?= $_SESSION['id_usuario'] ?? '' ?>";
-  const RUTA_URL = "<?= RUTA_URL ?>";
+  var RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureTareas.js"></script>

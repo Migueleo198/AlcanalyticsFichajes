@@ -70,7 +70,7 @@
 </div>
 
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
+var RUTA_URL = "<?= RUTA_URL ?>";
 
 window.fichajeActivo = <?= json_encode($datos['fichaje'] ?? null); ?>;
 window.descansos = <?= json_encode($datos['descansos'] ?? []); ?>;

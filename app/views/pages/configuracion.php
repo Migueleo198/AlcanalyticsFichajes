@@ -91,7 +91,7 @@
           <i class="bi bi-person-vcard me-2 text-primary"></i>Información personal
         </div>
         <div class="cfg-card-body">
-          <form method="POST" action="<?= RUTA_URL ?>/Configuracion/actualizarPerfil">
+          <form method="POST" action="<?= RUTA_URL ?>/Configuracion/actualizarPerfil" data-validate>
 
             <div class="row g-3">
               <div class="col-6">
@@ -154,13 +154,13 @@
           <i class="bi bi-shield-lock me-2 text-warning"></i>Cambiar contraseña
         </div>
         <div class="cfg-card-body">
-          <form method="POST" action="<?= RUTA_URL ?>/Configuracion/cambiarPassword">
+          <form method="POST" action="<?= RUTA_URL ?>/Configuracion/cambiarPassword" data-validate>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">Contraseña actual</label>
               <div class="input-group">
                 <input type="password" name="password_actual" id="passActual"
-                       class="form-control" required autocomplete="current-password">
+                       class="form-control" required minlength="1" autocomplete="current-password">
                 <button type="button" class="btn btn-outline-secondary btn-toggle-pass" data-target="passActual">
                   <i class="bi bi-eye"></i>
                 </button>
@@ -171,7 +171,7 @@
               <label class="form-label fw-semibold">Nueva contraseña</label>
               <div class="input-group">
                 <input type="password" name="password_nueva" id="passNueva"
-                       class="form-control" required autocomplete="new-password" minlength="6">
+                       class="form-control" required autocomplete="new-password" minlength="6" data-no-valid>
                 <button type="button" class="btn btn-outline-secondary btn-toggle-pass" data-target="passNueva">
                   <i class="bi bi-eye"></i>
                 </button>
@@ -183,7 +183,8 @@
               <label class="form-label fw-semibold">Confirmar contraseña</label>
               <div class="input-group">
                 <input type="password" name="password_confirma" id="passConfirma"
-                       class="form-control" required autocomplete="new-password">
+                       class="form-control" required autocomplete="new-password"
+                       data-match="passNueva" data-no-valid>
                 <button type="button" class="btn btn-outline-secondary btn-toggle-pass" data-target="passConfirma">
                   <i class="bi bi-eye"></i>
                 </button>

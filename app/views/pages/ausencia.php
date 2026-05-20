@@ -14,17 +14,14 @@
 
     <!-- NOTIFICACIONES -->
     <div class="dropdown me-3 position-relative">
-      <i class="bi bi-bell fs-5" data-bs-toggle="dropdown" style="cursor:pointer;"></i>
-
-      <span class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
-        3
+      <i class="bi bi-bell fs-5 shake-loop" id="notificacionesIcon"
+         data-bs-toggle="dropdown" style="cursor:pointer;"></i>
+      <span id="contadorNotificaciones"
+            class="position-absolute top-0 start-100 translate-middle bg-danger text-white badge-fix">
+        0
       </span>
-
-      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;">
+      <ul class="dropdown-menu dropdown-menu-end p-2" style="width:300px;" id="listaNotificaciones">
         <li class="fw-bold mb-2">Notificaciones</li>
-        <li class="dropdown-item">Nuevo fichaje registrado</li>
-        <li class="dropdown-item">Contrato por vencer</li>
-        <li class="dropdown-item">Actualización completada</li>
       </ul>
     </div>
 
@@ -182,7 +179,7 @@
 
 
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
+var RUTA_URL = "<?= RUTA_URL ?>";
 
 // ✅ CREAR NO REMUNERADA (endpoint nuevo)
 document.getElementById("formAusencia").onsubmit = function(e) {

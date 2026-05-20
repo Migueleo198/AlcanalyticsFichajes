@@ -56,12 +56,12 @@
         <h5 class="modal-title">Nueva jornada</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form id="formAddJornada">
+      <form id="formAddJornada" data-validate>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Empleado</label>
+            <label class="form-label fw-semibold">Empleado <span class="text-danger">*</span></label>
             <select name="id_usuario" class="form-select" required>
-              <option value="">Seleccionar</option>
+              <option value="">— Seleccionar empleado —</option>
               <?php foreach ($datos['usuarios'] as $u): ?>
               <option value="<?= $u['id_usuario'] ?>">
                 <?= htmlspecialchars($u['nombre'] . ' ' . $u['apellidos']) ?>
@@ -69,21 +69,25 @@
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Horas día</label>
-            <input type="number" step="0.1" min="0" name="horas_dia" class="form-control" required>
+          <div class="row g-3 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Horas/día <span class="text-danger">*</span></label>
+              <input type="number" step="0.5" min="0.5" max="24" name="horas_dia" class="form-control" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Horas/semana <span class="text-danger">*</span></label>
+              <input type="number" step="0.5" min="0.5" max="168" name="horas_semana" class="form-control" required>
+            </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Horas semana</label>
-            <input type="number" step="0.1" min="0" name="horas_semana" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fecha inicio</label>
-            <input type="date" name="fecha_inicio" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fecha fin</label>
-            <input type="date" name="fecha_fin" class="form-control">
+          <div class="row g-3 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha inicio</label>
+              <input type="date" name="fecha_inicio" id="add_inicio" class="form-control" data-no-valid>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha fin</label>
+              <input type="date" name="fecha_fin" class="form-control" data-date-after="add_inicio" data-no-valid>
+            </div>
           </div>
         </div>
         <div class="modal-footer">

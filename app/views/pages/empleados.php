@@ -166,7 +166,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="/user/addUser" method="POST">
+      <form action="/user/addUser" method="POST" data-validate>
 
         <div class="modal-header">
           <h5 class="modal-title">Añadir empleado</h5>
@@ -175,25 +175,66 @@
 
         <div class="modal-body">
 
-          <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" required>
-          <input type="text" name="apellidos" class="form-control mb-2" placeholder="Apellidos" required>
-          <input type="text" name="usuario" class="form-control mb-2" placeholder="Usuario" required>
-          <input type="password" name="contraseña" class="form-control mb-2" placeholder="Contraseña" required>
-          <input type="text" name="dni" class="form-control mb-2" placeholder="DNI" required>
-          <input type="text" name="telefono" class="form-control mb-2" placeholder="Teléfono">
-          <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+              <input type="text" name="nombre" class="form-control" placeholder="Nombre" required minlength="2">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" name="apellidos" class="form-control" placeholder="Apellidos" required minlength="2">
+            </div>
+          </div>
 
-          <!-- ✅ IMPORTANT FIX -->
-          <label class="form-label">Fecha nacimiento</label>
-          <input type="date" name="fecha_nacimiento" class="form-control mb-2">
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Usuario <span class="text-danger">*</span></label>
+              <input type="text" name="usuario" class="form-control" placeholder="nombre.apellido" required minlength="3" maxlength="50">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Contraseña <span class="text-danger">*</span></label>
+              <input type="password" name="contraseña" id="addPass" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+          </div>
 
-          <input type="text" name="matriculas" class="form-control mb-2" placeholder="Matrículas (separadas por coma)">
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">DNI <span class="text-danger">*</span></label>
+              <input type="text" name="dni" class="form-control" placeholder="00000000A" required
+                     pattern="[0-9]{8}[A-Za-z]" data-error-msg="Formato: 8 dígitos + letra">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Teléfono</label>
+              <input type="tel" name="telefono" class="form-control" placeholder="600000000"
+                     pattern="[0-9]{9}" data-error-msg="9 dígitos" data-no-valid>
+            </div>
+          </div>
 
-          <select name="rol" class="form-select mb-2" required>
-            <option value="Administrador">Administrador</option>
-            <option value="Trabajador">Trabajador</option>
-            <option value="Practicas">Practicas</option>
-          </select>
+          <div class="mb-1">
+            <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+            <input type="email" name="email" class="form-control" placeholder="correo@empresa.com" required>
+          </div>
+
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha nacimiento</label>
+              <input type="date" name="fecha_nacimiento" class="form-control" data-no-valid>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Rol <span class="text-danger">*</span></label>
+              <select name="rol" class="form-select" required>
+                <option value="">— Seleccionar —</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Trabajador">Trabajador</option>
+                <option value="Practicas">Prácticas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-1">
+            <label class="form-label fw-semibold">Matrículas <small class="text-muted">(separadas por coma)</small></label>
+            <input type="text" name="matriculas" class="form-control" placeholder="Ej: 1234ABC, 5678DEF" data-no-valid>
+          </div>
 
         </div>
 
@@ -213,7 +254,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="/user/editUser" method="POST">
+      <form action="/user/editUser" method="POST" data-validate>
 
         <div class="modal-header">
           <h5 class="modal-title">Editar empleado</h5>
@@ -224,12 +265,36 @@
 
           <input type="hidden" name="id" id="edit_id">
 
-          <input type="text" name="nombre" class="form-control mb-2">
-          <input type="text" name="apellidos" class="form-control mb-2">
-          <input type="text" name="usuario" class="form-control mb-2">
-          <input type="text" name="dni" class="form-control mb-2">
-          <input type="text" name="telefono" class="form-control mb-2">
-          <input type="email" name="email" class="form-control mb-2">
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+              <input type="text" name="nombre" class="form-control" required minlength="2">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" name="apellidos" class="form-control" required minlength="2">
+            </div>
+          </div>
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Usuario <span class="text-danger">*</span></label>
+              <input type="text" name="usuario" class="form-control" required minlength="3">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">DNI <span class="text-danger">*</span></label>
+              <input type="text" name="dni" class="form-control" required pattern="[0-9]{8}[A-Za-z]" data-error-msg="Formato: 8 dígitos + letra">
+            </div>
+          </div>
+          <div class="row g-2 mb-1">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Teléfono</label>
+              <input type="tel" name="telefono" class="form-control" pattern="[0-9]{9}" data-error-msg="9 dígitos" data-no-valid>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+              <input type="email" name="email" class="form-control" required>
+            </div>
+          </div>
 
           
           <label class="form-label">Fecha nacimiento</label>
@@ -318,6 +383,7 @@
 
 
 
+<script>var RUTA_URL = "<?= RUTA_URL ?>";</script>
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructureEmpleados.js"></script>
 <script type="module" src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>

@@ -146,58 +146,69 @@ class User extends Controller
     // =========================
     public function addUser()
     {
-        $this->checkAdmin();
         header('Content-Type: application/json; charset=utf-8');
+        $this->checkAdmin();
 
-        if (empty($_POST)) {
+        $nombre   = trim($_POST['nombre']    ?? '');
+        $usuario  = trim($_POST['usuario']   ?? '');
+        $password = $_POST['contraseña']     ?? '';
+        $email    = trim($_POST['email']     ?? '');
+
+        if (!$nombre || !$usuario || !$password || !$email) {
             echo json_encode([
                 "success" => false,
-                "message" => "Datos vacíos"
+                "message" => "Los campos Nombre, Usuario, Contraseña y Email son obligatorios"
             ]);
             exit;
         }
 
         $model = new UserModel();
 
-        // 1. CREATE USER
-        $userId = $model->crearUsuario([
-            'nombre'          => $_POST['nombre']           ?? '',
-            'apellidos'       => $_POST['apellidos']        ?? '',
-            'nombre_usuario'  => $_POST['usuario']          ?? '',
-            'contraseña'      => $_POST['contraseña']       ?? '',
-            'dni'             => $_POST['dni']              ?? '',
-            'telefono'        => $_POST['telefono']         ?? '',
-            'email'           => $_POST['email']            ?? '',
-            'rol'             => $_POST['rol']              ?? '',
-            'fecha_nacimiento'=> $_POST['fecha_nacimiento'] ?? ''  // ← ADDED
-        ]);
-
-        if (!$userId) {
-            echo json_encode([
-                "success" => false,
-                "message" => "Error al crear el usuario"
+        try {
+            $userId = $model->crearUsuario([
+                'nombre'           => $nombre,
+                'apellidos'        => trim($_POST['apellidos']        ?? ''),
+                'nombre_usuario'   => $usuario,
+                'contraseña'       => $password,
+                'dni'              => trim($_POST['dni']              ?? ''),
+                'telefono'         => trim($_POST['telefono']         ?? ''),
+                'email'            => $email,
+                'rol'              => $_POST['rol']                   ?? 'Trabajador',
+                'fecha_nacimiento' => $_POST['fecha_nacimiento']      ?? ''
             ]);
-            exit;
+
+            if (!$userId) {
+                echo json_encode(["success" => false, "message" => "No se pudo crear el usuario"]);
+                exit;
+            }
+
+            // Matrículas (comma-separated string o array)
+            $raw = $_POST['matriculas'] ?? [];
+            $matriculas = is_string($raw)
+                ? array_filter(array_map('trim', explode(',', $raw)))
+                : array_filter(array_map('trim', (array) $raw));
+
+            foreach ($matriculas as $m) {
+                $model->addMatricula($userId, $m);
+            }
+
+            echo json_encode([
+                "success"    => true,
+                "message"    => "Usuario creado correctamente",
+                "id_usuario" => $userId
+            ]);
+
+        } catch (Throwable $e) {
+            // Detectar violación de constraint UNIQUE (código SQLSTATE 23000)
+            $msg = "Error al crear el usuario";
+            if (str_contains($e->getMessage(), 'nombre_usuario') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                if (str_contains($e->getMessage(), 'nombre_usuario'))  $msg = "El nombre de usuario ya existe";
+                elseif (str_contains($e->getMessage(), 'dni'))         $msg = "El DNI ya está registrado";
+                elseif (str_contains($e->getMessage(), 'email'))       $msg = "El email ya está registrado";
+                else                                                    $msg = "Ya existe un usuario con esos datos";
+            }
+            echo json_encode(["success" => false, "message" => $msg]);
         }
-
-        // 2. ADD MATRICULAS — accepts both matriculas[] array and legacy comma-separated string
-        $raw = $_POST['matriculas'] ?? [];
-
-        if (is_string($raw)) {
-            $matriculas = array_filter(array_map('trim', explode(',', $raw)));
-        } else {
-            $matriculas = array_filter(array_map('trim', (array) $raw));
-        }
-
-        foreach ($matriculas as $m) {
-            $model->addMatricula($userId, $m);
-        }
-
-        echo json_encode([
-            "success"    => true,
-            "message"    => "Usuario creado correctamente",
-            "id_usuario" => $userId
-        ]);
 
         exit;
     }

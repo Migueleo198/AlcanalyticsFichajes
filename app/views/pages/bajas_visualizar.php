@@ -155,6 +155,7 @@
 
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/infrastructurePaginacion.js"></script>
+<script>var RUTA_URL = "<?= RUTA_URL ?>";</script>
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtroBajas.js"></script>
 
 <script>

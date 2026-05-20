@@ -84,7 +84,7 @@
 
 
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
+var RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>

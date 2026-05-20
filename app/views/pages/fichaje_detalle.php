@@ -213,7 +213,7 @@ $fichajesMes = array_filter($fichajes ?? [], function($f) use ($mesActual) {
 
 <!-- SCRIPTS -->
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
+var RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
 <!-- FIX: ensure tableReady always triggers AFTER DOM + modules -->

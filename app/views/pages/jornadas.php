@@ -96,7 +96,7 @@
 </div>
 
 <script>
-const RUTA_URL = "<?= RUTA_URL ?>";
+var RUTA_URL = "<?= RUTA_URL ?>";
 </script>
 
 <script>
