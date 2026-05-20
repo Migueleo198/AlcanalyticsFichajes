@@ -80,7 +80,22 @@
     field.classList.toggle('is-invalid', !!error);
     field.classList.toggle('is-valid',   !error && hasValue && !field.dataset.noValid);
 
-    // Buscar o crear el <div class="invalid-feedback">
+    // Si el campo está dentro de un .input-group, poner el feedback
+    // DESPUÉS del grupo (no entre el input y el botón)
+    const group = field.closest('.input-group');
+    if (group) {
+      group.classList.add('has-validation');
+      let fb = group.parentElement?.querySelector(':scope > .invalid-feedback');
+      if (!fb) {
+        fb = document.createElement('div');
+        fb.className = 'invalid-feedback';
+        group.insertAdjacentElement('afterend', fb);
+      }
+      fb.textContent = error;
+      return;
+    }
+
+    // Campo normal: feedback después del propio campo
     let fb = field.parentElement?.querySelector('.invalid-feedback');
     if (!fb) {
       fb = document.createElement('div');
@@ -141,10 +156,15 @@
 
       // Re-validar mientras escribe si ya tenía error
       form.addEventListener('input', e => {
-        if (e.target.matches('input, select, textarea')) {
-          if (e.target.classList.contains('is-invalid')) {
-            validarCampo(e.target);
-          }
+        if (!e.target.matches('input, select, textarea')) return;
+        if (e.target.classList.contains('is-invalid')) {
+          validarCampo(e.target);
+        }
+        // Si cambia el campo "original" de un data-match, re-validar el confirmador
+        const id = e.target.id;
+        if (id) {
+          const confirmer = form.querySelector(`[data-match="${id}"]`);
+          if (confirmer && confirmer.value) validarCampo(confirmer);
         }
       });
 

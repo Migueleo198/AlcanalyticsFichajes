@@ -91,46 +91,49 @@ class Configuracion extends Controller
     }
 
     // ============================================================
-    // CAMBIAR CONTRASEÑA
+    // CAMBIAR CONTRASEÑA (JSON — llamada AJAX)
     // ============================================================
     public function cambiarPassword()
     {
         $this->checkAuth();
+        header('Content-Type: application/json; charset=utf-8');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta");
+            echo json_encode(['ok' => false, 'msg' => 'Método no permitido']);
             exit;
         }
 
-        $userModel    = new UserModel();
-        $id           = (int) $_SESSION['id_usuario'];
-        $actual       = $_POST['password_actual']   ?? '';
-        $nueva        = $_POST['password_nueva']    ?? '';
-        $confirma     = $_POST['password_confirma'] ?? '';
+        $userModel = new UserModel();
+        $id        = (int) $_SESSION['id_usuario'];
+        $actual    = $_POST['password_actual']   ?? '';
+        $nueva     = $_POST['password_nueva']    ?? '';
+        $confirma  = $_POST['password_confirma'] ?? '';
 
         if (!$actual || !$nueva || !$confirma) {
-            header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta&err=campos_vacios");
+            echo json_encode(['ok' => false, 'msg' => 'Rellena todos los campos.']);
             exit;
         }
 
         if ($nueva !== $confirma) {
-            header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta&err=no_coinciden");
+            echo json_encode(['ok' => false, 'msg' => 'La nueva contraseña y la confirmación no coinciden.']);
             exit;
         }
 
         if (strlen($nueva) < 6) {
-            header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta&err=muy_corta");
+            echo json_encode(['ok' => false, 'msg' => 'La contraseña debe tener al menos 6 caracteres.']);
             exit;
         }
 
         if (!$userModel->verificarPassword($id, $actual)) {
-            header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta&err=pass_incorrecta");
+            echo json_encode(['ok' => false, 'msg' => 'La contraseña actual es incorrecta.']);
             exit;
         }
 
         $ok = $userModel->actualizarPassword($id, $nueva);
-        $destino = $ok ? 'ok=password' : 'err=password';
-        header("Location: " . RUTA_URL . "/Configuracion/index?tab=cuenta&{$destino}");
+        echo json_encode([
+            'ok'  => (bool) $ok,
+            'msg' => $ok ? 'Contraseña cambiada correctamente.' : 'Error al guardar. Inténtalo de nuevo.',
+        ]);
         exit;
     }
 

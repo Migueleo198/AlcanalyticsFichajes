@@ -154,7 +154,7 @@
           <i class="bi bi-shield-lock me-2 text-warning"></i>Cambiar contraseña
         </div>
         <div class="cfg-card-body">
-          <form method="POST" action="<?= RUTA_URL ?>/Configuracion/cambiarPassword" data-validate>
+          <form id="formCambiarPass" data-validate novalidate>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">Contraseña actual</label>
@@ -201,6 +201,8 @@
                 <div id="strengthBar" class="progress-bar" style="width:0%"></div>
               </div>
             </div>
+
+            <div id="passAlert" class="mt-2" style="display:none;"></div>
 
             <button type="submit" class="btn btn-warning px-4">
               <i class="bi bi-lock me-1"></i>Cambiar contraseña
@@ -469,6 +471,58 @@
 </div>
 
 <script>
+// ── Cambiar contraseña: submit AJAX ─────────────────────────────
+const formPass = document.getElementById('formCambiarPass');
+if (formPass) {
+  formPass.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    // Validación cliente (validacion.js)
+    if (!window.Validacion?.validarFormulario(formPass)) return;
+
+    const btn    = formPass.querySelector('[type="submit"]');
+    const alerta = document.getElementById('passAlert');
+    const orig   = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando…';
+    alerta.style.display = 'none';
+
+    try {
+      const fd  = new FormData(formPass);
+      const res = await fetch('<?= RUTA_URL ?>/Configuracion/cambiarPassword', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+
+      alerta.style.display = '';
+      alerta.className = data.ok
+        ? 'alert alert-success mt-2'
+        : 'alert alert-danger mt-2';
+      alerta.innerHTML = `<i class="bi bi-${data.ok ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>${data.msg}`;
+
+      if (data.ok) {
+        formPass.reset();
+        window.Validacion?.limpiarValidacion(formPass);
+        // Resetear medidor de fortaleza
+        const bar   = document.getElementById('strengthBar');
+        const label = document.getElementById('strengthLabel');
+        if (bar)   { bar.style.width = '0%'; bar.className = 'progress-bar'; }
+        if (label) { label.textContent = '—'; label.className = 'text-muted'; }
+        setTimeout(() => { alerta.style.display = 'none'; }, 4000);
+      }
+    } catch {
+      alerta.style.display = '';
+      alerta.className = 'alert alert-danger mt-2';
+      alerta.textContent = 'Error de conexión. Inténtalo de nuevo.';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
+  });
+}
+
 // Toggle visibilidad contraseñas
 document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -524,7 +578,7 @@ if (passNueva) {
 .cfg-tab.active{background:#fff;color:#2563eb;border-color:#e5e7eb;border-bottom-color:#fff;margin-bottom:-2px;font-weight:600;}
 
 /* === CARDS === */
-.cfg-card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);overflow:hidden;height:100%;}
+.cfg-card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
 .cfg-card-header{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:.88rem;color:#374151;}
 .cfg-card-body{padding:20px;}
 

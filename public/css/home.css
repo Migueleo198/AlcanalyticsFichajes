@@ -94,6 +94,8 @@ body {
     color: #fff;
     text-align: center;
     padding: 10px 0;
+    margin-top: auto;   /* empuja el footer al fondo del flex-column del body */
+    flex-shrink: 0;     /* evita que se comprima si el contenido es muy alto */
 }
 
 .footer-no-login p {
