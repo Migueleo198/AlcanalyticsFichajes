@@ -148,13 +148,20 @@ class Configuracion extends Controller
 
         $modelo = $this->getModelo();
 
+        $nombreEmpresa = trim($_POST['nombre_empresa'] ?? '');
+
         $modelo->setMultiple([
-            'nombre_empresa'         => trim($_POST['nombre_empresa']         ?? ''),
+            'nombre_empresa'         => $nombreEmpresa,
             'hora_inicio_jornada'    => trim($_POST['hora_inicio_jornada']    ?? '09:00'),
             'umbral_retraso_minutos' => (int) ($_POST['umbral_retraso_minutos'] ?? 30),
             'horas_jornada_defecto'  => (float) ($_POST['horas_jornada_defecto']  ?? 7.5),
             'horas_semana_defecto'   => (float) ($_POST['horas_semana_defecto']   ?? 37.5),
         ]);
+
+        // Reflejar el cambio en sesión para que el sidebar lo muestre inmediatamente
+        if ($nombreEmpresa !== '') {
+            $_SESSION['nombre_empresa'] = $nombreEmpresa;
+        }
 
         header("Location: " . RUTA_URL . "/Configuracion/index?tab=sistema&ok=sistema");
         exit;

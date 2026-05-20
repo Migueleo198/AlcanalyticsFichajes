@@ -3,6 +3,7 @@
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
 
 $jornadasActivo      = strpos($currentPath, '/Jornadas') === 0 || strpos($currentPath, '/AsignarJornadas') === 0;
+$_empresa = htmlspecialchars($_SESSION['nombre_empresa'] ?? 'Alcanalytics');
 $ausenciasActivo    = strpos($currentPath, '/Ausencias') === 0 || strpos($currentPath, '/Bajas') === 0;
 $estadisticasActivo = strpos($currentPath, '/Estadisticas') === 0;
 
@@ -18,7 +19,7 @@ function sideActive(string $path, string $currentPath): string {
   <nav class="mobile-topbar d-lg-none px-3">
 
     <a class="navbar-brand fw-bold" href="#">
-      Alcanalytics
+      <?= $_empresa ?>
     </a>
 
     <button type="button"
@@ -37,7 +38,7 @@ function sideActive(string $path, string $currentPath): string {
 
     <div>
 
-      <h4 class="p-3">Alcanalytics</h4>
+      <h4 class="p-3"><?= $_empresa ?></h4>
 
       <!-- DASHBOARD -->
       <a href="<?= RUTA_URL ?>/home/index"
@@ -210,7 +211,7 @@ function sideActive(string $path, string $currentPath): string {
        id="mobileSidebar">
 
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title">Alcanalytics</h5>
+      <h5 class="offcanvas-title"><?= $_empresa ?></h5>
 
       <button type="button"
               class="btn-close"

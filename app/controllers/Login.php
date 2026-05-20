@@ -88,6 +88,17 @@ class Login extends Controller
             $_SESSION['nombre']     = $user['nombre'];
             $_SESSION['rol']        = $user['rol'];
 
+            // Cargar nombre de empresa para el sidebar
+            try {
+                require_once __DIR__ . '/../config/Database.php';
+                require_once __DIR__ . '/../models/ConfiguracionModel.php';
+                $cfgDb = new Database();
+                $cfgModel = new ConfiguracionModel($cfgDb->conectar());
+                $_SESSION['nombre_empresa'] = $cfgModel->get('nombre_empresa', 'Alcanalytics');
+            } catch (Throwable $e) {
+                $_SESSION['nombre_empresa'] = 'Alcanalytics';
+            }
+
             echo json_encode([
                 'success' => true,
                 'usuario' => $user['nombre']
