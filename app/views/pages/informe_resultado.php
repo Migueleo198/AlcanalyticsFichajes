@@ -11,9 +11,10 @@
 // FIX ROBUSTO MULTI-USUARIO
 // =========================
 
-$filas = $datos['datos'] ?? $datos ?? [];
-$desde = $datos['desde'] ?? ($desde ?? '');
-$hasta = $datos['hasta'] ?? ($hasta ?? '');
+$filas   = $datos['datos'] ?? $datos ?? [];
+$desde   = $datos['desde'] ?? ($desde ?? '');
+$hasta   = $datos['hasta'] ?? ($hasta ?? '');
+$esAdmin = isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador';
 
 // Precalcular totales ANTES de renderizar las KPI cards
 $totalHoras   = 0;
@@ -135,7 +136,7 @@ if (!empty($_GET['usuarios'])) {
                     <th>Salida</th>
                     <th>H. Netas</th>
                     <th>Ordinarias</th>
-                    <th>Extra</th>
+                    <th>Extra <?= $esAdmin ? '<i class="bi bi-pencil-fill text-warning ms-1" style="font-size:.7rem;" title="Editable"></i>' : '' ?></th>
                     <th>Descanso</th>
                     <th>Estado</th>
                     <th>Incidencia</th>
@@ -168,7 +169,34 @@ if (!empty($_GET['usuarios'])) {
 
                         <td class="fw-semibold text-primary"><?= $netas ?>h</td>
                         <td class="text-success"><?= $horas ?>h</td>
+
+                        <?php if ($esAdmin): ?>
+                        <td class="p-1" style="min-width:130px;">
+                          <div class="d-flex align-items-center gap-1">
+                            <input type="number"
+                                   class="form-control form-control-sm input-horas-extra"
+                                   style="width:70px;"
+                                   min="0" max="24" step="0.1"
+                                   value="<?= $extras ?>"
+                                   data-id="<?= (int)($fila['id_fichaje'] ?? 0) ?>"
+                                   data-original="<?= $extras ?>">
+                            <button class="btn btn-sm btn-outline-secondary btn-guardar-extra"
+                                    data-id="<?= (int)($fila['id_fichaje'] ?? 0) ?>"
+                                    title="Guardar horas extra">
+                              <i class="bi bi-save"></i>
+                            </button>
+                            <?php if (!empty($fila['horas_extra_manual'])): ?>
+                            <i class="bi bi-pencil-fill text-warning" style="font-size:.65rem;"
+                               title="Valor editado manualmente"></i>
+                            <?php endif; ?>
+                            <span class="feedback-extra text-success" style="display:none;font-size:.8rem;">
+                              <i class="bi bi-check-circle-fill"></i>
+                            </span>
+                          </div>
+                        </td>
+                        <?php else: ?>
                         <td><?= $extras > 0 ? '<span class="badge bg-warning text-dark">'.$extras.'h</span>' : '<span class="text-muted">—</span>' ?></td>
+                        <?php endif; ?>
 
                         <td class="text-muted"><?= round($fila['horas_descanso'] ?? 0, 2) ?>h</td>
 
@@ -225,5 +253,67 @@ if (!empty($_GET['usuarios'])) {
 
 </div>
 </div>
+
+<?php if ($esAdmin): ?>
+<script>
+var RUTA_URL = "<?= RUTA_URL ?>";
+
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.btn-guardar-extra');
+  if (!btn) return;
+
+  const id   = btn.dataset.id;
+  const row  = btn.closest('tr');
+  const input    = row.querySelector('.input-horas-extra');
+  const feedback = row.querySelector('.feedback-extra');
+  const val  = input.value.trim();
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+  fetch(RUTA_URL + '/Fichaje/setHorasExtra', {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body   : 'id_fichaje=' + encodeURIComponent(id) + '&horas_extra=' + encodeURIComponent(val)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      input.dataset.original = val;
+      feedback.style.display = 'inline';
+      // Añadir icono de manual si no lo tiene
+      if (!row.querySelector('.bi-pencil-fill')) {
+        const ico = document.createElement('i');
+        ico.className = 'bi bi-pencil-fill text-warning';
+        ico.style.fontSize = '.65rem';
+        ico.title = 'Valor editado manualmente';
+        btn.after(ico);
+      }
+      setTimeout(() => { feedback.style.display = 'none'; }, 2500);
+    } else {
+      alert('Error al guardar: ' + (data.error || 'desconocido'));
+    }
+  })
+  .catch(() => alert('Error de red al guardar'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-save"></i>';
+  });
+});
+
+// Marcar celda como modificada al cambiar el input
+document.addEventListener('input', function (e) {
+  const input = e.target.closest('.input-horas-extra');
+  if (!input) return;
+  const changed = input.value !== input.dataset.original;
+  input.classList.toggle('border-warning', changed);
+});
+</script>
+
+<style>
+.input-horas-extra { font-size: .8rem; text-align: right; }
+.input-horas-extra.border-warning { box-shadow: 0 0 0 2px rgba(245,158,11,.4); }
+</style>
+<?php endif; ?>
 
 <?php require_once RUTA_APP . '/views/inc/footer.php'; ?>

@@ -218,6 +218,32 @@ class Fichaje extends Controller {
     ]);
     }
 
+    // ========================
+    // GUARDAR HORAS EXTRA MANUALMENTE (solo admin)
+    // ========================
+    public function setHorasExtra()
+    {
+        header('Content-Type: application/json');
+        $this->checkSession();
 
-    
+        if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Administrador') {
+            echo json_encode(['ok' => false, 'error' => 'No autorizado']);
+            exit;
+        }
+
+        $id_fichaje  = (int)($_POST['id_fichaje']  ?? 0);
+        $horas_extra = isset($_POST['horas_extra']) ? (float)$_POST['horas_extra'] : null;
+
+        if (!$id_fichaje) {
+            echo json_encode(['ok' => false, 'error' => 'ID de fichaje inválido']);
+            exit;
+        }
+
+        $ok = ($horas_extra === null || $_POST['horas_extra'] === '')
+            ? $this->modelo->resetHorasExtra($id_fichaje)
+            : $this->modelo->setHorasExtra($id_fichaje, $horas_extra);
+
+        echo json_encode(['ok' => (bool)$ok]);
+        exit;
+    }
 }

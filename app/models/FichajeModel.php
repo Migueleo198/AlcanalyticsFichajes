@@ -297,6 +297,22 @@ public function getHorasTotalesUsuario($id_usuario) {
 }
 
 
+public function setHorasExtra($id_fichaje, $horas_extra)
+{
+    $stmt = $this->db->prepare(
+        "UPDATE Fichaje SET horas_extra = ? WHERE id_fichaje = ?"
+    );
+    return $stmt->execute([$horas_extra, $id_fichaje]);
+}
+
+public function resetHorasExtra($id_fichaje)
+{
+    $stmt = $this->db->prepare(
+        "UPDATE Fichaje SET horas_extra = NULL WHERE id_fichaje = ?"
+    );
+    return $stmt->execute([$id_fichaje]);
+}
+
 public function getTiempoDescansoHoy($id_usuario) {
 
     $sql = "SELECT 

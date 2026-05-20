@@ -23,7 +23,8 @@ class InformeModel {
         }));
 
         $sql = "
-            SELECT 
+            SELECT
+                f.id_fichaje,
                 u.nombre,
                 u.apellidos,
                 u.dni,
@@ -31,6 +32,7 @@ class InformeModel {
                 f.hora_entrada,
                 f.hora_salida,
                 f.estado,
+                f.horas_extra AS horas_extra_guardada,
 
                 CASE WHEN f.hora_salida IS NOT NULL
                     THEN ROUND(TIMESTAMPDIFF(MINUTE, f.hora_entrada, f.hora_salida) / 60.0, 2)
@@ -44,7 +46,7 @@ class InformeModel {
                 ), 0) AS horas_descanso,
 
                 i.mensaje AS incidencia,
-                i.estado AS estado_incidencia
+                i.estado  AS estado_incidencia
 
             FROM Fichaje f
             JOIN Usuario u ON u.id_usuario = f.id_usuario
@@ -88,9 +90,15 @@ class InformeModel {
             $descanso = (float)($f['horas_descanso'] ?? 0);
             $netas    = max(0, round($brutas - $descanso, 2));
 
+            // Si hay un valor manual guardado en BD, usarlo; si no, calcular automáticamente
+            $extraGuardada = $f['horas_extra_guardada'];
+            $f['horas_extra_manual'] = ($extraGuardada !== null);
+
             $f['horas_netas']      = $netas;
-            $f['horas_ordinarias'] = round(min($netas, 7.5), 2);
-            $f['horas_extra']      = round(max(0, $netas - 7.5), 2);
+            $f['horas_extra']      = $f['horas_extra_manual']
+                                        ? round((float)$extraGuardada, 2)
+                                        : round(max(0, $netas - 7.5), 2);
+            $f['horas_ordinarias'] = round(max(0, $netas - $f['horas_extra']), 2);
         }
         unset($f);
 
