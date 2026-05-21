@@ -195,12 +195,10 @@ document.addEventListener('click', function (e) {
   }
 
   if (fechaInput) {
-
     const now = new Date();
-
-    const formatted = now.toISOString().slice(0, 16);
-
-    fechaInput.value = formatted;
+   
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    fechaInput.value = local.toISOString().slice(0, 16);
   }
 });
 
