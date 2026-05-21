@@ -68,7 +68,7 @@
                 <option value="">Todos</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="en proceso">En proceso</option>
-                <option value="resuelto">Resuelto</option>
+                <option value="resuelta">Resuelta</option>
               </select>
             </div>
 

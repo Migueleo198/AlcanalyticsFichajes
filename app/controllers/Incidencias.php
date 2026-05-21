@@ -169,25 +169,26 @@ class Incidencias extends Controller
             return;
         }
 
-        $required = ['id_fichaje', 'mensaje', 'respuesta', 'estado', 'fecha'];
+        $id_fichaje = $_POST['id_fichaje'] ?? null;
+        $mensaje    = trim($_POST['mensaje']   ?? '');
 
-        foreach ($required as $field) {
-            if (!isset($_POST[$field])) {
-                echo json_encode([
-                    "success" => false,
-                    "message" => "Falta el campo: $field"
-                ]);
-                return;
-            }
+        if (!$id_fichaje || !$mensaje) {
+            echo json_encode([
+                "success" => false,
+                "message" => "El fichaje y el mensaje son obligatorios"
+            ]);
+            return;
         }
 
         try {
             $ok = $this->model->addIncidencia([
-                'id_fichaje' => $_POST['id_fichaje'],
-                'mensaje'    => $_POST['mensaje'],
-                'respuesta'  => $_POST['respuesta'],
-                'estado'     => $_POST['estado'],
-                'fecha'      => $_POST['fecha']
+                'id_fichaje' => $id_fichaje,
+                'mensaje'    => $mensaje,
+                'respuesta'  => $_POST['respuesta'] ?? null,
+                'estado'     => $_POST['estado']    ?? 'pendiente',
+                'fecha'      => !empty($_POST['fecha'])
+                                    ? date('Y-m-d H:i:s', strtotime($_POST['fecha']))
+                                    : date('Y-m-d H:i:s'),
             ]);
 
             if ($ok) {

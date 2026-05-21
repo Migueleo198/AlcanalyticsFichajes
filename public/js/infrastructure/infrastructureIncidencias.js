@@ -3,7 +3,8 @@
 // =========================
 async function loadIncidencias() {
     try {
-        const RESPONSE = await fetch('/incidencias/getIncidencias');
+        const base = typeof RUTA_URL !== 'undefined' ? RUTA_URL : '';
+        const RESPONSE = await fetch(base + '/incidencias/getIncidencias');
 
         const text = await RESPONSE.text();
 
@@ -67,7 +68,7 @@ function renderIncidencias(response) {
 
                 <td>
                     <span class="badge bg-${
-                        incidencia.estado === 'resuelto' ? 'success' :
+                        incidencia.estado === 'resuelta' ? 'success' :
                         incidencia.estado === 'pendiente' ? 'warning' :
                         'secondary'
                     }">

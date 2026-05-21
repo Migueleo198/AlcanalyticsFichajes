@@ -73,7 +73,6 @@ class IncidenciaModel {
 
         $sql = "INSERT INTO Incidencia (
                     id_fichaje,
-                    id_usuario,
                     mensaje,
                     respuesta,
                     estado,
@@ -81,7 +80,6 @@ class IncidenciaModel {
                 )
                 VALUES (
                     :id_fichaje,
-                    :id_usuario,
                     :mensaje,
                     :respuesta,
                     :estado,
@@ -92,11 +90,10 @@ class IncidenciaModel {
 
         return $stmt->execute([
             'id_fichaje' => $data['id_fichaje'],
-            'id_usuario' => $data['id_usuario'],
-            'mensaje' => $data['mensaje'],
-            'respuesta' => $data['respuesta'] ?? null,
-            'estado' => $data['estado'],
-            'fecha' => $data['fecha']
+            'mensaje'    => $data['mensaje'],
+            'respuesta'  => $data['respuesta'] ?? null,
+            'estado'     => $data['estado']    ?? 'pendiente',
+            'fecha'      => $data['fecha']      ?? date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -106,25 +103,23 @@ class IncidenciaModel {
     // =========================
     public function updateIncidencia($id, $data) {
 
-        $sql = "UPDATE Incidencia 
+        $sql = "UPDATE Incidencia
                 SET id_fichaje = :id_fichaje,
-                    id_usuario = :id_usuario,
-                    mensaje = :mensaje,
-                    respuesta = :respuesta,
-                    estado = :estado,
-                    fecha = :fecha
+                    mensaje    = :mensaje,
+                    respuesta  = :respuesta,
+                    estado     = :estado,
+                    fecha      = :fecha
                 WHERE id_incidencia = :id";
 
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            'id' => $id,
+            'id'         => $id,
             'id_fichaje' => $data['id_fichaje'],
-            'id_usuario' => $data['id_usuario'],
-            'mensaje' => $data['mensaje'],
-            'respuesta' => $data['respuesta'] ?? null,
-            'estado' => $data['estado'],
-            'fecha' => $data['fecha']
+            'mensaje'    => $data['mensaje'],
+            'respuesta'  => $data['respuesta'] ?? null,
+            'estado'     => $data['estado'],
+            'fecha'      => $data['fecha'],
         ]);
     }
 

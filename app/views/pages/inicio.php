@@ -203,7 +203,7 @@
             <label class="form-label">Estado</label>
             <select class="form-select" name="estado" required>
               <option value="pendiente">Pendiente</option>
-              <option value="resuelto">Resuelto</option>
+              <option value="resuelta">Resuelta</option>
             </select>
           </div>
 
