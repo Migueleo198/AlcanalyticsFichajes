@@ -176,8 +176,9 @@
           </div>
 
           <div class="mb-2">
-            <label>Tiempo total</label>
-            <input type="text" name="tiempo_total" class="form-control">
+            <label>Tiempo total <small class="text-muted">(se calcula automáticamente)</small></label>
+            <input type="text" name="tiempo_total" class="form-control auto-tiempo" readonly
+                   placeholder="Se rellena al poner inicio y fin">
           </div>
 
           <div class="mb-2">
@@ -185,7 +186,7 @@
             <select name="estado" class="form-control">
               <option value="pendiente">Pendiente</option>
               <option value="en_progreso">En proceso</option>
-              <option value="completado">Completado</option>
+              <option value="finalizada">Finalizada</option>
             </select>
           </div>
 
@@ -262,8 +263,9 @@
           </div>
 
           <div class="mb-2">
-            <label>Tiempo total</label>
-            <input type="text" name="tiempo_total" class="form-control">
+            <label>Tiempo total <small class="text-muted">(se calcula automáticamente)</small></label>
+            <input type="text" name="tiempo_total" class="form-control auto-tiempo" readonly
+                   placeholder="Se rellena al poner inicio y fin">
           </div>
 
           <div class="mb-2">
@@ -271,7 +273,7 @@
             <select name="estado" class="form-control">
               <option value="pendiente">Pendiente</option>
               <option value="en_progreso">En proceso</option>
-              <option value="completado">Completado</option>
+              <option value="finalizada">Finalizada</option>
             </select>
           </div>
 
