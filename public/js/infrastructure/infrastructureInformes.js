@@ -2,8 +2,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const btnGenerar   = document.getElementById("btnGenerarInforme");
     const btnLimpiar   = document.getElementById("btnLimpiarFiltros");
-    const btnSemanal   = document.getElementById("btnSemanal");
-    const btnMensual   = document.getElementById("btnMensual");
+    const btnSemanal      = document.getElementById("btnSemanal");
+    const btnMensual      = document.getElementById("btnMensual");
+    const btnSemanaPasada      = document.getElementById("btnSemanaPasada");
+    const btnMesPasado         = document.getElementById("btnMesPasado");
+    const btnSeleccionarTodos  = document.getElementById("btnSeleccionarTodos");
+    const btnDeseleccionarTodos = document.getElementById("btnDeseleccionarTodos");
     const inputDesde   = document.getElementById("desde");
     const inputHasta   = document.getElementById("hasta");
     const selectUsuarios = document.getElementById("usuario");
@@ -48,6 +52,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const hoy       = new Date();
         const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
         setRango(formatDate(inicioMes), formatDate(hoy));
+    });
+
+    btnSemanaPasada?.addEventListener("click", () => {
+        const hoy    = new Date();
+        const diaSem = (hoy.getDay() + 6) % 7; // 0=lunes
+        const lunesPasado  = new Date(hoy);
+        lunesPasado.setDate(hoy.getDate() - diaSem - 7);
+        const domingoP = new Date(lunesPasado);
+        domingoP.setDate(lunesPasado.getDate() + 6);
+        setRango(formatDate(lunesPasado), formatDate(domingoP));
+    });
+
+    btnMesPasado?.addEventListener("click", () => {
+        const hoy      = new Date();
+        const inicioMP = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        const finMP    = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        setRango(formatDate(inicioMP), formatDate(finMP));
+    });
+
+    btnSeleccionarTodos?.addEventListener("click", () => {
+        Array.from(selectUsuarios.options).forEach(opt => opt.selected = true);
+    });
+
+    btnDeseleccionarTodos?.addEventListener("click", () => {
+        Array.from(selectUsuarios.options).forEach(opt => opt.selected = false);
     });
 
     // ── Generar ──────────────────────────────────────────────────

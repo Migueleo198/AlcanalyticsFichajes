@@ -63,7 +63,7 @@
   <div class="col-md-4">
     <div class="card card-custom p-3 cardhov">
       <h6>Exportación</h6>
-      <h3>PDF</h3>
+      <h3>PDF / Excel</h3>
     </div>
   </div>
 
@@ -74,9 +74,6 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h5 class="mb-0">Generar informe</h5>
-      <button class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-file-earmark-text me-1"></i>Opciones
-      </button>
     </div>
 
     <div class="row g-3">
@@ -84,12 +81,18 @@
       <div class="col-md-4">
         <label class="form-label fw-semibold">Desde <span class="text-danger">*</span></label>
         <input type="date" id="desde" class="form-control">
-        <div class="mt-1 d-flex gap-1">
+        <div class="mt-1 d-flex gap-1 flex-wrap">
           <button id="btnSemanal" class="btn btn-outline-secondary btn-sm flex-fill">
             <i class="bi bi-calendar-week me-1"></i>Esta semana
           </button>
           <button id="btnMensual" class="btn btn-outline-secondary btn-sm flex-fill">
             <i class="bi bi-calendar-month me-1"></i>Este mes
+          </button>
+          <button id="btnSemanaPasada" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-calendar-week me-1"></i>Semana pasada
+          </button>
+          <button id="btnMesPasado" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-calendar-month me-1"></i>Mes pasado
           </button>
         </div>
       </div>
@@ -118,6 +121,14 @@
           <?php endif; ?>
         </select>
         <?php if ($_SESSION['rol'] === 'Administrador'): ?>
+        <div class="mt-1 d-flex gap-1">
+          <button id="btnSeleccionarTodos" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-check-all me-1"></i>Seleccionar todos
+          </button>
+          <button id="btnDeseleccionarTodos" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-x-lg me-1"></i>Deseleccionar
+          </button>
+        </div>
         <small class="text-muted">Ctrl / Cmd para seleccionar varios</small>
         <?php endif; ?>
       </div>

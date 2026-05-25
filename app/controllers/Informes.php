@@ -110,6 +110,64 @@ class Informes extends Controller {
     }
 
 
+    public function generarExcel() {
+
+        $this->checkAuth();
+
+        $desde = $_GET['desde'] ?? '';
+        $hasta = $_GET['hasta'] ?? '';
+
+        $usuarios = $_GET['usuarios'] ?? [];
+
+        if (!is_array($usuarios)) {
+            $usuarios = [$usuarios];
+        }
+
+        $usuarios = array_filter($usuarios, 'is_numeric');
+
+        if (empty($desde) || empty($hasta)) {
+            header("Location: " . RUTA_URL . "/Informes/index?error=fechas");
+            exit;
+        }
+
+        $db = new Database();
+        $conexion = $db->conectar();
+
+        $modelo = new InformeModel($conexion);
+        $filas  = $modelo->obtenerInforme($desde, $hasta, $usuarios);
+
+        $filename = "informe_fichajes_{$desde}_{$hasta}.csv";
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        // UTF-8 BOM so Excel opens it correctly
+        fwrite($out, "\xEF\xBB\xBF");
+
+        fputcsv($out, ['Empleado', 'Fecha', 'Entrada', 'Salida', 'H. Netas', 'H. Ordinarias', 'H. Extra', 'H. Descanso', 'Estado', 'Incidencia'], ';');
+
+        foreach ($filas as $f) {
+            fputcsv($out, [
+                trim(($f['nombre'] ?? '') . ' ' . ($f['apellidos'] ?? '')),
+                $f['fecha']         ?? '',
+                $f['hora_entrada']  ?? '',
+                $f['hora_salida']   ?? '',
+                round((float)($f['horas_netas']      ?? 0), 2),
+                round((float)($f['horas_ordinarias'] ?? 0), 2),
+                round((float)($f['horas_extra']      ?? 0), 2),
+                round((float)($f['horas_descanso']   ?? 0), 2),
+                $f['estado']        ?? '',
+                $f['incidencia']    ?? '',
+            ], ';');
+        }
+
+        fclose($out);
+        exit;
+    }
+
     public function informeSemanalCron() {
 
         $db = new Database();

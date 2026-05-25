@@ -33,13 +33,13 @@ $totalExtras   = round($totalExtras,   1);
 $totalNetas    = round($totalNetas,    1);
 $totalDescanso = round($totalDescanso, 1);
 
-// URL del PDF (mayúsculas correctas para el router)
-$pdfUrl = RUTA_URL . "/Informes/generarPDF?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
+$pdfUrl   = RUTA_URL . "/Informes/generarPDF?desde="   . urlencode($desde) . "&hasta=" . urlencode($hasta);
+$excelUrl = RUTA_URL . "/Informes/generarExcel?desde=" . urlencode($desde) . "&hasta=" . urlencode($hasta);
 
-// si hubiera usuarios en el futuro
 if (!empty($_GET['usuarios'])) {
     foreach ($_GET['usuarios'] as $u) {
-        $pdfUrl .= "&usuarios[]=" . urlencode($u);
+        $pdfUrl   .= "&usuarios[]=" . urlencode($u);
+        $excelUrl .= "&usuarios[]=" . urlencode($u);
     }
 }
 ?>
@@ -122,6 +122,11 @@ if (!empty($_GET['usuarios'])) {
                class="btn btn-danger btn-sm"
                target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> PDF
+            </a>
+
+            <a href="<?= $excelUrl ?>"
+               class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Excel
             </a>
         </div>
     </div>

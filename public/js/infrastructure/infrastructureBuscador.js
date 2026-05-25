@@ -176,7 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
-                <form action="/user/editUser" method="POST">
+                <div id="profileFeedback" class="d-none mb-3"></div>
+                <form id="profileForm">
                   <input type="hidden" name="id">
                   <div class="mb-2"><label>Nombre</label><input name="nombre" class="form-control"></div>
                   <div class="mb-2"><label>Apellidos</label><input name="apellidos" class="form-control"></div>
@@ -193,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <input type="text" class="form-control" id="profileRolVisible" disabled>
                     <input type="hidden" name="rol" id="profileRolHidden">
                   </div>
-                  <button class="btn btn-primary w-100">Guardar</button>
+                  <button type="submit" class="btn btn-primary w-100">Guardar</button>
                 </form>
               </div>
             </div>
@@ -236,5 +237,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modal.show();
     modalEl.addEventListener("hidden.bs.modal", () => modalEl.remove(), { once: true });
+
+    const form     = modalEl.querySelector("#profileForm");
+    const feedback = modalEl.querySelector("#profileFeedback");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const base    = typeof RUTA_URL !== "undefined" ? RUTA_URL : "";
+      const body    = new FormData(form);
+      const saveBtn = form.querySelector('[type="submit"]');
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Guardando…";
+      feedback.className = "d-none mb-3";
+
+      try {
+        const res  = await fetch(`${base}/user/editUser`, { method: "POST", body });
+        const data = await res.json();
+
+        if (data.success) {
+          feedback.className = "alert alert-success mb-3";
+          feedback.textContent = data.message || "Cambios guardados correctamente";
+          setTimeout(() => modal.hide(), 1200);
+        } else {
+          feedback.className = "alert alert-danger mb-3";
+          feedback.textContent = data.message || "Error al guardar los cambios";
+        }
+      } catch {
+        feedback.className = "alert alert-danger mb-3";
+        feedback.textContent = "Error de red al guardar";
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Guardar";
+      }
+    }, { once: true });
   }
 });
