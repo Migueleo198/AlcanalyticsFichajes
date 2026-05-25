@@ -36,7 +36,7 @@ class Bajas extends Controller
         $motivos = $bajasModel->obtenerMotivosBaja();
 
         $datos = [
-            'title' => 'Solicitar Baja',
+            'title' => 'Solicitar Ausencia',
             'motivos' => $motivos
         ];
 
@@ -87,7 +87,7 @@ class Bajas extends Controller
     $bajas = $bajasModel->obtenerBajasPorUsuario($_SESSION['id_usuario']);
 
     $datos = [
-        'title' => 'Mis bajas',
+        'title' => 'Mis ausencias',
         'bajas' => $bajas
     ];
 
@@ -107,7 +107,7 @@ class Bajas extends Controller
         $bajas = $bajasModel->obtenerTodasBajas();
 
         $datos = [
-            'title' => 'Gestión de bajas',
+            'title' => 'Gestión de ausencias',
             'bajas' => $bajas
         ];
 

@@ -8,7 +8,7 @@
 
 <!-- TOPBAR -->
   <div class="topbar d-flex justify-content-between align-items-center">
-  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar bajas...">
+  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar ausencias...">
 
   <div class="d-flex align-items-center">
 
@@ -42,14 +42,14 @@
 
     <?php if (isset($_GET['ok'])): ?>
     <div class="alert alert-success">
-        Baja solicitada correctamente
+        Ausencia solicitada correctamente
     </div>
     <?php endif; ?>
 
     <form method="POST" action="<?= RUTA_URL ?>/Bajas/solicitar">
 
         <div class="mb-3">
-            <label class="form-label">Motivo de la baja</label>
+            <label class="form-label">Motivo de la ausencia</label>
 
             <select name="id_motivo" class="form-select" required>
                 <option value="">-- Selecciona un motivo --</option>
@@ -74,7 +74,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">
-            Solicitar baja
+            Solicitar ausencia
         </button>
 
     </form>

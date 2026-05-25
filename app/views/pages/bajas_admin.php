@@ -8,7 +8,7 @@
 
 <!-- TOPBAR -->
   <div class="topbar d-flex justify-content-between align-items-center">
-  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar bajas...">
+  <input type="text" id="buscadorTabla" class="form-control w-50" placeholder="Buscar ausencias...">
 
   <div class="d-flex align-items-center">
 
@@ -45,7 +45,7 @@
   <div class="card card-custom p-3">
 
  <div class="d-flex justify-content-between mb-3 align-items-center">
-  <h5>Gestión de Bajas</h5>
+  <h5>Gestión de Ausencias</h5>
 
   <div class="dropdown">
     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
@@ -95,7 +95,7 @@
   <?php if (empty($datos['bajas'])): ?>
 
     <div class="alert alert-info">
-      No hay bajas registradas.
+      No hay ausencias registradas.
     </div>
 
   <?php else: ?>
