@@ -200,9 +200,13 @@
             <input type="text" name="respuesta" id="edit_respuesta" class="form-control">
           </div>
 
+          <!-- ESTADO DESPLEGABLE -->
           <div class="mb-3">
             <label class="form-label">Estado</label>
-            <input type="text" name="estado" id="edit_estado" class="form-control">
+            <select name="estado" id="edit_estado" class="form-select">
+              <option value="pendiente">Pendiente</option>
+              <option value="resuelta">Resuelta</option>
+            </select>
           </div>
 
           <div class="mb-3">
