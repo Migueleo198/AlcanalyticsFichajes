@@ -60,7 +60,6 @@ class Ausencias extends Controller
 
             // 🔵 NO REMUNERADAS
             'ausencias' => $ausenciasModel->getAll(),
-            'motivos_no_remunerados' => $ausenciasModel->getMotivos(),
 
             // 👥 COMUNES
             'usuarios' => $userModel->getUsuarios(),
@@ -87,6 +86,8 @@ class Ausencias extends Controller
             'fecha_inicio' => $_POST['fecha_inicio'] ?? null,
             'fecha_fin' => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null
         ];
+
+        $data['descripcion'] = trim($_POST['descripcion'] ?? '');
 
         $bajasModel->insertarBaja($data);
 
@@ -140,15 +141,31 @@ class Ausencias extends Controller
         $modelo = new AusenciaModel($this->conexion);
 
         $modelo->crear(
-            $_POST['id_usuario'] ?? null,
-            $_POST['id_motivo'] ?? null,
-            $_POST['fecha_inicio'] ?? null,
-            $_POST['fecha_fin'] ?? null
+            $_POST['id_usuario']          ?? null,
+            trim($_POST['motivo_texto']   ?? ''),
+            $_POST['fecha_inicio']        ?? null,
+            $_POST['fecha_fin']           ?? null
         );
 
         echo json_encode(["ok" => true]);
     }
 
+
+    public function editarNoRemunerada()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+
+        $modelo = new AusenciaModel($this->conexion);
+        $modelo->editar(
+            $_POST['id']          ?? null,
+            $_POST['id_usuario']  ?? null,
+            trim($_POST['motivo_texto'] ?? ''),
+            $_POST['fecha_inicio'] ?? null,
+            $_POST['fecha_fin']    ?? null
+        );
+
+        echo json_encode(["ok" => true]);
+    }
 
     public function eliminarNoRemunerada()
     {

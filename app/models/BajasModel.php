@@ -11,7 +11,7 @@ class BajasModel
 
     public function obtenerMotivosBaja()
     {
-        $sql = "SELECT id_motivo, nombre FROM MotivoAlta ORDER BY nombre ASC";
+        $sql = "SELECT id_motivo, nombre, dias, tipo, limite_horas_anual, nota_limite FROM MotivoAlta ORDER BY nombre ASC";
         $stmt = $this->conexion->prepare($sql);
         $stmt->execute();
 
@@ -20,18 +20,19 @@ class BajasModel
 
     public function insertarBaja($data)
     {
-    $sql = "INSERT INTO Bajas 
-            (id_usuario, id_motivo, fecha_inicio, fecha_fin) 
-            VALUES (:id_usuario, :id_motivo, :fecha_inicio, :fecha_fin)";
+        $sql = "INSERT INTO Bajas
+                (id_usuario, id_motivo, fecha_inicio, fecha_fin, descripcion)
+                VALUES (:id_usuario, :id_motivo, :fecha_inicio, :fecha_fin, :descripcion)";
 
-    $stmt = $this->conexion->prepare($sql);
+        $stmt = $this->conexion->prepare($sql);
 
-    return $stmt->execute([
-        ':id_usuario' => $data['id_usuario'],
-        ':id_motivo' => $data['id_motivo'],
-        ':fecha_inicio' => $data['fecha_inicio'],
-        ':fecha_fin' => $data['fecha_fin']
-    ]);
+        return $stmt->execute([
+            ':id_usuario'  => $data['id_usuario'],
+            ':id_motivo'   => $data['id_motivo'],
+            ':fecha_inicio'=> $data['fecha_inicio'],
+            ':fecha_fin'   => $data['fecha_fin'],
+            ':descripcion' => $data['descripcion'] ?? null,
+        ]);
     }
 
     public function obtenerBajas()
