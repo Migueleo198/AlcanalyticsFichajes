@@ -86,9 +86,12 @@ class Bajas extends Controller
     $bajasModel = new BajasModel($conexion);
     $bajas = $bajasModel->obtenerBajasPorUsuario($_SESSION['id_usuario']);
 
+    $motivos = $bajasModel->obtenerMotivosBaja();
+
     $datos = [
-        'title' => 'Mis ausencias',
-        'bajas' => $bajas
+        'title'   => 'Mis ausencias',
+        'bajas'   => $bajas,
+        'motivos' => $motivos,
     ];
 
     $this->load_view('bajas_visualizar', $datos);
@@ -106,15 +109,65 @@ class Bajas extends Controller
         $bajasModel = new BajasModel($conexion);
         $bajas = $bajasModel->obtenerTodasBajas();
 
+        $motivos = $bajasModel->obtenerMotivosBaja();
+
         $datos = [
-            'title' => 'Gestión de ausencias',
-            'bajas' => $bajas
+            'title'   => 'Gestión de ausencias',
+            'bajas'   => $bajas,
+            'motivos' => $motivos,
         ];
 
         $this->load_view('bajas_admin', $datos);
     }
 
     
+    public function eliminarBaja()
+    {
+        $this->checkSession();
+        $this->checkAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['ok' => false]); exit;
+        }
+
+        $db = new Database();
+        $modelo = new BajasModel($db->conectar());
+        $ok = $modelo->eliminarBaja($_POST['id'] ?? null);
+
+        echo json_encode(['ok' => (bool)$ok]);
+        exit;
+    }
+
+    public function editarBaja()
+    {
+        $this->checkSession();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['ok' => false]); exit;
+        }
+
+        $db = new Database();
+        $conexion = $db->conectar();
+        $modelo = new BajasModel($conexion);
+
+        $esAdmin = isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador';
+        $estado  = $esAdmin ? ($_POST['estado'] ?? null) : null;
+
+        $ok = $modelo->editarBaja(
+            $_POST['id']          ?? null,
+            $_POST['id_motivo']   ?? null,
+            $_POST['fecha_inicio'] ?? null,
+            $_POST['fecha_fin']   ?? null,
+            trim($_POST['descripcion'] ?? ''),
+            $estado
+        );
+
+        echo json_encode(['ok' => (bool)$ok]);
+        exit;
+    }
+
     public function cambiarEstado($id, $estado)
     {
         $this->checkSession();

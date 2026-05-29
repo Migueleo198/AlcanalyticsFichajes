@@ -1,7 +1,7 @@
 <?php
 
 // 🔌 Autoload Composer (ruta absoluta recomendada)
-require_once '/var/www/vhosts/peaceful-keldysh.82-223-99-74.plesk.page/vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 // 📦 Modelos
 require_once __DIR__ . '/../models/UserModel.php';

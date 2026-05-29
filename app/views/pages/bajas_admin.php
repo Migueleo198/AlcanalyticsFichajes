@@ -107,6 +107,8 @@
           <th>Motivo</th>
           <th>Inicio</th>
           <th>Fin</th>
+          <th title="Solo para motivos con límite anual de horas (visita médica, formación)">Horas</th>
+          <th>Tipo</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -121,6 +123,14 @@
           <td><?= htmlspecialchars($baja['motivo'] ?? '') ?></td>
           <td><?= htmlspecialchars($baja['fecha_inicio'] ?? '') ?></td>
           <td><?= htmlspecialchars($baja['fecha_fin'] ?? '-') ?></td>
+          <td><?= $baja['horas'] ? $baja['horas'] . 'h' : '—' ?></td>
+          <td>
+            <?php if (($baja['es_remunerada'] ?? 1)): ?>
+              <span class="badge bg-success">Remunerada</span>
+            <?php else: ?>
+              <span class="badge bg-secondary">No remunerada</span>
+            <?php endif; ?>
+          </td>
 
           <td>
             <?php
@@ -137,23 +147,30 @@
             ?>
           </td>
 
-          <td>
+          <td class="d-flex gap-1 flex-wrap">
+            <button class="btn btn-outline-primary btn-sm btnEditarBaja"
+              data-id="<?= $baja['id'] ?>"
+              data-motivo="<?= $baja['id_motivo'] ?>"
+              data-inicio="<?= htmlspecialchars($baja['fecha_inicio']) ?>"
+              data-fin="<?= htmlspecialchars($baja['fecha_fin'] ?? '') ?>"
+              data-descripcion="<?= htmlspecialchars($baja['descripcion'] ?? '') ?>"
+              data-estado="<?= htmlspecialchars($baja['estado']) ?>">
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            <button class="btn btn-outline-danger btn-sm btnEliminarBaja"
+              data-id="<?= $baja['id'] ?>"
+              data-nombre="<?= htmlspecialchars($baja['usuario'] ?? '') ?>">
+              <i class="bi bi-trash"></i>
+            </button>
+
             <?php if ($baja['estado'] == 'pendiente'): ?>
-    
               <a href="<?= RUTA_URL ?>/Bajas/cambiarEstado/<?= $baja['id'] ?>/aprobada"
-               class="btn btn-success btn-sm">
-               Aprobar
-             </a>
-
-           <a href="<?= RUTA_URL ?>/Bajas/cambiarEstado/<?= $baja['id'] ?>/rechazada"
-            class="btn btn-danger btn-sm">
-            Rechazar
-             </a>
-
-            <?php else: ?>
-              <span class="text-muted">Sin acciones</span>
-         <?php endif; ?>
-        </td>
+                 class="btn btn-success btn-sm">Aprobar</a>
+              <a href="<?= RUTA_URL ?>/Bajas/cambiarEstado/<?= $baja['id'] ?>/rechazada"
+                 class="btn btn-danger btn-sm">Rechazar</a>
+            <?php endif; ?>
+          </td>
 
         </tr>
 
@@ -171,10 +188,127 @@
           </div>
 
 
-          <script>
+<!-- MODAL EDITAR AUSENCIA REMUNERADA (ADMIN) -->
+<div class="modal fade" id="modalEditarBaja" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar ausencia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditarBaja">
+          <input type="hidden" name="id" id="editBajaId">
+
+          <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            <select name="id_motivo" id="editBajaMotivo" class="form-select" required>
+              <?php foreach ($datos['motivos'] as $m): ?>
+                <option value="<?= $m['id_motivo'] ?>"><?= htmlspecialchars($m['nombre']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Fecha inicio</label>
+            <input type="date" name="fecha_inicio" id="editBajaInicio" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Fecha fin</label>
+            <input type="date" name="fecha_fin" id="editBajaFin" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea name="descripcion" id="editBajaDesc" class="form-control" rows="2"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <select name="estado" id="editBajaEstado" class="form-select">
+              <option value="pendiente">Pendiente</option>
+              <option value="aprobada">Aprobada</option>
+              <option value="rechazada">Rechazada</option>
+            </select>
+          </div>
+
+          <div id="editBajaFeedback" class="d-none mb-3"></div>
+          <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
 var RUTA_URL = "<?= RUTA_URL ?>";
+
 document.addEventListener('DOMContentLoaded', () => {
     document.dispatchEvent(new Event('tableReady'));
+
+    const modal    = new bootstrap.Modal(document.getElementById('modalEditarBaja'));
+    const feedback = document.getElementById('editBajaFeedback');
+
+    document.querySelectorAll('.btnEliminarBaja').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const nombre = btn.dataset.nombre || 'este registro';
+            if (!confirm(`¿Eliminar la ausencia de ${nombre}? Esta acción no se puede deshacer.`)) return;
+
+            fetch(RUTA_URL + '/Bajas/eliminarBaja', {
+                method: 'POST',
+                body: new URLSearchParams({ id: btn.dataset.id })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) location.reload();
+                else alert('Error al eliminar la ausencia');
+            })
+            .catch(() => alert('Error de red'));
+        });
+    });
+
+    document.querySelectorAll('.btnEditarBaja').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('editBajaId').value      = btn.dataset.id;
+            document.getElementById('editBajaMotivo').value  = btn.dataset.motivo;
+            document.getElementById('editBajaInicio').value  = btn.dataset.inicio;
+            document.getElementById('editBajaFin').value     = btn.dataset.fin;
+            document.getElementById('editBajaDesc').value    = btn.dataset.descripcion;
+            document.getElementById('editBajaEstado').value  = btn.dataset.estado;
+            feedback.className = 'd-none mb-3';
+            modal.show();
+        });
+    });
+
+    document.getElementById('formEditarBaja').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Guardando…';
+
+        fetch(RUTA_URL + '/Bajas/editarBaja', {
+            method: 'POST',
+            body: new FormData(this)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                location.reload();
+            } else {
+                feedback.className = 'alert alert-danger mb-3';
+                feedback.textContent = 'Error al guardar los cambios';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar cambios';
+            }
+        })
+        .catch(() => {
+            feedback.className = 'alert alert-danger mb-3';
+            feedback.textContent = 'Error de red';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Guardar cambios';
+        });
+    });
 });
 </script>
 

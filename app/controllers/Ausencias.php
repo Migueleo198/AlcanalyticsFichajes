@@ -60,7 +60,6 @@ class Ausencias extends Controller
 
             // 🔵 NO REMUNERADAS
             'ausencias' => $ausenciasModel->getAll(),
-            'motivos_no_remunerados' => $ausenciasModel->getMotivos(),
 
             // 👥 COMUNES
             'usuarios' => $userModel->getUsuarios(),
@@ -75,17 +74,81 @@ class Ausencias extends Controller
        🔴 AUSENCIAS REMUNERADAS
     ========================= */
 
+    public function checkLimiteHoras()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idMotivo  = (int)($_GET['id_motivo'] ?? 0);
+        $idUsuario = $_SESSION['id_usuario'];
+        $anio      = (int)date('Y');
+
+        $bajasModel  = new BajasModel($this->conexion);
+        $motivos     = $bajasModel->obtenerMotivosBaja();
+        $motivo      = null;
+
+        foreach ($motivos as $m) {
+            if ((int)$m['id_motivo'] === $idMotivo) { $motivo = $m; break; }
+        }
+
+        if (!$motivo || empty($motivo['limite_horas_anual'])) {
+            echo json_encode(['tiene_limite' => false]);
+            exit;
+        }
+
+        $limite  = (float)$motivo['limite_horas_anual'];
+        $usadas  = $bajasModel->getHorasUsadasAnio($idUsuario, $idMotivo, $anio);
+        $restantes = max(0, $limite - $usadas);
+
+        echo json_encode([
+            'tiene_limite' => true,
+            'limite'       => $limite,
+            'usadas'       => round($usadas, 2),
+            'restantes'    => round($restantes, 2),
+        ]);
+        exit;
+    }
+
     public function solicitarRemunerada()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
 
         $bajasModel = new BajasModel($this->conexion);
+        $idMotivo   = (int)($_POST['id_motivo'] ?? 0);
+        $horas      = isset($_POST['horas']) && $_POST['horas'] !== '' ? (float)$_POST['horas'] : null;
+
+        // Verificar límite anual si aplica
+        $motivos = $bajasModel->obtenerMotivosBaja();
+        $motivo  = null;
+        foreach ($motivos as $m) {
+            if ((int)$m['id_motivo'] === $idMotivo) { $motivo = $m; break; }
+        }
+
+        $esRemunerada = 1;
+
+        if ($motivo && !empty($motivo['limite_horas_anual']) && $horas !== null) {
+            $limite    = (float)$motivo['limite_horas_anual'];
+            $usadas    = $bajasModel->getHorasUsadasAnio($_SESSION['id_usuario'], $idMotivo, (int)date('Y'));
+            $restantes = max(0, $limite - $usadas);
+
+            if ($restantes <= 0) {
+                // Sin horas disponibles → no remunerada
+                $esRemunerada = 0;
+            } elseif ($horas > $restantes) {
+                // Solicita más de lo disponible → bloquear
+                header('Location: ' . RUTA_URL . '/Ausencias?error=limite&motivo=' . urlencode($motivo['nombre'])
+                    . '&restantes=' . $restantes . '&limite=' . $limite);
+                exit;
+            }
+        }
 
         $data = [
-            'id_usuario' => $_SESSION['id_usuario'],
-            'id_motivo' => $_POST['id_motivo'] ?? null,
-            'fecha_inicio' => $_POST['fecha_inicio'] ?? null,
-            'fecha_fin' => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null
+            'id_usuario'    => $_SESSION['id_usuario'],
+            'id_motivo'     => $idMotivo,
+            'fecha_inicio'  => $_POST['fecha_inicio'] ?? null,
+            'fecha_fin'     => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null,
+            'descripcion'   => trim($_POST['descripcion'] ?? ''),
+            'horas'         => $horas,
+            'es_remunerada' => $esRemunerada,
         ];
 
         $bajasModel->insertarBaja($data);
@@ -140,15 +203,31 @@ class Ausencias extends Controller
         $modelo = new AusenciaModel($this->conexion);
 
         $modelo->crear(
-            $_POST['id_usuario'] ?? null,
-            $_POST['id_motivo'] ?? null,
-            $_POST['fecha_inicio'] ?? null,
-            $_POST['fecha_fin'] ?? null
+            $_POST['id_usuario']          ?? null,
+            trim($_POST['motivo_texto']   ?? ''),
+            $_POST['fecha_inicio']        ?? null,
+            $_POST['fecha_fin']           ?? null
         );
 
         echo json_encode(["ok" => true]);
     }
 
+
+    public function editarNoRemunerada()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+
+        $modelo = new AusenciaModel($this->conexion);
+        $modelo->editar(
+            $_POST['id']          ?? null,
+            $_POST['id_usuario']  ?? null,
+            trim($_POST['motivo_texto'] ?? ''),
+            $_POST['fecha_inicio'] ?? null,
+            $_POST['fecha_fin']    ?? null
+        );
+
+        echo json_encode(["ok" => true]);
+    }
 
     public function eliminarNoRemunerada()
     {
