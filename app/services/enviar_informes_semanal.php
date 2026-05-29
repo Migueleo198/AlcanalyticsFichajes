@@ -1,6 +1,6 @@
 <?php
 
-require_once '/var/www/vhosts/peaceful-keldysh.82-223-99-74.plesk.page/vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../models/InformeModel.php';
