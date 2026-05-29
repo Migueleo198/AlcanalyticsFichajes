@@ -89,4 +89,31 @@ public function actualizarEstado($id, $estado)
         ':id' => $id
     ]);
 }
+
+public function eliminarBaja($id)
+{
+    $stmt = $this->conexion->prepare("DELETE FROM Bajas WHERE id = ?");
+    return $stmt->execute([$id]);
+}
+
+public function editarBaja($id, $idMotivo, $fechaInicio, $fechaFin, $descripcion, $estado = null)
+{
+    $sql = $estado !== null
+        ? "UPDATE Bajas SET id_motivo=:m, fecha_inicio=:fi, fecha_fin=:ff, descripcion=:d, estado=:e WHERE id=:id"
+        : "UPDATE Bajas SET id_motivo=:m, fecha_inicio=:fi, fecha_fin=:ff, descripcion=:d WHERE id=:id";
+
+    $params = [
+        ':m'  => $idMotivo,
+        ':fi' => $fechaInicio,
+        ':ff' => !empty($fechaFin) ? $fechaFin : null,
+        ':d'  => $descripcion,
+        ':id' => $id,
+    ];
+
+    if ($estado !== null) {
+        $params[':e'] = $estado;
+    }
+
+    return $this->conexion->prepare($sql)->execute($params);
+}
 }
