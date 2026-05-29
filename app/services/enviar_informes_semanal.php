@@ -1,81 +1,90 @@
 <?php
 
+require_once '/var/www/vhosts/peaceful-keldysh.82-223-99-74.plesk.page/vendor/autoload.php';
+
+require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../models/InformeModel.php';
+require_once __DIR__ . '/../services/ReportGenerator.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-public function informeSemanalCron() {
+// Conexión BD
+$host   = 'localhost';
+$dbname = 'Fichajes2';
+$user   = 'admin_fichajes2';
+$pass   = '6%DfdlBrud5$jVg8';
 
-    require_once __DIR__ . '/../../../vendor/autoload.php';
+try {
+    $conexion = new PDO(
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        $user,
+        $pass
+    );
+    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Error conexión BD: " . $e->getMessage());
+}
 
-    $db = new Database();
-    $conexion = $db->conectar();
-    $modelo = new InformeModel($conexion);
+$userModel    = new UserModel($conexion);
+$informeModel = new InformeModel($conexion);
 
-    // 📅 SEMANA ANTERIOR (más correcto que la actual)
-    $desde = date("Y-m-d", strtotime("monday last week"));
-    $hasta = date("Y-m-d", strtotime("sunday last week"));
+// Semana anterior: lunes a domingo
+$desde = date('Y-m-d', strtotime('monday last week'));
+$hasta = date('Y-m-d', strtotime('sunday last week'));
 
-    $usuarios = $modelo->obtenerUsuarios();
+$usuarios = $userModel->getUsuarios();
 
-    foreach ($usuarios as $user) {
+foreach ($usuarios as $usuario) {
 
-        $datos = $modelo->obtenerInforme($desde, $hasta, $user['id_usuario']);
+    $userId = $usuario['id_usuario'];
+    $email  = $usuario['email'];
+    $nombre = $usuario['nombre'];
 
-        // 🚫 No enviar si no hay datos
-        if (empty($datos)) {
-            echo "Sin datos para usuario ID: " . $user['id_usuario'] . "\n";
-            continue;
-        }
+    $filas = $informeModel->obtenerInforme($desde, $hasta, [$userId]);
 
-        // 🧾 GENERAR PDF
-        $dompdf = new Dompdf\Dompdf();
+    if (empty($filas)) {
+        echo "Sin datos para $nombre ($email)\n";
+        continue;
+    }
 
-        ob_start();
-        $nombreUsuario = $user['nombre'];
-        require __DIR__ . '/../views/pages/informe_pdf.php';
-        $html = ob_get_clean();
+    // Generar PDF en memoria (sin fichero temporal)
+    $pdf = ReportGenerator::generarPDF($filas, $desde, $hasta);
 
-        $dompdf->loadHtml($html);
-        $dompdf->render();
+    $mail = new PHPMailer(true);
 
-        // 📁 Guardar temporalmente
-        $rutaPDF = __DIR__ . "/tmp/informe_semanal_" . $user['id_usuario'] . ".pdf";
-        file_put_contents($rutaPDF, $dompdf->output());
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'miguel.alcanalytics@gmail.com';
+        $mail->Password   = 'qqua rvcv wmyk ndaw';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+        $mail->CharSet    = 'UTF-8';
 
-        // 📧 ENVIAR EMAIL
-        $mail = new PHPMailer(true);
+        $mail->setFrom('miguel.alcanalytics@gmail.com', 'Sistema de Fichajes');
+        $mail->addAddress($email, $nombre);
 
-        try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'miguel.alcanalytics@gmail.com';
-            $mail->Password = 'qqua rvcv wmyk ndaw'; // ⚠️ usar App Password en producción
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+        $mail->isHTML(true);
+        $mail->Subject = 'Informe semanal de fichajes';
+        $mail->Body    = "
+            <p>Hola <b>$nombre</b>,</p>
+            <p>Adjuntamos tu informe semanal de fichajes correspondiente al periodo:</p>
+            <p><b>$desde</b> al <b>$hasta</b></p>
+            <p>Saludos.</p>
+        ";
 
-            $mail->setFrom('miguel.alcanalytics@gmail.com', 'Sistema de Informes');
-            $mail->addAddress($user['email'], $user['nombre']);
+        $filename = "informe_semanal_{$userId}_{$desde}_{$hasta}.pdf";
+        $mail->addStringAttachment($pdf, $filename);
 
-            $mail->isHTML(true);
-            $mail->Subject = 'Informe semanal';
-            $mail->Body = "
-                <p>Hola {$user['nombre']},</p>
-                <p>Adjunto tienes tu informe semanal 
-                ({$desde} a {$hasta}).</p>
-            ";
+        $mail->send();
 
-            $mail->addAttachment($rutaPDF);
+        echo "Enviado a $email\n";
 
-            $mail->send();
-
-            echo "✅ Informe semanal enviado a: " . $user['email'] . "\n";
-
-        } catch (Exception $e) {
-            echo "❌ Error enviando a {$user['email']}: {$mail->ErrorInfo}\n";
-        }
-
-        // 🧹 limpiar
-        unlink($rutaPDF);
+    } catch (Exception $e) {
+        echo "Error enviando a $email: {$mail->ErrorInfo}\n";
     }
 }
+
+echo "Proceso finalizado\n";
