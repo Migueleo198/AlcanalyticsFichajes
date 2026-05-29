@@ -105,8 +105,10 @@
           <thead>
             <tr>
               <th>Motivo</th>
-              <th>Fecha inicio</th>
-              <th>Fecha fin</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Horas</th>
+              <th>Tipo</th>
               <th>Estado</th>
               <th>Solicitada</th>
               <th>Acciones</th>
@@ -121,6 +123,14 @@
               <td><?= htmlspecialchars($baja['motivo']) ?></td>
               <td><?= htmlspecialchars($baja['fecha_inicio']) ?></td>
               <td><?= $baja['fecha_fin'] ? htmlspecialchars($baja['fecha_fin']) : '-' ?></td>
+              <td><?= $baja['horas'] ? $baja['horas'] . 'h' : '—' ?></td>
+              <td>
+                <?php if (($baja['es_remunerada'] ?? 1)): ?>
+                  <span class="badge bg-success">Remunerada</span>
+                <?php else: ?>
+                  <span class="badge bg-secondary">No remunerada</span>
+                <?php endif; ?>
+              </td>
 
               <td>
                 <?php

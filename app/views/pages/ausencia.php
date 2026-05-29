@@ -39,45 +39,69 @@
   <h3 class="mb-3">Ausencias remuneradas</h3>
 
   <?php if (isset($_GET['ok'])): ?>
-    <div class="alert alert-success">
-      Solicitud registrada correctamente
+    <div class="alert alert-success">Solicitud registrada correctamente</div>
+  <?php endif; ?>
+
+  <?php if (isset($_GET['error']) && $_GET['error'] === 'limite'): ?>
+    <div class="alert alert-danger">
+      <i class="bi bi-x-circle-fill me-1"></i>
+      <strong>Límite superado:</strong> Para el motivo
+      <em><?= htmlspecialchars($_GET['motivo'] ?? '') ?></em>
+      solo te quedan <strong><?= round((float)($_GET['restantes'] ?? 0), 2) ?>h</strong>
+      de las <?= round((float)($_GET['limite'] ?? 0), 2) ?>h anuales retribuidas.
+      Ajusta las horas o solicítala como ausencia no remunerada.
     </div>
   <?php endif; ?>
 
   <div class="card p-3 mb-4">
-    <!-- ✅ CAMBIADO endpoint -->
     <form method="POST" action="<?= RUTA_URL ?>/Ausencias/solicitarRemunerada">
 
-      <div class="row">
+      <div class="row g-3">
         <div class="col-md-4">
           <label>Motivo</label>
           <select name="id_motivo" id="selectMotivoRemunerada" class="form-select" required>
             <option value="">Selecciona motivo</option>
-
             <?php foreach ($datos['motivos_remunerados'] as $motivo): ?>
+              <?php
+                $etiqueta = htmlspecialchars($motivo['nombre']);
+                if (!empty($motivo['limite_horas_anual'])) {
+                    $etiqueta .= ' — ⏱ máx. ' . $motivo['limite_horas_anual'] . 'h/año';
+                } elseif (!empty($motivo['dias'])) {
+                    $etiqueta .= ' (' . $motivo['dias'] . ' día' . ($motivo['dias'] != 1 ? 's' : '') . ')';
+                }
+              ?>
               <option value="<?= $motivo['id_motivo'] ?>"
                 data-limite="<?= htmlspecialchars($motivo['limite_horas_anual'] ?? '') ?>"
                 data-nota="<?= htmlspecialchars($motivo['nota_limite'] ?? '') ?>"
                 data-dias="<?= htmlspecialchars($motivo['dias'] ?? '') ?>">
-                <?= htmlspecialchars($motivo['nombre']) ?>
+                <?= $etiqueta ?>
               </option>
             <?php endforeach; ?>
-
           </select>
-          <div id="avisoLimiteMotivo" class="alert alert-warning mt-2 d-none small py-2">
+
+          <div id="avisoLimiteMotivo" class="alert alert-warning mt-2 d-none small py-2 mb-0">
             <i class="bi bi-exclamation-triangle-fill me-1"></i>
             <span id="avisoLimiteTexto"></span>
           </div>
         </div>
 
-        <div class="col-md-4">
-          <label>Fecha inicio</label>
-          <input type="date" name="fecha_inicio" class="form-control" required>
+        <!-- Campo horas: solo visible para motivos con límite en horas -->
+        <div class="col-md-2 d-none" id="colHoras">
+          <label>Horas <span class="text-danger">*</span></label>
+          <input type="number" name="horas" id="inputHoras" class="form-control"
+                 min="0.25" max="24" step="0.25" placeholder="0">
+          <div id="contadorHoras" class="small mt-1"></div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
+          <label>Fecha inicio</label>
+          <input type="date" name="fecha_inicio" id="remFechaInicio" class="form-control" required>
+        </div>
+
+        <div class="col-md-3">
           <label>Fecha fin</label>
-          <input type="date" name="fecha_fin" class="form-control">
+          <input type="date" name="fecha_fin" id="remFechaFin" class="form-control">
+          <small id="infoDiasMotivo" class="text-muted d-none mt-1 d-block"></small>
         </div>
       </div>
 
@@ -239,92 +263,196 @@
 <script>
 var RUTA_URL = "<?= RUTA_URL ?>";
 
-// Aviso de límite al seleccionar motivo remunerado
-document.getElementById("selectMotivoRemunerada")?.addEventListener("change", function() {
-  const opt    = this.options[this.selectedIndex];
-  const nota   = opt?.dataset?.nota   || '';
-  const limite = opt?.dataset?.limite || '';
-  const aviso  = document.getElementById("avisoLimiteMotivo");
-  const texto  = document.getElementById("avisoLimiteTexto");
+document.addEventListener("DOMContentLoaded", function () {
 
-  if (nota) {
-    texto.textContent = nota;
-    aviso.classList.remove("d-none");
-  } else {
-    aviso.classList.add("d-none");
+  // ── HORAS + AVISO AL SELECCIONAR MOTIVO REMUNERADO ───────────────
+  var selMotivo   = document.getElementById("selectMotivoRemunerada");
+  var colHoras    = document.getElementById("colHoras");
+  var inputHoras  = document.getElementById("inputHoras");
+  var cntHoras    = document.getElementById("contadorHoras");
+  var avisoBloque = document.getElementById("avisoLimiteMotivo");
+  var avisoTexto  = document.getElementById("avisoLimiteTexto");
+
+  if (selMotivo) {
+    selMotivo.addEventListener("change", function () {
+      var opt    = selMotivo.options[selMotivo.selectedIndex];
+      var nota   = (opt && opt.dataset.nota)   ? opt.dataset.nota   : '';
+      var limite = (opt && opt.dataset.limite) ? opt.dataset.limite : '';
+      var id     = (opt && opt.value)          ? opt.value          : '';
+
+      // Nota de límite
+      if (nota) {
+        avisoTexto.textContent = nota;
+        avisoBloque.classList.remove("d-none");
+      } else {
+        avisoBloque.classList.add("d-none");
+      }
+
+      // Campo horas
+      if (limite && id) {
+        colHoras.classList.remove("d-none");
+        inputHoras.required = true;
+        cntHoras.textContent = "Consultando horas disponibles…";
+        cntHoras.className   = "small mt-1 text-muted";
+
+        fetch(RUTA_URL + "/Ausencias/checkLimiteHoras?id_motivo=" + id)
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.tiene_limite) return;
+            if (data.restantes <= 0) {
+              cntHoras.textContent = "⛔ Sin horas retribuidas disponibles este año (" + data.usadas + "h usadas de " + data.limite + "h). Esta solicitud será no remunerada.";
+              cntHoras.className   = "small mt-1 text-danger";
+            } else {
+              cntHoras.textContent = "✔ Disponibles: " + data.restantes + "h de " + data.limite + "h anuales (usadas: " + data.usadas + "h)";
+              cntHoras.className   = "small mt-1 text-success";
+              inputHoras.max       = data.restantes;
+            }
+          })
+          .catch(function () {
+            cntHoras.textContent = "No se pudo verificar el límite";
+            cntHoras.className   = "small mt-1 text-warning";
+          });
+
+      } else {
+        colHoras.classList.add("d-none");
+        inputHoras.required = false;
+        inputHoras.value    = '';
+        cntHoras.textContent = '';
+      }
+    });
   }
-});
 
-// CREAR NO REMUNERADA
-document.getElementById("formAusencia").onsubmit = function(e) {
-  e.preventDefault();
-  fetch(RUTA_URL + "/Ausencias/crearNoRemunerada", {
-    method: "POST",
-    body: new FormData(this)
-  })
-  .then(r => r.json())
-  .then(() => location.reload());
-};
+  // ── LÍMITE DE DÍAS EN FECHAS ────────────────────────────────────
+  var inputInicio   = document.getElementById("remFechaInicio");
+  var inputFin      = document.getElementById("remFechaFin");
+  var infoDias      = document.getElementById("infoDiasMotivo");
 
-// ELIMINAR
-document.querySelectorAll(".btnEliminar").forEach(btn => {
-  btn.onclick = function() {
-    if (!confirm("¿Eliminar ausencia?")) return;
-    fetch(RUTA_URL + "/Ausencias/eliminarNoRemunerada", {
-      method: "POST",
-      body: new URLSearchParams({ id: this.dataset.id })
-    })
-    .then(r => r.json())
-    .then(() => location.reload());
-  };
-});
+  function sumarDias(fechaStr, dias) {
+    var d = new Date(fechaStr + 'T00:00:00');
+    d.setDate(d.getDate() + dias - 1);
+    return d.toISOString().split('T')[0];
+  }
 
-// EDITAR — abrir modal
-const modalEl  = document.getElementById("modalEditarAusencia");
-const bsModal  = modalEl ? new bootstrap.Modal(modalEl) : null;
+  function aplicarLimiteDias() {
+    if (!selMotivo || !inputInicio || !inputFin) return;
+    var opt  = selMotivo.options[selMotivo.selectedIndex];
+    var dias = opt && opt.dataset.dias ? parseInt(opt.dataset.dias) : 0;
 
-document.querySelectorAll(".btnEditarAusencia").forEach(btn => {
-  btn.onclick = function() {
-    document.getElementById("editId").value      = this.dataset.id;
-    document.getElementById("editUsuario").value = this.dataset.usuario;
-    document.getElementById("editMotivo").value  = this.dataset.motivo;
-    document.getElementById("editInicio").value  = this.dataset.inicio;
-    document.getElementById("editFin").value     = this.dataset.fin;
-    document.getElementById("editFeedback").className = "d-none mb-3";
-    bsModal.show();
-  };
-});
-
-// EDITAR — guardar
-document.getElementById("formEditarAusencia").onsubmit = function(e) {
-  e.preventDefault();
-  const feedback = document.getElementById("editFeedback");
-  const btn = this.querySelector('[type="submit"]');
-  btn.disabled = true;
-  btn.textContent = "Guardando…";
-
-  fetch(RUTA_URL + "/Ausencias/editarNoRemunerada", {
-    method: "POST",
-    body: new FormData(this)
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) {
-      location.reload();
+    if (dias > 0 && inputInicio.value) {
+      var maxFecha = sumarDias(inputInicio.value, dias);
+      inputFin.value = maxFecha;
+      inputFin.max   = maxFecha;
+      inputFin.min   = inputInicio.value;
+      infoDias.textContent = 'Máximo ' + dias + ' día' + (dias !== 1 ? 's' : '') + ' según convenio (hasta ' + maxFecha + ')';
+      infoDias.className = 'text-info small mt-1 d-block';
+    } else if (dias > 0) {
+      // Motivo con días fijo pero aún no hay fecha inicio
+      inputFin.removeAttribute('max');
+      inputFin.removeAttribute('min');
+      infoDias.textContent = 'Este motivo tiene un máximo de ' + dias + ' día' + (dias !== 1 ? 's' : '') + ' según convenio';
+      infoDias.className = 'text-muted small mt-1 d-block';
     } else {
-      feedback.className = "alert alert-danger mb-3";
-      feedback.textContent = "Error al guardar los cambios";
-      btn.disabled = false;
-      btn.textContent = "Guardar cambios";
+      inputFin.removeAttribute('max');
+      inputFin.removeAttribute('min');
+      infoDias.textContent = '';
+      infoDias.className = 'd-none';
     }
-  })
-  .catch(() => {
-    feedback.className = "alert alert-danger mb-3";
-    feedback.textContent = "Error de red";
-    btn.disabled = false;
-    btn.textContent = "Guardar cambios";
+  }
+
+  if (selMotivo) {
+    selMotivo.addEventListener("change", aplicarLimiteDias);
+  }
+
+  if (inputInicio) {
+    inputInicio.addEventListener("change", aplicarLimiteDias);
+  }
+
+  // Bloquear manualmente escribir una fecha fin mayor al límite
+  if (inputFin) {
+    inputFin.addEventListener("change", function () {
+      if (this.max && this.value > this.max) {
+        this.value = this.max;
+      }
+    });
+  }
+
+  // ── CREAR NO REMUNERADA ──────────────────────────────────────────
+  var formAusencia = document.getElementById("formAusencia");
+  if (formAusencia) {
+    formAusencia.onsubmit = function (e) {
+      e.preventDefault();
+      fetch(RUTA_URL + "/Ausencias/crearNoRemunerada", {
+        method: "POST",
+        body: new FormData(this)
+      })
+      .then(function (r) { return r.json(); })
+      .then(function () { location.reload(); });
+    };
+  }
+
+  // ── ELIMINAR NO REMUNERADA ───────────────────────────────────────
+  document.querySelectorAll(".btnEliminar").forEach(function (btn) {
+    btn.onclick = function () {
+      if (!confirm("¿Eliminar ausencia?")) return;
+      fetch(RUTA_URL + "/Ausencias/eliminarNoRemunerada", {
+        method: "POST",
+        body: new URLSearchParams({ id: this.dataset.id })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function () { location.reload(); });
+    };
   });
-};
+
+  // ── EDITAR NO REMUNERADA ─────────────────────────────────────────
+  var modalEl = document.getElementById("modalEditarAusencia");
+  var bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+  document.querySelectorAll(".btnEditarAusencia").forEach(function (btn) {
+    btn.onclick = function () {
+      document.getElementById("editId").value      = this.dataset.id;
+      document.getElementById("editUsuario").value = this.dataset.usuario;
+      document.getElementById("editMotivo").value  = this.dataset.motivo;
+      document.getElementById("editInicio").value  = this.dataset.inicio;
+      document.getElementById("editFin").value     = this.dataset.fin;
+      document.getElementById("editFeedback").className = "d-none mb-3";
+      if (bsModal) bsModal.show();
+    };
+  });
+
+  var formEditarAusencia = document.getElementById("formEditarAusencia");
+  if (formEditarAusencia) {
+    formEditarAusencia.onsubmit = function (e) {
+      e.preventDefault();
+      var feedback  = document.getElementById("editFeedback");
+      var submitBtn = this.querySelector('[type="submit"]');
+      submitBtn.disabled    = true;
+      submitBtn.textContent = "Guardando…";
+
+      fetch(RUTA_URL + "/Ausencias/editarNoRemunerada", {
+        method: "POST",
+        body: new FormData(this)
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          location.reload();
+        } else {
+          feedback.className    = "alert alert-danger mb-3";
+          feedback.textContent  = "Error al guardar los cambios";
+          submitBtn.disabled    = false;
+          submitBtn.textContent = "Guardar cambios";
+        }
+      })
+      .catch(function () {
+        feedback.className    = "alert alert-danger mb-3";
+        feedback.textContent  = "Error de red";
+        submitBtn.disabled    = false;
+        submitBtn.textContent = "Guardar cambios";
+      });
+    };
+  }
+
+});
 </script>
 
 <script type='module' src="<?= RUTA_URL ?>/js/infrastructure/filtros.js"></script>

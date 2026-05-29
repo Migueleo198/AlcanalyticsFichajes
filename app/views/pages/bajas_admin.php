@@ -107,6 +107,8 @@
           <th>Motivo</th>
           <th>Inicio</th>
           <th>Fin</th>
+          <th title="Solo para motivos con límite anual de horas (visita médica, formación)">Horas</th>
+          <th>Tipo</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -121,6 +123,14 @@
           <td><?= htmlspecialchars($baja['motivo'] ?? '') ?></td>
           <td><?= htmlspecialchars($baja['fecha_inicio'] ?? '') ?></td>
           <td><?= htmlspecialchars($baja['fecha_fin'] ?? '-') ?></td>
+          <td><?= $baja['horas'] ? $baja['horas'] . 'h' : '—' ?></td>
+          <td>
+            <?php if (($baja['es_remunerada'] ?? 1)): ?>
+              <span class="badge bg-success">Remunerada</span>
+            <?php else: ?>
+              <span class="badge bg-secondary">No remunerada</span>
+            <?php endif; ?>
+          </td>
 
           <td>
             <?php

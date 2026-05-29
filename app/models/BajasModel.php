@@ -18,20 +18,35 @@ class BajasModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getHorasUsadasAnio($idUsuario, $idMotivo, $anio)
+    {
+        $stmt = $this->conexion->prepare(
+            "SELECT COALESCE(SUM(horas), 0) AS total
+             FROM Bajas
+             WHERE id_usuario = ? AND id_motivo = ?
+               AND YEAR(fecha_inicio) = ?
+               AND estado != 'rechazada'"
+        );
+        $stmt->execute([$idUsuario, $idMotivo, $anio]);
+        return (float) $stmt->fetchColumn();
+    }
+
     public function insertarBaja($data)
     {
         $sql = "INSERT INTO Bajas
-                (id_usuario, id_motivo, fecha_inicio, fecha_fin, descripcion)
-                VALUES (:id_usuario, :id_motivo, :fecha_inicio, :fecha_fin, :descripcion)";
+                (id_usuario, id_motivo, fecha_inicio, fecha_fin, descripcion, horas, es_remunerada)
+                VALUES (:id_usuario, :id_motivo, :fecha_inicio, :fecha_fin, :descripcion, :horas, :es_remunerada)";
 
         $stmt = $this->conexion->prepare($sql);
 
         return $stmt->execute([
-            ':id_usuario'  => $data['id_usuario'],
-            ':id_motivo'   => $data['id_motivo'],
-            ':fecha_inicio'=> $data['fecha_inicio'],
-            ':fecha_fin'   => $data['fecha_fin'],
-            ':descripcion' => $data['descripcion'] ?? null,
+            ':id_usuario'    => $data['id_usuario'],
+            ':id_motivo'     => $data['id_motivo'],
+            ':fecha_inicio'  => $data['fecha_inicio'],
+            ':fecha_fin'     => $data['fecha_fin'],
+            ':descripcion'   => $data['descripcion']   ?? null,
+            ':horas'         => $data['horas']         ?? null,
+            ':es_remunerada' => $data['es_remunerada'] ?? 1,
         ]);
     }
 
@@ -49,7 +64,7 @@ class BajasModel
 
     public function obtenerBajasPorUsuario($id_usuario)
 {
-    $sql = "SELECT b.*, m.nombre AS motivo
+    $sql = "SELECT b.*, m.nombre AS motivo, b.horas, b.es_remunerada
             FROM Bajas b
             JOIN MotivoAlta m ON b.id_motivo = m.id_motivo
             WHERE b.id_usuario = :id_usuario
@@ -65,7 +80,7 @@ class BajasModel
     // Obtener TODAS las bajas (para admin)
 public function obtenerTodasBajas()
 {
-    $sql = "SELECT b.*, u.nombre AS usuario, m.nombre AS motivo
+    $sql = "SELECT b.*, u.nombre AS usuario, m.nombre AS motivo, b.horas, b.es_remunerada
             FROM Bajas b
             JOIN Usuario u ON b.id_usuario = u.id_usuario
             JOIN MotivoAlta m ON b.id_motivo = m.id_motivo
